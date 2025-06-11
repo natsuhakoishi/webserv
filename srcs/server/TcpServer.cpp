@@ -82,8 +82,8 @@ void	TcpServer::handleClientConnection(size_t i)
 
 		std::cout << "Client (fd: "<< new_socket << ") Connected" << std::endl;
 
-		const char *msg = "Connected to the Server\n";
-		send(new_socket, msg, strlen(msg), 0);
+		// const char *msg = "Connected to the Server\n";
+		// send(new_socket, msg, strlen(msg), 0);
 	}
 }
 
@@ -92,7 +92,11 @@ void	TcpServer::handleClientMessage(size_t i)
 	char	buffer[1024] = { 0 };
 	ssize_t bytes_read = recv(this->fds[i].fd, buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
-		std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
+	{
+		// std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
+		Http h((string(buffer)));
+		h.respond(this->fds[i]);
+	}
 	else if (bytes_read == 0)
 	{
 		std::cout << "Client (fd: " << this->fds[i].fd << ") Disconnected" << std::endl;

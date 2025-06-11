@@ -1,16 +1,7 @@
 #ifndef TCPSERVER_HPP
 # define TCPSERVER_HPP
 
-# include <iostream>
-# include <unistd.h>
-# include <cstring> //for memset()
-# include <sys/socket.h> //socket library
-# include <netinet/in.h> //Internet family
-# include <poll.h>
-# include <fcntl.h>
-# include <vector>
-# include <cstdlib>
-# include <algorithm>
+#include "Webserv.hpp"
 
 class TcpServer
 {
