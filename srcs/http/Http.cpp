@@ -44,10 +44,10 @@ void Http::respond(pollfd pfd)
             GET(pfd, this->filePath);
         else
         {
-            cout << "404!!!!!!!!!!" << endl;
+            cout << RED << "404!!!!!!!!!!" << RESETEND;
             string notFound("HTTP/1.1 404 Not Found\r\n\r\n");
             notFound += "<!doctype html><html lang=\"en\"><head><title>404 not found</title></head><body><main><h1>404 Not found</h1></main></body></html>";
-            cout << notFound << endl;
+            cout << BLUE << notFound << RESETEND;
             send(pfd.fd, notFound.c_str(), notFound.length(), 0);
             std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << std::endl;
             close(pfd.fd);
