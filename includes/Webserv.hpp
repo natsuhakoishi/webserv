@@ -6,6 +6,7 @@
 #include <cstring> //for memset()
 #include <sys/socket.h> //socket library
 #include <netinet/in.h> //Internet family
+#include <arpa/inet.h>
 #include <poll.h>
 #include <fcntl.h>
 #include <vector>

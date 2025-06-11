@@ -2,16 +2,18 @@
 
 TcpServer::TcpServer()
 {
-	this->ports.push_back(8080);
+	this->ips.push_back("0.0.0.0");
+	this->ports.push_back(80);
 	initServer();
 }
 
-TcpServer::TcpServer(std::vector<int> ports)
+TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp)
 {
-	if (ports.empty())
-		ports.push_back(8080);
-	else
-		this->ports = ports;
+	for (std::vector<std::pair<std::string, int> >::iterator it = ipp.begin(); it != ipp.end(); it++)
+	{
+		this->ips.push_back((*it).first);
+		this->ports.push_back((*it).second);
+	}
 	initServer();
 }
 
@@ -33,7 +35,11 @@ void	TcpServer::initServer()
 		struct sockaddr_in address;
 		std::memset(&address, 0, sizeof(address));
 		address.sin_family = AF_INET;
-		address.sin_addr.s_addr = INADDR_ANY;
+		if (inet_pton(AF_INET, this->ips[i].c_str(), &(address.sin_addr)) <= 0)
+		{
+			std::cerr << "Error: Invalid Address: " << this->ips[i] << std::endl;
+			exit(1);
+		}
 		address.sin_port = htons(ports[i]);
 
 		if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)

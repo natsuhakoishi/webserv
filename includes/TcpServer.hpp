@@ -7,15 +7,16 @@ class TcpServer
 {
 	public:
 		TcpServer();
-		TcpServer(std::vector<int> ports);
+		TcpServer(std::vector<std::pair<std::string, int> > ipp);
 		~TcpServer();
 
 		void	runServer();
 
 	private:
-		std::vector<int>	ports;
-		std::vector<int>	server_fds;
-		std::vector<pollfd>	fds;
+		std::vector<std::string>	ips;
+		std::vector<int>			ports;
+		std::vector<int>			server_fds;
+		std::vector<pollfd>			fds;
 
 		void	initServer();
 		void	handleClientConnection(size_t i);
