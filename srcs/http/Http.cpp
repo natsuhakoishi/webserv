@@ -23,7 +23,7 @@ void Http::parse()
     //read headers
 
     if (this->url == "/")
-        this->url = "/index.html"; //will update to config file default seting
+        this->url = "/index/index.html"; //will update to config file default seting
     this->filePath = "." + this->url;
 
 }
@@ -54,6 +54,6 @@ void Http::respond(pollfd pfd)
             // 404 not found;
         }
     }
-    // else if 
+    // else if
     // else if
 }

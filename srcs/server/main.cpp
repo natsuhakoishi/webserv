@@ -1,11 +1,16 @@
 #include "../../includes/Webserv.hpp"
 
 int main() {
-    std::vector<int> ports;
-    ports.push_back(8080);
-    ports.push_back(9090);
+    std::vector<std::pair<std::string, int> > ipp;
+    std::pair<std::string, int> temp;
 
-    TcpServer server(ports);
+    temp = std::make_pair("127.0.0.1", 8080);
+    ipp.push_back(temp);
+
+    temp = std::make_pair("0.0.0.0", 9090);
+    ipp.push_back(temp);
+
+    TcpServer server(ipp);
     server.runServer();
 
     return 0;
