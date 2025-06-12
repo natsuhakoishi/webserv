@@ -43,16 +43,7 @@ void Http::respond(pollfd pfd)
         if (fileExistis(this->filePath))
             GET(pfd, this->filePath);
         else
-        {
-            cout << RED << "404!!!!!!!!!!" << RESETEND;
-            string notFound("HTTP/1.1 404 Not Found\r\n\r\n");
-            notFound += "<!doctype html><html lang=\"en\"><head><title>404 not found</title></head><body><main><h1>404 Not found</h1></main></body></html>";
-            cout << BLUE << notFound << RESETEND;
-            send(pfd.fd, notFound.c_str(), notFound.length(), 0);
-            std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << std::endl;
-            close(pfd.fd);
-            // 404 not found;
-        }
+            code404(pfd.fd);
     }
     // else if
     // else if
