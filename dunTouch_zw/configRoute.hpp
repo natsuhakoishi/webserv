@@ -33,14 +33,14 @@ class cfgRoute {
 		~cfgRoute();
 
 		//getter
-		const string&				get_requestPath() const;
-		const string&				get_rootDirPath() const;
-		const string&				get_indexFilePath() const;
-		bool						get_autoIndexState() const;
-		const std::vector<string>&	get_httpMethod() const;
-		const string&				get_redirectionPath() const;
-		const string&				get_uploadPath() const;
-		const std::vector<pair<string,string> >	get_cgiInfo() const;
+		string								get_requestPath();
+		string								get_rootDirPath();
+		string								get_indexFilePath();
+		bool								get_autoIndexState();
+		std::vector<string>					get_httpMethod();
+		string								get_redirectionPath();
+		string								get_uploadPath();
+		std::vector<pair<string,string> >	get_cgiInfo();
 		//setter
 		void	set_requestPath(const string &input); 
 		void	set_rootDirPath(const string &input);

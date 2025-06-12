@@ -31,11 +31,11 @@ class cfgServer {
 		~cfgServer();
 
 		//getter
-		const string&							get_serverName() const;
-		const std::vector<string>&				get_hostPort() const;
-		int										get_clientBodySize() const;
-		const std::vector<pair<int,string> >&	get_errorCodesMap() const;
-		const std::vector<cfgRoute>&			get_routes() const;
+		string							get_serverName();
+		std::vector<string>				get_hostPort();
+		int								get_clientBodySize();
+		std::vector<pair<int,string> >	get_errorCodesMap();
+		std::vector<cfgRoute>			get_routes();
 		//setter
 		void	set_serverName(const string &input);
 		void	set_hostPort(const std::vector<string> &inputS);

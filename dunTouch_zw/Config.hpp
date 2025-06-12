@@ -9,6 +9,7 @@
 //Libraries & Headers
 # include <exception>
 # include <iostream>
+# include <fstream>
 # include "configServer.hpp"
 
 using std::string;
@@ -28,20 +29,23 @@ class Config {
 		~Config();
 
 		//getter
-		const std::map<string,std::vector<cfgServer> >&	get_bindTable() const;
-		const std::vector<cfgServer>&					get_Servers() const;
+		std::map<string,std::vector<cfgServer> >	get_bindTable();
+		std::vector<cfgServer>						get_Servers();
 		//setter
 		void	set_bindTable(const std::map<string,std::vector<cfgServer> > &inputS);
 		void	set_Servers(const std::vector<cfgServer> &inputS);
 
 		//exception
 		class ConfigError : public std::exception {
+			private:
+				string	err_msg;
 			public:
+				ConfigError(const string &msg);
 				const char*	what() const throw();
 		};
 
 		//member functions
-		bool	read_config(string filepath);
+		void	read_config(std::ifstream &infile);//loop and parse
 };
 
 #endif
