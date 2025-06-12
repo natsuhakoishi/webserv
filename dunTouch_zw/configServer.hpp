@@ -1,37 +1,47 @@
-#ifndef CONFIG_SERVER_HPP
-# define CONFIG_SERVER_HPP
+#ifndef CONFIGSERVER_HPP
+# define CONFIGSERVER_HPP
 
+//Containers
 # include <string>
 # include <vector>
 # include <map>
-# include <utility>
+# include <utility> //for std::pair
+//Libraries & Headers
+# include "Config.hpp"
+# include "configRoute.hpp"
 
 using std::string;
+using std::pair;
 
-class Config {
-	std::pair<string,std::vector<cfgServer*> >	table_hostPort;
-	std::vector<cfgServer>						servers;
-};
+class cfgRoute;
 
 class cfgServer {
-		string										server_name;
-		std::vector<std::pair<string,int> >			hostPort; //host = IP
-		int											client_body_size; //or size_t?
-		std::vector<std::pair<int,string> >			error_pages;
-		std::vector<std::pair<string,cfgRoute> >	route_map; //access type is matter
-};
+	private:
+		string								server_name; //equivalent to HTTP request header's Host
+		std::vector<string>					hostPort; //IP:Port
+		int									clientBodySize;
+		std::vector<pair<int,string> >		errorCodes_map;
+		// std::vector<pair<string,cfgRoute> >	Routes_map;
+		std::vector<cfgRoute>				Routes;
+	public:
+		//OCCF
+		cfgServer();
+		cfgServer(const cfgServer &other);
+		cfgServer&	operator=(const cfgServer &other);
+		~cfgServer();
 
-class cfgRoute {
-		string									location_path;
-		string									rootDir_path; //file directory
-		string									indexFile_path; //the one gonna send back to client when request is a dir
-		bool									autoIndex_state; //determine whether send error pages or generate directory listing automatically
-		std::vector<string>						httpMethods; //using vector<string> temporarily
-		string									redirection_path; //redirect webpage to where
-		bool									has_upload; //checking flag
-		string									upload_path; //where the stuff upload by clients going to store
-		bool									has_cgi; //checking flag
-		std::vector<std::pair<string,string> >	cgi_info; //ex. format <file extension>,<correspond path>
+		//getter
+		const string&							get_serverName() const;
+		const std::vector<string>&				get_hostPort() const;
+		int										get_clientBodySize() const;
+		const std::vector<pair<int,string> >&	get_errorCodesMap() const;
+		const std::vector<cfgRoute>&			get_routes() const;
+		//setter
+		void	set_serverName(const string &input);
+		void	set_hostPort(const std::vector<string> &inputS);
+		void	set_clientBodySize(int input);
+		void	set_errorCodesMap(const std::vector<pair<int,string> > &inputS);
+		void	set_routesMap(const std::vector<cfgRoute> &inputS);
 };
 
 #endif
