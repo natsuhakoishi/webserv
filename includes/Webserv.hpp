@@ -16,6 +16,7 @@
 #include <sstream>
 #include <fstream>
 #include <sys/stat.h> //for stat & stat()
+#include <dirent.h> //for opendir()
 
 using std::string;
 using std::cout;

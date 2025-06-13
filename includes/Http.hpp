@@ -27,6 +27,9 @@ class Http
         string GetContentType(string);
         void GET(pollfd, string);
 
+        string autoindex(string);
+        string createElement(string, struct stat);
+
         void code404(int pfd);
         void code301(int pfd, string url);
 };
