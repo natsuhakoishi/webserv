@@ -52,7 +52,10 @@ void Http::GET(pollfd pfd, string path)
             cout << RED << "Auto index" << RESETEND;
         }
         else if (!fileExistis(path + "index.html"))
+        {
             code403(pfd.fd);
+            return ;
+        }
         else 
             path.append("index.html");
     }
