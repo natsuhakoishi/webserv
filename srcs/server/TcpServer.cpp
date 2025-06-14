@@ -99,8 +99,9 @@ void	TcpServer::handleClientMessage(size_t i)
 	ssize_t bytes_read = recv(this->fds[i].fd, buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
 	{
+		cout << YELLOW << bytes_read << RESETEND;
 		// std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
-		Http h((string(buffer)));
+		Http h((string(buffer, bytes_read)), this->fds[i]);
 		h.respond(this->fds[i]);
 	}
 	else if (bytes_read == 0)

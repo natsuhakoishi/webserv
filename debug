@@ -1,0 +1,82 @@
+Listening on port 8080...
+Listening on port 9090...
+Client (fd: 5) Connected
+[33m720[0m
+[0;32mClient: GET /index/upload.html HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+sec-ch-ua: "Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7,ja;q=0.6,ms;q=0.5
+
+
+[34mGET: Client request: [0;32m./index/upload.html[0m
+[34mGET: Respond successful[0m
+Client (fd: 5) Disconnected[0m
+Client (fd: 5) Connected
+[33m646[0m
+[0;32mClient: GET /img/pls.png HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+sec-ch-ua-platform: "Windows"
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+sec-ch-ua: "Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"
+sec-ch-ua-mobile: ?0
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://localhost:8080/index/upload.html
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7,ja;q=0.6,ms;q=0.5
+
+
+[34mGET: Client request: [0;32m./img/pls.png[0m
+[34mGET: Respond successful[0m
+Client (fd: 5) Disconnected[0m
+Client (fd: 5) Connected
+[33m931[0m
+[0;32mClient: POST /upload HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 27743
+Cache-Control: max-age=0
+sec-ch-ua: "Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+Origin: http://localhost:8080
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryJA3aE5b6WEA0bmMh
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Referer: http://localhost:8080/index/upload.html
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: zh-TW,zh;q=0.9,en;q=0.8,zh-CN;q=0.7,ja;q=0.6,ms;q=0.5
+
+
+[33m1024[0m
+[0;32mClient: ------WebKitFormBoundaryJA3aE5b6WEA0bmMh
+Content-Disposition: form-data; name="file"; filename="0l3gwi7n0am5kddegws8xw5n6skhufp.png"
+Content-Type: image/png
+
+‰PNG
+
+
+[33m1024[0m
+[0;32mClient: <üð*`ø²>Œ|à$¥Ô…"rŒrä‘Gòµ¯}Ù³g‡ù$Z½z5üã¹ï¾ûX·n‰Da·´1æ)àÀ@’~LÈú æˆðUË²æcb@ã?žoûÛLœ8‘üü|>jkkY±b7Ýt«V­Âu]D„Ý¶c~ü
+[33m1024[0m
+[0;32mClient: Ü%"£srr8ûì³¹æškðù|¼ŸŽŽn<×#‹à÷Ûˆ}ÉH%3´µõàfÀÓš¦]M¼þÚ47µP=p
+[33m1024[0m
