@@ -31,10 +31,22 @@ void Http::GET(pollfd pfd, string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
-    if (path[path.length() - 1] == '/' || path == "./")
+    int autoindexFlag = 1;
+
+    if ((!isDirectory(path) && !fileExistis(path)) || //not a directory & file not exists
+        (path[path.length() - 1] == '/' && autoindexFlag == false)) //request a path but autoindex closed
     {
-        int autoindexFlag = 1;
-        if (!fileExistis(path + "index.html") && autoindexFlag)
+        code404(pfd.fd);
+        return ;
+    }
+    else if (isDirectory(this->filePath) && this->filePath[this->filePath.length() - 1] != '/')
+    {
+        code301(pfd.fd, path); //redirect ./example to ./example/
+        return ;
+    }
+    else if (path[path.length() - 1] == '/')
+    {
+        if (!fileExistis(path + "index.html")) //if index.html not found, show directory (autoindex)
         {
             Autoindex = true;
             cout << RED << "Auto index" << RESETEND;
@@ -42,22 +54,11 @@ void Http::GET(pollfd pfd, string path)
         else
             path.append("index.html");
     }
-    else if (!isDirectory(path) && !fileExistis(path))
-    {
-        code404(pfd.fd);
-        return ;
-    }
-    else if (isDirectory(this->filePath) && this->filePath[this->filePath.length() - 1] != '/')
-    {
-        code301(pfd.fd, path);
-        // close(pfd.fd);
-        return ;
-    }
 
-    cout << RED << "debug" << path << RESETEND;
+    // cout << RED << "debug " << path << RESETEND;
 
     string content;
-    
+
     if (Autoindex == true)
     {
         content = autoindex(path);
