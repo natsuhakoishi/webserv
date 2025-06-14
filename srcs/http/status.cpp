@@ -16,7 +16,28 @@ void Http::code404(int pfd)
 
     send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 404 succesful" << endl; //debug
+    cout << BLUE << "GET: Respond 404 successful" << endl; //debug
+    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    close(pfd);
+}
+
+void Http::code403(int pfd)
+{
+    cout << RED << "403!" << RESETEND; //debug
+
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 403 Forbidden\r\n\r\n";
+
+    string content = getContent("./error_page/403.html");
+    if (!content.compare(""))
+        ss << "<!doctype html><html lang=\"en\"><head><title>403 Forbidden</title></head><body><main><h1>403 Forbidden</h1></main></body></html>";
+    else
+        ss << content;
+
+    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+
+    cout << BLUE << "GET: Respond 403 successful" << endl; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);
 }
@@ -38,7 +59,7 @@ void Http::code301(int pfd, string url)
 
     send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 301 succesful" << endl; //debug
+    cout << BLUE << "GET: Respond 301 successful" << endl; //debug
     cout << BLUE << "Respond:" << RED << ss.str() << RESETEND; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);

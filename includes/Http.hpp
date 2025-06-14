@@ -33,6 +33,7 @@ class Http
         bool fileExistis(string path);
     
         void code404(int pfd);
+        void code403(int pfd);
         void code301(int pfd, string url);
 };
 
