@@ -1,5 +1,5 @@
-#ifndef PARSING_HELPER_HPP
-# define PARSING_HELPER_HPP
+#ifndef HELPER_HPP
+# define HELPER_HPP
 
 # include <string>
 

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/14 18:32:29 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/14 21:34:25 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,10 @@ int	Config::get_blockCount() const {
 	return (this->_blockCount);
 }
 
-vector<cfgServer>	Config::get_Servers() const {
-	return (this->_Servers);
-}
+//memo blocking basic test
+// vector<cfgServer>	Config::get_Servers() const {
+// 	return (this->_Servers);
+// }
 
 map<string,vector<int> >	Config::get_SocketTable() const {
 	return (this->_SocketTable);
@@ -143,8 +144,11 @@ void	Config::get_serverBody(std::ifstream &infile) {
 					in_body = false;
 					first_Obrace = false;
 					this->_blockCount++;
-					cfgServer a_block = cfgServer(server_body, this->_blockCount - 1);
-					this->_Servers.push_back(a_block);
+					//memo uncomment 2 lines below to see what happen in this function
+					std::cout << this->_blockCount << "th" << std::endl;
+					std::cout << server_body << std::endl;
+					// cfgServer a_block = cfgServer(server_body, this->_blockCount - 1);
+					// this->_Servers.push_back(a_block);
 					server_body.clear();
 				}
 			}

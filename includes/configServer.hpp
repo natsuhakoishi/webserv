@@ -9,6 +9,7 @@
 //Libraries & Headers
 # include "Config.hpp"
 # include "configRoute.hpp"
+# include "helper.hpp"
 
 using std::string;
 using std::pair;

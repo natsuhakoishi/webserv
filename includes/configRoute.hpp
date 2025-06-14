@@ -8,6 +8,7 @@
 //Libraries & Headers
 # include "Config.hpp"
 # include "configServer.hpp"
+# include "helper.hpp"
 
 using std::string;
 using std::pair;
