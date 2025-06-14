@@ -15,3 +15,10 @@ int main() {
 
     return 0;
 }
+
+// int main()
+// {
+//     Http h("/");
+
+//     h.autoindex("./srcs");
+// }

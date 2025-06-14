@@ -4,7 +4,7 @@ Http::Http() {}
 
 Http::Http(string buffer): rev(buffer)
 {
-    cout << "Client: " << rev << endl;
+    cout << GREEN << "Client: " << rev << endl;
     parse();
 }
 
@@ -22,38 +22,13 @@ void Http::parse()
 
     //read headers
 
-    if (this->url == "/")
-        this->url = "/index/index.html"; //will update to config file default seting
     this->filePath = "." + this->url;
-
-}
-
-bool Http::fileExistis(string file)
-{
-    std::ifstream ifile(file.c_str());
-    if (!ifile.good())
-        return false;
-    return true;
 }
 
 void Http::respond(pollfd pfd)
 {
     if (this->method == "GET")
-    {
-        if (fileExistis(this->filePath))
-            GET(pfd, this->filePath);
-        else
-        {
-            cout << "404!!!!!!!!!!" << endl;
-            string notFound("HTTP/1.1 404 Not Found\r\n\r\n");
-            notFound += "<!doctype html><html lang=\"en\"><head><title>404 not found</title></head><body><main><h1>404 Not found</h1></main></body></html>";
-            cout << notFound << endl;
-            send(pfd.fd, notFound.c_str(), notFound.length(), 0);
-            std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << std::endl;
-            close(pfd.fd);
-            // 404 not found;
-        }
-    }
+        GET(pfd, this->filePath);
     // else if
     // else if
 }

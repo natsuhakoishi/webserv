@@ -19,12 +19,20 @@ class Http
         void parse();
         void respond(pollfd);
 
-        //helper function
-        bool fileExistis(string);
 
         //GET method
         string getContent(string);
         string GetContentType(string);
         void GET(pollfd, string);
+
+        string autoindex(string path);
+        string createElement(string file);
+
+        //utils
+        bool isDirectory(string path);
+        bool fileExistis(string path);
+    
+        void code404(int pfd);
+        void code301(int pfd, string url);
 };
 
