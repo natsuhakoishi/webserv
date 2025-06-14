@@ -2,6 +2,7 @@
 
 string Http::GetContentType(string c)
 {
+    if (!c.compare("./")) return "text/html";
     // cout << "eeeeeeeee:" << c.substr(c.length() - 5) << endl;
     if (!c.substr(c.length() - 5).compare(".html")) return "text/html";
     if (!c.substr(c.length() - 4).compare(".png")) return "image/png";
@@ -28,14 +29,46 @@ string Http::GetContentType(string c)
 */
 void Http::GET(pollfd pfd, string path)
 {
-    cout << BLUE << "GET: Client request: " << path << RESETEND;
-    // struct stat s;
-    // if (stat(path.c_str(), &s) == 0 && S_ISDIR(s.st_mode)) // && directory_listing == true
-    // {
-    //     code301(pfd.fd, path);
-    // }
-    string content(getContent(path));
-    string type(GetContentType(path));
+    cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
+    bool Autoindex = false;
+    if (path[path.length() - 1] == '/' || path == "./")
+    {
+        int autoindexFlag = 1;
+        if (!fileExistis(path + "index.html") && autoindexFlag)
+        {
+            Autoindex = true;
+            cout << RED << "Auto index" << RESETEND;
+        }
+        else
+            path.append("index.html");
+    }
+    else if (!isDirectory(path) && !fileExistis(path))
+    {
+        code404(pfd.fd);
+        return ;
+    }
+    else if (isDirectory(this->filePath) && this->filePath[this->filePath.length() - 1] != '/')
+    {
+        code301(pfd.fd, path);
+        // close(pfd.fd);
+        return ;
+    }
+
+    cout << RED << "debug" << path << RESETEND;
+
+    string content;
+    
+    if (Autoindex == true)
+    {
+        content = autoindex(path);
+        path.append("index.html");
+    }
+    else
+        content = getContent(path);
+    // cout << RED << "debug" << content << RESETEND;
+
+    string type;
+    type = GetContentType(path);
 
     std::ostringstream ss;
 
@@ -48,4 +81,6 @@ void Http::GET(pollfd pfd, string path)
     send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
 
     cout << BLUE << "GET: Respond succesful" << RESETEND;
+    std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
+    close(pfd.fd);
 }

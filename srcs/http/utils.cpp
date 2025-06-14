@@ -13,3 +13,20 @@ string Http::getContent(string path)
 
     return ss.str();
 }
+
+bool Http::isDirectory(string path)
+{
+    struct stat s;
+    stat(path.c_str(), &s);
+    if (S_ISDIR(s.st_mode))
+        return true;
+    return false;
+}
+
+bool Http::fileExistis(string file)
+{
+    std::ifstream ifile(file.c_str());
+    if (!ifile.good())
+        return false;
+    return true;
+}

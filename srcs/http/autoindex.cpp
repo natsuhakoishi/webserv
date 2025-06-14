@@ -1,10 +1,10 @@
 #include "../../includes/Http.hpp"
 
-string Http::createElement(string file, struct stat isdir)
+string Http::createElement(string path)
 {
-    if (S_ISDIR(isdir.st_mode))
-        return "<a href=\"" + file + "/\">" + file + "/</a>"; //directory
-    return "<a href=\"" + file + "\">" + file + "</a>"; //file
+    if (isDirectory(path))
+        return "<a href=\"/" + path + "/\">" + path + "/</a>"; //directory
+    return "<a href=\"/" + path + "\">" + path + "</a>"; //file
 }
 
 string Http::autoindex(string path)
@@ -14,6 +14,7 @@ string Http::autoindex(string path)
     if (!dir)
     {
         //error page;
+        cout << RED << "autoindex: huh" << RESETEND;
         return "";
     }
     struct dirent *entry;
@@ -25,14 +26,12 @@ string Http::autoindex(string path)
     while ((entry = readdir(dir)) != NULL)
     {
         string filename = entry->d_name;
-        if (filename == "." || filename == "..")
+        if (filename == ".") // || filename == ".."
             continue ;
         string fullPath = path + filename;
-        struct stat s;
-        stat(fullPath.c_str(), &s);
-        // cout << GREEN << fullPath << " " << S_ISDIR(s.st_mode) << RESETEND;
+        // cout << GREEN << fullPath << RESETEND;
         ss << "<div>";
-        ss << createElement(fullPath, s);
+        ss << createElement(fullPath);
         ss << "</div>";
     }
     ss << "</body>";

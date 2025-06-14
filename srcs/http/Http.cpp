@@ -4,7 +4,7 @@ Http::Http() {}
 
 Http::Http(string buffer): rev(buffer)
 {
-    cout << "Client: " << rev << endl;
+    cout << GREEN << "Client: " << rev << endl;
     parse();
 }
 
@@ -22,29 +22,13 @@ void Http::parse()
 
     //read headers
 
-    if (this->url == "/")
-        this->url = "/index.html"; //will update to config file default seting
     this->filePath = "." + this->url;
-
-}
-
-bool Http::fileExistis(string file)
-{
-    std::ifstream ifile(file.c_str());
-    if (!ifile.good())
-        return false;
-    return true;
 }
 
 void Http::respond(pollfd pfd)
 {
     if (this->method == "GET")
-    {
-        if (fileExistis(this->filePath))
-            GET(pfd, this->filePath);
-        else
-            code404(pfd.fd);
-    }
+        GET(pfd, this->filePath);
     // else if
     // else if
 }
