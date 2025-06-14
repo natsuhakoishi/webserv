@@ -6,6 +6,7 @@ class Http
 {
     private:
         string rev;
+        pollfd pfd;
         string method;
         string url;
         string filePath;
@@ -14,9 +15,11 @@ class Http
         Http();
 
     public:
-        Http(string buffer);
+        Http(string _buffer, pollfd _pfd);
         ~Http();
         void parse();
+        void readHeaders();
+
         void respond(pollfd);
 
 
@@ -24,6 +27,7 @@ class Http
         string getContent(string);
         string GetContentType(string);
         void GET(pollfd, string);
+        void POST(pollfd, string);
 
         string autoindex(string path);
         string createElement(string file);

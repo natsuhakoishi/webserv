@@ -4,6 +4,7 @@ CFLAG= -Wall -Wextra -Werror -g3 -fsanitize=address
 SRCS=srcs/server/main.cpp \
 	srcs/server/TcpServer.cpp \
 	srcs/http/GET.cpp \
+	srcs/http/POST.cpp \
 	srcs/http/autoindex.cpp \
 	srcs/http/Http.cpp \
 	srcs/http/status.cpp \
