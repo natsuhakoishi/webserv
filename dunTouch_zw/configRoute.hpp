@@ -14,17 +14,17 @@ using std::pair;
 
 class cfgRoute {
 	private:
-		string									request_path;
-		string									rootDir_path;
-		string									indexFile_path;
-		bool									autoIndex_state;
-		std::vector<string>						http_method;
+		string									_request_path;
+		string									_rootDir_path;
+		string									_indexFile_path;
+		bool									_autoIndex_state;
+		std::vector<string>						_http_method;
 		// bool									has_redirec;
-		string									redirection_path;
+		string									_redirection_path;
 		// bool									has_upload;
-		string									upload_path;
+		string									_upload_path;
 		// bool									has_cgi;
-		std::vector<pair<string,string> >	cgi_info; //ex. format <file extension>,</file/to/script>
+		std::vector<pair<string,string> >		_cgi_info; //ex. format <file extension>,</file/to/script>
 	public:
 		//OCCF
 		cfgRoute();
@@ -33,14 +33,14 @@ class cfgRoute {
 		~cfgRoute();
 
 		//getter
-		const string&				get_requestPath() const;
-		const string&				get_rootDirPath() const;
-		const string&				get_indexFilePath() const;
-		bool						get_autoIndexState() const;
-		const std::vector<string>&	get_httpMethod() const;
-		const string&				get_redirectionPath() const;
-		const string&				get_uploadPath() const;
-		const std::vector<pair<string,string> >	get_cgiInfo() const;
+		string								get_requestPath();
+		string								get_rootDirPath();
+		string								get_indexFilePath();
+		bool								get_autoIndexState();
+		std::vector<string>					get_httpMethod();
+		string								get_redirectionPath();
+		string								get_uploadPath();
+		std::vector<pair<string,string> >	get_cgiInfo();
 		//setter
 		void	set_requestPath(const string &input); 
 		void	set_rootDirPath(const string &input);

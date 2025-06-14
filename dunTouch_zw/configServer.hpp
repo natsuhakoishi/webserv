@@ -17,25 +17,26 @@ class cfgRoute;
 
 class cfgServer {
 	private:
-		string								server_name; //equivalent to HTTP request header's Host
-		std::vector<string>					hostPort; //IP:Port
-		int									clientBodySize;
-		std::vector<pair<int,string> >		errorCodes_map;
+		int									_id;
+		string								_server_name; //equivalent to HTTP request header's Host
+		std::vector<string>					_hostPort; //IP:Port
+		int									_clientBodySize;
+		std::vector<pair<int,string> >		_errorCodes_map;
 		// std::vector<pair<string,cfgRoute> >	Routes_map;
-		std::vector<cfgRoute>				Routes;
+		std::vector<cfgRoute>				_Routes;
 	public:
 		//OCCF
-		cfgServer();
+		cfgServer(string &content, int id);
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);
 		~cfgServer();
 
 		//getter
-		const string&							get_serverName() const;
-		const std::vector<string>&				get_hostPort() const;
-		int										get_clientBodySize() const;
-		const std::vector<pair<int,string> >&	get_errorCodesMap() const;
-		const std::vector<cfgRoute>&			get_routes() const;
+		string							get_serverName();
+		std::vector<string>				get_hostPort();
+		int								get_clientBodySize();
+		std::vector<pair<int,string> >	get_errorCodesMap();
+		std::vector<cfgRoute>			get_routes();
 		//setter
 		void	set_serverName(const string &input);
 		void	set_hostPort(const std::vector<string> &inputS);
