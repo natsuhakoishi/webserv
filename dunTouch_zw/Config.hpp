@@ -5,47 +5,45 @@
 # include <string>
 # include <vector>
 # include <map>
-# include <utility> //for std::pair
 //Libraries & Headers
-# include <exception>
 # include <iostream>
+# include <exception>
 # include <fstream>
 # include "configServer.hpp"
+# include "utils.hpp"
 
 using std::string;
-using std::pair;
+using std::vector;
+using std::map;
 
 class cfgServer;
 
 class Config {
 	private:
-		std::map<string,std::vector<cfgServer> >	bind_table; //how about std::vector<int>, store the index of cfgServer in the std::vector
-		std::vector<cfgServer>						Servers;
+		static int					_blockCount;
+		vector<cfgServer>			_Servers;
+		map<string,vector<int> >	_SocketTable;
 	public:
-		//OCCF
-		Config(string filepath);
+		Config(string &filepath);
 		Config(const Config &other);
 		Config&	operator=(const Config &other);
 		~Config();
 
-		//getter
-		std::map<string,std::vector<cfgServer> >	get_bindTable();
-		std::vector<cfgServer>						get_Servers();
-		//setter
-		void	set_bindTable(const std::map<string,std::vector<cfgServer> > &inputS);
-		void	set_Servers(const std::vector<cfgServer> &inputS);
+		int							get_blockCount() const;
+		vector<cfgServer>			get_Servers() const;
+		map<string,vector<int> >	get_SocketTable() const;
+		
+		void	set_SocketTable(string newAddress, int id);
 
-		//exception
 		class ConfigError : public std::exception {
 			private:
-				string	err_msg;
+				const char	*_err_msg;
 			public:
-				ConfigError(const string &msg);
-				const char*	what() const throw();
+				ConfigError(const char *msg) throw();
+				virtual const char*	what() const throw();
 		};
 
-		//member functions
-		void	read_config(std::ifstream &infile);//loop and parse
+		void	get_serverBody(std::ifstream &infile);
 };
 
 #endif

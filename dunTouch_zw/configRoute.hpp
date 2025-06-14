@@ -14,17 +14,17 @@ using std::pair;
 
 class cfgRoute {
 	private:
-		string									request_path;
-		string									rootDir_path;
-		string									indexFile_path;
-		bool									autoIndex_state;
-		std::vector<string>						http_method;
+		string									_request_path;
+		string									_rootDir_path;
+		string									_indexFile_path;
+		bool									_autoIndex_state;
+		std::vector<string>						_http_method;
 		// bool									has_redirec;
-		string									redirection_path;
+		string									_redirection_path;
 		// bool									has_upload;
-		string									upload_path;
+		string									_upload_path;
 		// bool									has_cgi;
-		std::vector<pair<string,string> >	cgi_info; //ex. format <file extension>,</file/to/script>
+		std::vector<pair<string,string> >		_cgi_info; //ex. format <file extension>,</file/to/script>
 	public:
 		//OCCF
 		cfgRoute();
