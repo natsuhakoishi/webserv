@@ -9,6 +9,7 @@ string Http::GetContentType(string c)
     if (!c.substr(c.length() - 4).compare(".gif")) return "image/gif";
     if (!c.substr(c.length() - 5).compare(".jpeg")) return "image/jpeg";
     if (!c.substr(c.length() - 4).compare(".csv")) return "text/csv";
+
     return "text/plain";
     // return "text/css";
 }
@@ -31,10 +32,9 @@ void Http::GET(pollfd pfd, string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
-    int autoindexFlag = 1;
+    int autoindexFlag = 0;
 
-    if ((!isDirectory(path) && !fileExistis(path)) || //not a directory & file not exists
-        (path[path.length() - 1] == '/' && autoindexFlag == false)) //request a path but autoindex closed
+    if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
     {
         code404(pfd.fd);
         return ;
@@ -46,30 +46,33 @@ void Http::GET(pollfd pfd, string path)
     }
     else if (path[path.length() - 1] == '/')
     {
-        if (!fileExistis(path + "index.html")) //if index.html not found, show directory (autoindex)
+        if (!fileExistis(path + "index.html") && autoindexFlag == 1) //if index.html not found, show directory (autoindex)
         {
             Autoindex = true;
             cout << RED << "Auto index" << RESETEND;
         }
-        else
+        else if (!fileExistis(path + "index.html"))
+            code403(pfd.fd);
+        else 
             path.append("index.html");
     }
 
     // cout << RED << "debug " << path << RESETEND;
 
     string content;
+    string type;
 
     if (Autoindex == true)
     {
         content = autoindex(path);
-        path.append("index.html");
+        type = "text/html";
     }
     else
+    {
         content = getContent(path);
+        type = GetContentType(path);
+    }
     // cout << RED << "debug" << content << RESETEND;
-
-    string type;
-    type = GetContentType(path);
 
     std::ostringstream ss;
 
@@ -81,7 +84,7 @@ void Http::GET(pollfd pfd, string path)
 
     send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond succesful" << RESETEND;
+    cout << BLUE << "GET: Respond successful" << RESETEND;
     std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
     close(pfd.fd);
 }
