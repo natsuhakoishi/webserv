@@ -43,7 +43,7 @@ class Config {
 				virtual const char*	what() const throw();
 		};
 
-		void	get_serverBody(std::ifstream &infile);
+		void	scan_serverBody(std::ifstream &infile);
 };
 
 #endif

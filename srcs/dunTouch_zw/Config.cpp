@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/14 21:34:25 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/16 17:06:13 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,25 +19,36 @@ int Config::_blockCount = 0;
 Config::Config(string &filepath) {
 	std::ifstream	infile;
 
-	infile.open(filepath.c_str(), std::ios::in);
-	if (!infile.fail())
+	try
 	{
-		if (infile.eof())
-			throw ConfigError("Configuration file is empty!");
-		get_serverBody(infile);
-		infile.close();
+		infile.open(filepath.c_str(), std::ios::in);
+		if (!infile.fail())
+		{
+			if (infile.eof())
+				throw ConfigError("Configuration file is empty!");
+			scan_serverBody(infile);
+			infile.close();
+		}
+		else
+			throw ConfigError("Configuration file fail to open!");
 	}
-	else
-		throw ConfigError("Configuration file fail to open!");
+	catch(const std::exception& e)
+	{
+		std::cerr << "\033[31mParse(File): " << e.what() << "\033[0m\n";
+	}
 }
 
-Config::Config(const Config &other) {
-	*this = other;
+Config::Config(const Config &other) 
+: _Servers(other._Servers), _SocketTable(other._SocketTable) {
 }
 
 Config&	Config::operator=(const Config &other) {
 	if (this != &other)
-		*this = other;
+	{
+		this->_blockCount = other._blockCount;
+		this->_Servers = other._Servers;
+		this->_SocketTable = other._SocketTable;
+	}
 	return (*this);
 }
 
@@ -51,9 +62,10 @@ int	Config::get_blockCount() const {
 }
 
 //memo blocking basic test
-// vector<cfgServer>	Config::get_Servers() const {
-// 	return (this->_Servers);
-// }
+vector<cfgServer>	Config::get_Servers() const {
+	
+	return (this->_Servers);
+}
 
 map<string,vector<int> >	Config::get_SocketTable() const {
 	return (this->_SocketTable);
@@ -67,7 +79,7 @@ void	Config::set_SocketTable(string newAddress, int id) {
 
 //--------------[Functions]--------------------------------------------------
 
-void	Config::get_serverBody(std::ifstream &infile) {
+void	Config::scan_serverBody(std::ifstream &infile) {
 	string	server_body;
 	string	line;
 	bool	in_body = false;
@@ -93,12 +105,12 @@ void	Config::get_serverBody(std::ifstream &infile) {
 					in_body = true;
 					if (temp_buf != "server")
 						brace_count++;
-					server_body.append(temp_buf).append("\n");
+					//memo server_body.append(temp_buf).append("\n");
 				}
 				continue ;
 			}
 			else //mostly mean detect content outside of block
-				throw ConfigError("Parse(File): Undefined configuration.");
+				throw ConfigError("Undefined configuration.");
 		}
 		else if (in_body)
 		{
@@ -116,11 +128,12 @@ void	Config::get_serverBody(std::ifstream &infile) {
 						//found the open brace as first character(other than blankspace); sequence correct
 						first_Obrace = true;
 						brace_count++;
-						server_body.append(line).append("\n");
+						//memo server_body.append(line).append("\n");
 					}
 					else
-						throw ConfigError("Parse(File): Other character after keyword. (Expect: Open Brace)");
+						throw ConfigError("Other character after keyword. (Expect: Open Brace)");
 				}
+				server_body.append(line).append("\n");
 			}
 			//found the valid format, can get the body's content
 			//what happen now? keep track of brace amount and appending line into server_body
@@ -145,19 +158,19 @@ void	Config::get_serverBody(std::ifstream &infile) {
 					first_Obrace = false;
 					this->_blockCount++;
 					//memo uncomment 2 lines below to see what happen in this function
-					std::cout << this->_blockCount << "th" << std::endl;
-					std::cout << server_body << std::endl;
-					// cfgServer a_block = cfgServer(server_body, this->_blockCount - 1);
-					// this->_Servers.push_back(a_block);
+						// std::cout << this->_blockCount << "th" << std::endl;
+						// std::cout << server_body << std::endl;
+					cfgServer a_block = cfgServer(server_body, this->_blockCount - 1);
+					this->_Servers.push_back(a_block);
 					server_body.clear();
 				}
 			}
 		}
 	}
 	if (brace_count)
-		throw ConfigError("Parse(File): Body not enclosed properly with brace.");
+		throw ConfigError("Body not enclosed properly with brace.");
 	if (!this->_blockCount)
-		throw ConfigError("Parse(File): Couldn't find Server body.");
+		throw ConfigError("Couldn't find Server body.");
 }
 
 Config::ConfigError::ConfigError(const char *msg) throw() {

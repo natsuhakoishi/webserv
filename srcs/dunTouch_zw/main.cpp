@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:50:04 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/12 19:01:02 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/16 17:14:34 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,19 @@ int main(int argc, char** argv) {
 		{
 			std::string	filepath = argv[1];
 			Config the_config(filepath);
+			std::cout << the_config.get_blockCount() << std::endl;
+			vector<cfgServer> temp = the_config.get_Servers();
+			vector<cfgServer>::iterator it = temp.begin();
+			while (it != temp.end())
+			{
+				cfgServer temp_buf = *it;
+				std::cout << temp_buf.get_id() << std::endl;
+				++it;
+			}
 		}
-		catch (std::exception &e)
+		catch (...)
 		{
-			std::cout << e.what() << std::endl;
+			std::cout << "Unknown error!" << std::endl;
 		}
 	}
 	else

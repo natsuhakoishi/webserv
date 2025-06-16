@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.cpp                                          :+:      :+:    :+:   */
+/*   helper.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/14 19:56:11 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/15 00:39:21 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,13 @@ string	trim_line(string &line) {
 	if (front == std::string::npos || behind == std::string::npos)
 		return ("");
 	return (line.substr(front, behind - front + 1));
+}
+
+string trim_inlineComment(string &line) {
+	size_t hash = line.find('#');
+	if (hash == std::string::npos)
+		return ("");
+	return (line.substr(0, hash));
 }
 
 }
