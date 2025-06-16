@@ -1,8 +1,7 @@
-#ifndef PARSING_HELPER_HPP
-# define PARSING_HELPER_HPP
+#ifndef HELPER_HPP
+# define HELPER_HPP
 
 # include <string>
-
 # include <iostream>
 # include <cctype>
 
@@ -12,6 +11,7 @@ namespace Utils {
 
 bool	is_blankLine(string &line);
 string	trim_line(string &line);
+string	trim_inlineComment(string &line);
 int		find_socketAddress(string &line);
 
 }

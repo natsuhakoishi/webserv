@@ -93,6 +93,24 @@ void	TcpServer::handleClientConnection(size_t i)
 	}
 }
 
+void	TcpServer::handlePOST(string temp)
+{
+	if (!this->method.compare("POST"))
+	{
+			this->body = temp;
+			// cout << RED << this->body << RESETEND;
+			this->method = "POST!";
+	}
+	else if (!temp.compare("POST"))
+		this->method = "POST";
+	if (!this->body.empty())
+	{
+		size_t bodyLast = this->recvBuffer.find(this->body);
+		if (bodyLast != string::npos)
+			this->canRespond = true;
+	}
+}
+
 void	TcpServer::handleMethod(string input)
 {
     // this->body = this->rev.substr(headersEnd + 4);
@@ -106,6 +124,8 @@ void	TcpServer::handleMethod(string input)
     std::istringstream requestLine(line);
     requestLine >> temp;
 
+	this->recvBuffer.append(input);
+
 	cout << YELLOW << temp << RESETEND;
 	if (!temp.compare("GET") || !this->method.compare("GET"))
 	{
@@ -114,30 +134,12 @@ void	TcpServer::handleMethod(string input)
 		if (headerEnd != string::npos)
 			this->canRespond = true;
 	}
-	else if (!temp.compare("POST") || !this->method.compare("POST"))
+	else if (!temp.compare("POST") || !this->method.compare("POST") || !this->method.compare("POST!"))
 	{
-		cout << YELLOW << "hey! POST" << endl;
-		this->method = "POST";
-		if (this->body.empty())
-		{
-			cout << " first post " << endl;
-			size_t bodyBegin = this->recvBuffer.find("\r\n\r\n") + 4; //+4 for skip /r/n/r/n
-			string bodyTemp = temp.substr(bodyBegin);
-			// std::istringstream ssBody;
-			// std::getline(ssBody, bodyTemp);
-			// ssBody >> this->body;
-			this->body = bodyTemp.substr(0, temp.find("\n"));
-			cout << YELLOW << bodyTemp << RESETEND;
-			cout << YELLOW << this->body << RESETEND;
-		}
-		else
-		{
-
-		}
+		handlePOST(temp);
 	}
-	this->recvBuffer.append(input);
-	cout << YELLOW << this->canRespond << endl;
-	cout << GREEN << this->recvBuffer << RESETEND;
+	// cout << YELLOW << this->canRespond << endl;
+	// cout << GREEN << this->recvBuffer << RESETEND;
 }
 
 void	TcpServer::handleClientMessage(size_t i)
@@ -147,18 +149,15 @@ void	TcpServer::handleClientMessage(size_t i)
 	if (bytes_read > 0)
 	{
 		handleMethod((string(buffer, bytes_read)));
-		// this->recvBuffer.append((string(buffer, bytes_read)));
 		if (this->canRespond == true)
 		{
 			Http h(this->recvBuffer, this->fds[i]);
 			h.respond(this->fds[i]);
 			this->recvBuffer.clear();
+			this->method.clear();
+			this->body.clear();
 			this->canRespond = false;
 		}
-		// cout << YELLOW << bytes_read << RESETEND;
-		// // std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
-		// Http h((string(buffer, bytes_read)), this->fds[i]);
-		// h.respond(this->fds[i]);
 	}
 	else if (bytes_read == 0)
 	{

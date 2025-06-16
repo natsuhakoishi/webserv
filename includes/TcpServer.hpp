@@ -30,6 +30,7 @@ class TcpServer
 		string body;
 		bool canRespond;
 		void	handleMethod(string input);
+		void	handlePOST(string input);
 
 };
 
