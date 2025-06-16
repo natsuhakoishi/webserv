@@ -7,10 +7,15 @@ class Http
     private:
         string rev;
         pollfd pfd;
+    
+        string header;
+        string body;
+
         string method;
         string url;
         string filePath;
         string HttpVersion;
+    
         map<string, string> headers;
         Http();
 

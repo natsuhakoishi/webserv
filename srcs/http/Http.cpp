@@ -12,9 +12,19 @@ Http::~Http() {}
 
 void Http::parse()
 {
-
+    char buffer[1024] = {0};
+    ssize_t bytes_read = -1;
+    while (1)
+    {
+        bytes_read = recv(this->pfd.fd, buffer, sizeof(buffer), 0);
+        cout << bytes_read << endl;
+        if (bytes_read == 0)
+            break ;
+        this->rev += buffer;
+    }
     //read headers
     readHeaders();
+    cout << YELLOW << this->body << RESETEND;
 
     this->filePath = "." + this->url;
 }
@@ -22,11 +32,8 @@ void Http::parse()
 void Http::readHeaders()
 {
     size_t headersEnd = this->rev.find("\r\n\r\n");
-    char buffer[1024] = {0};
-
-    while ((headersEnd = this->rev.find("\r\n\r\n")) == string::npos)
-        recv(this->pfd.fd, buffer, sizeof(buffer), 0);
-    string header(this->rev.substr(0, headersEnd));
+    this->header = this->rev.substr(0, headersEnd);
+    // this->body = this->rev.substr(headersEnd + 4);
     // cout << "headers: " << YELLOW << header << endl;
 
     std::istringstream ss(header);
@@ -37,10 +44,16 @@ void Http::readHeaders()
     requestLine >> this->method >> this->url >> this->HttpVersion;
     // cout << YELLOW << "method:" << method << ", " << "url:" << url << ", " << "httpVer:" << HttpVersion << RESETEND;
 
-    while ()
-    {
-        
-    }
+    // while (getline(ss, line))
+    // {
+    //     size_t pos = line.find(":");
+    //     string key = line.substr(0, pos);
+    //     string value = line.substr(pos + 1);
+    //     value.erase(0, value.find_first_not_of(" \t\r"));
+    //     value.erase(value.find_last_not_of(" \t\r") + 1);
+    //     this->headers[key] = value;
+    //     cout << YELLOW << "key:" << RESET << key << YELLOW << " value:" << RESET << value << "$" << RESETEND;
+    // }
 
 }
 
