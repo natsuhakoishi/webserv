@@ -2,10 +2,15 @@
 
 #include "Webserv.hpp"
 
+#ifndef DEBUG
+# define DEBUG 0
+#endif
+
 class Http
 {
     private:
         string rev;
+        string buffer;
         pollfd pfd;
     
         string header;
@@ -15,18 +20,24 @@ class Http
         string url;
         string filePath;
         string HttpVersion;
-    
+
         map<string, string> headers;
+
+        bool isRespond;
         Http();
 
     public:
-        Http(string _buffer, pollfd _pfd);
+        Http(pollfd _pfd);
+        Http(const Http &);
         ~Http();
-        void parse();
+
+        Http &operator=(const Http &);
+
+        void parse(string input);
         void readHeaders();
+        void readBody();
 
         void respond(pollfd);
-
 
         //GET method
         string getContent(string);
@@ -44,5 +55,8 @@ class Http
         void code404(int pfd);
         void code403(int pfd);
         void code301(int pfd, string url);
+
+        //getter
+        bool getIsRespond() const;
 };
 

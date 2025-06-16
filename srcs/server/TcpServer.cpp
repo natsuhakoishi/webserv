@@ -95,17 +95,19 @@ void	TcpServer::handleClientConnection(size_t i)
 
 void	TcpServer::handlePOST(string temp)
 {
+	bool flag = false;
 	if (!this->method.compare("POST"))
 	{
 			this->body = temp;
 			// cout << RED << this->body << RESETEND;
 			this->method = "POST!";
+			flag = true;
 	}
 	else if (!temp.compare("POST"))
 		this->method = "POST";
-	if (!this->body.empty())
+	if (!this->body.empty() && flag == false)
 	{
-		size_t bodyLast = this->recvBuffer.find(this->body);
+		size_t bodyLast = temp.find(this->body);
 		if (bodyLast != string::npos)
 			this->canRespond = true;
 	}
@@ -126,7 +128,7 @@ void	TcpServer::handleMethod(string input)
 
 	this->recvBuffer.append(input);
 
-	cout << YELLOW << temp << RESETEND;
+	// cout << YELLOW << temp << RESETEND;
 	if (!temp.compare("GET") || !this->method.compare("GET"))
 	{
 		this->method = "GET";
@@ -148,16 +150,30 @@ void	TcpServer::handleClientMessage(size_t i)
 	ssize_t bytes_read = recv(this->fds[i].fd, buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
 	{
-		handleMethod((string(buffer, bytes_read)));
-		if (this->canRespond == true)
+		map<int, Http *>::iterator isExisit = this->httpMap.find(this->fds[i].fd);
+		if (isExisit == this->httpMap.end())
 		{
-			Http h(this->recvBuffer, this->fds[i]);
-			h.respond(this->fds[i]);
-			this->recvBuffer.clear();
-			this->method.clear();
-			this->body.clear();
-			this->canRespond = false;
+			cout << YELLOW << "new http" << RESETEND;
+			this->httpMap[this->fds[i].fd] = new Http(this->fds[i]);;
 		}
+		Http *h = this->httpMap[this->fds[i].fd];
+		h->parse((string(buffer, bytes_read)));
+		if (h->getIsRespond() == true)
+		{
+			cout << RED << "deleted" << RESETEND;
+			delete h;
+			this->httpMap.erase(this->fds[i].fd);
+		}
+		// handleMethod((string(buffer, bytes_read)));
+		// if (this->canRespond == true)
+		// {
+		// 	Http h(this->recvBuffer, this->fds[i]);
+		// 	h.respond(this->fds[i]);
+		// 	this->recvBuffer.clear();
+		// 	this->method.clear();
+		// 	this->body.clear();
+		// 	this->canRespond = false;
+		// }
 	}
 	else if (bytes_read == 0)
 	{
