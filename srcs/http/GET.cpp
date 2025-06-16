@@ -90,4 +90,5 @@ void Http::GET(pollfd pfd, string path)
     cout << BLUE << "GET: Respond successful" << RESETEND;
     std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
     close(pfd.fd);
+    this->isRespond = true;
 }

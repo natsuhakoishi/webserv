@@ -1,28 +1,63 @@
 #include "../../includes/Http.hpp"
 
-Http::Http() {}
-
-Http::Http(string _buffer, pollfd _pfd): rev(_buffer), pfd(_pfd)
+Http::Http()
 {
-    cout << GREEN << "Client: " << rev << RESETEND;
-    parse();
+    if (DEBUG)
+        cout << GREEN << "Default constructor called" << endl;
+}
+
+Http::Http(pollfd _pfd): pfd(_pfd), isRespond(false)
+{
+    if (DEBUG)
+        cout << GREEN << "Arg constructor called" << endl;
+}
+
+Http::Http(const Http &other)
+{
+    if (DEBUG)
+        cout << GREEN << "Copy constructor called" << endl;
+    *this = other;
 }
 
 Http::~Http() {}
 
-void Http::parse()
+Http &Http::operator=(const Http &other)
 {
-    //read headers
-    readHeaders();
-    // cout << YELLOW << this->body << RESETEND;
+    if (this == &other)
+        return *this;
+    this->rev = other.rev;
+    this->buffer = other.buffer;
+    this->pfd = other.pfd;
+    this->header = other.header;
+    this->body = other.body;
+    this->method = other.method;
+    this->filePath = other.filePath;
+    this->HttpVersion = other.HttpVersion;
+    this->headers = other.headers;
+    this->isRespond = other.isRespond;
 
-    this->filePath = "." + this->url;
+    return *this;
+}
+
+void Http::parse(string input)
+{
+    // cout << GREEN << "Client: " << input << RESETEND;
+    this->buffer = input;
+    this->rev.append(buffer);
+    if (header.empty())
+        readHeaders();
+    if (!this->method.compare("POST"))
+        readBody();
+    if (!this->method.compare("GET"))
+        GET(this->pfd, this->filePath);
+
+    this->buffer.clear();
 }
 
 void Http::readHeaders()
 {
-    size_t headersEnd = this->rev.find("\r\n\r\n");
-    this->header = this->rev.substr(0, headersEnd);
+    size_t headersEnd = this->buffer.find("\r\n\r\n");
+    this->header = this->buffer.substr(0, headersEnd);
 
     std::istringstream ss(this->header);
     std::string line;
@@ -31,10 +66,9 @@ void Http::readHeaders()
 
     requestLine >> this->method >> this->url >> this->HttpVersion;
 
-    if (!this->method.compare("POST"))
-        this->body = this->rev.substr(headersEnd + 4);
+    this->filePath = "." + this->url;
 
-    cout << YELLOW << "method:" << method << ", " << "url:" << url << ", " << "httpVer:" << HttpVersion << RESETEND;
+    // cout << YELLOW << "method:" << method << ", " << "url:" << url << ", " << "httpVer:" << HttpVersion << RESETEND;
     // cout << "headers: " << YELLOW << this->header << RESETEND;
 
     while (getline(ss, line))
@@ -48,6 +82,22 @@ void Http::readHeaders()
         // cout << YELLOW << "key:" << RESET << key << YELLOW << " value:" << RESET << value << "$" << RESETEND;
     }
 
+    //parse headers
+}
+
+void Http::readBody()
+{
+    size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
+    this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+    
+    // size_t headersEnd = this->rev.find("\r\n\r\n");
+    // tempBody.substr(headersEnd + 4);
+
+    // cout << YELLOW << this->body << RESETEND;
+    // cout << YELLOW << ContentLenght << " , " << this->body.length() << RESETEND;
+
+    if (this->body.length() == ContentLenght)
+        POST(this->pfd, this->filePath);
 }
 
 void Http::respond(pollfd pfd)
@@ -57,4 +107,9 @@ void Http::respond(pollfd pfd)
     else if (!this->method.compare("POST"))
         POST(pfd, this->filePath);
     // else if
+}
+
+bool Http::getIsRespond() const
+{
+    return this->isRespond;
 }

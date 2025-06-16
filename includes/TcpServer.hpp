@@ -3,6 +3,8 @@
 
 #include "Webserv.hpp"
 
+class Http;
+
 class TcpServer
 {
 	public:
@@ -31,6 +33,8 @@ class TcpServer
 		bool canRespond;
 		void	handleMethod(string input);
 		void	handlePOST(string input);
+
+		map<int, Http *> httpMap;
 
 };
 
