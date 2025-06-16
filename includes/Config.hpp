@@ -10,7 +10,7 @@
 # include <exception>
 # include <fstream>
 # include "configServer.hpp"
-# include "utils.hpp"
+# include "helper.hpp"
 
 using std::string;
 using std::vector;
@@ -43,7 +43,7 @@ class Config {
 				virtual const char*	what() const throw();
 		};
 
-		void	get_serverBody(std::ifstream &infile);
+		void	scan_serverBody(std::ifstream &infile);
 };
 
 #endif

@@ -1,30 +1,28 @@
 NAME= webserv
 
-###compile flag####
 VAL = -ggdb3
 VAL_FLAG = --show-leak-kinds=all --leak-check=full --track-origins=yes
 # comment $ASAN if dw use AddSan
 ASAN = -fsanitize=address -g3
-CXXFLAG= -Wall -Wextra -Werror $(ASAN) -g3 -std=c++98 -pedantic -I./
+CXXFLAG= -Wall -Wextra -Werror $(ASAN) -std=c++98 -pedantic -I./includes/
 
-###src file####
-SRCS= \
-	srcs/server/main.cpp \
-	srcs/server/TcpServer.cpp \
-	srcs/http/GET.cpp \
-	srcs/http/autoindex.cpp \
-	srcs/http/Http.cpp \
-	srcs/http/status.cpp \
-	srcs/http/utils.cpp
+SRCS_FILE= \
+	server/main \
+	server/TcpServer \
+	http/GET \
+	http/autoindex \
+	http/Http \
+	http/status \
+	http/utils
+SRCS = $(addprefix srcs/, $(addsuffix .cpp, $(SRCS_FILE)))
 
-###obj file####
 OBJ_DIR = objs
-OBJ=$(SRCS:.cpp=$(OBJ_DIR)/.o)
+OBJ:=$(SRCS:srcs/%.cpp=$(OBJ_DIR)/%.o)
 
-$(OBJ_DIR)/%.o: %.cpp
+$(OBJ_DIR)/%.o: srcs/%.cpp | $(OBJ_DIR)
 	@c++ $(CXXFLAG) -c $< -o $@
 
-###build target####
+
 all: $(NAME)
 
 $(NAME): $(OBJ)
@@ -32,18 +30,20 @@ $(NAME): $(OBJ)
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)/server
+	@mkdir -p $(OBJ_DIR)/http
 
 r: $(NAME)
 	@./$(NAME)
 
 #run with valgrind
-v: CXXLAGS += $(VAL)
+v: CXXFLAG += $(VAL)
 v: re $(OBJ)
 	@c++ $(CXXFLAG) $(OBJ) -o $(NAME)
 	@valgrind $VAL_FLAG ./$(NAME)
 
 clean:
-	@rm -rf $(OBJ)
+	@rm -rf $(OBJ_DIR)
 
 fclean: clean
 	@rm -rf $(NAME)
