@@ -12,19 +12,9 @@ Http::~Http() {}
 
 void Http::parse()
 {
-    char buffer[1024] = {0};
-    ssize_t bytes_read = -1;
-    while (1)
-    {
-        bytes_read = recv(this->pfd.fd, buffer, sizeof(buffer), 0);
-        cout << bytes_read << endl;
-        if (bytes_read == 0)
-            break ;
-        this->rev += buffer;
-    }
     //read headers
     readHeaders();
-    cout << YELLOW << this->body << RESETEND;
+    // cout << YELLOW << this->body << RESETEND;
 
     this->filePath = "." + this->url;
 }

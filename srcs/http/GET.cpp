@@ -32,7 +32,7 @@ void Http::GET(pollfd pfd, string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
-    int autoindexFlag = 0;
+    int autoindexFlag = 1;
 
     if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
     {

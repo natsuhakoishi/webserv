@@ -1,13 +1,13 @@
 #include "../../includes/TcpServer.hpp"
 
-TcpServer::TcpServer()
+TcpServer::TcpServer(): canRespond(false)
 {
 	this->ips.push_back("0.0.0.0");
 	this->ports.push_back(80);
 	initServer();
 }
 
-TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp)
+TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp): canRespond(false)
 {
 	for (std::vector<std::pair<std::string, int> >::iterator it = ipp.begin(); it != ipp.end(); it++)
 	{
@@ -93,16 +93,72 @@ void	TcpServer::handleClientConnection(size_t i)
 	}
 }
 
+void	TcpServer::handleMethod(string input)
+{
+    // this->body = this->rev.substr(headersEnd + 4);
+    // cout << "headers: " << YELLOW << header << endl;
+
+    std::istringstream ss(input);
+    std::string line;
+	string temp;
+
+    std::getline(ss, line);
+    std::istringstream requestLine(line);
+    requestLine >> temp;
+
+	cout << YELLOW << temp << RESETEND;
+	if (!temp.compare("GET") || !this->method.compare("GET"))
+	{
+		this->method = "GET";
+		size_t headerEnd = input.find("\r\n\r\n");
+		if (headerEnd != string::npos)
+			this->canRespond = true;
+	}
+	else if (!temp.compare("POST") || !this->method.compare("POST"))
+	{
+		cout << YELLOW << "hey! POST" << endl;
+		this->method = "POST";
+		if (this->body.empty())
+		{
+			cout << " first post " << endl;
+			size_t bodyBegin = this->recvBuffer.find("\r\n\r\n") + 4; //+4 for skip /r/n/r/n
+			string bodyTemp = temp.substr(bodyBegin);
+			// std::istringstream ssBody;
+			// std::getline(ssBody, bodyTemp);
+			// ssBody >> this->body;
+			this->body = bodyTemp.substr(0, temp.find("\n"));
+			cout << YELLOW << bodyTemp << RESETEND;
+			cout << YELLOW << this->body << RESETEND;
+		}
+		else
+		{
+
+		}
+	}
+	this->recvBuffer.append(input);
+	cout << YELLOW << this->canRespond << endl;
+	cout << GREEN << this->recvBuffer << RESETEND;
+}
+
 void	TcpServer::handleClientMessage(size_t i)
 {
 	char	buffer[1024] = { 0 };
 	ssize_t bytes_read = recv(this->fds[i].fd, buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
 	{
-		cout << YELLOW << bytes_read << RESETEND;
-		// std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
-		Http h((string(buffer, bytes_read)), this->fds[i]);
-		h.respond(this->fds[i]);
+		handleMethod((string(buffer, bytes_read)));
+		// this->recvBuffer.append((string(buffer, bytes_read)));
+		if (this->canRespond == true)
+		{
+			Http h(this->recvBuffer, this->fds[i]);
+			h.respond(this->fds[i]);
+			this->recvBuffer.clear();
+			this->canRespond = false;
+		}
+		// cout << YELLOW << bytes_read << RESETEND;
+		// // std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
+		// Http h((string(buffer, bytes_read)), this->fds[i]);
+		// h.respond(this->fds[i]);
 	}
 	else if (bytes_read == 0)
 	{
