@@ -56,6 +56,8 @@ class Http
         void code404(int pfd);
         void code403(int pfd);
         void code301(int pfd, string url);
+        void code409(int pfd);
+        void code500(int pfd);
 
         //getter
         bool getIsRespond() const;
