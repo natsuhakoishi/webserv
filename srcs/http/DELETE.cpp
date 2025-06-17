@@ -23,7 +23,7 @@ void	Http::DELETE(pollfd pfd, string path)
 		DIR* dir = opendir(path.c_str());
 		if (dir == NULL)
 		{
-			code404(pfd.fd); //500 later //reminder
+			code500(pfd.fd);
 			return ;
 		}
 		struct dirent *enterdir;
@@ -39,14 +39,14 @@ void	Http::DELETE(pollfd pfd, string path)
 		closedir(dir);
 		if (isEmpty == false) //if folder got stuff cant delete, send 409 conflict
 		{
-			code403(pfd.fd); //409 later //reminder
+			code409(pfd.fd);
 			return ;
 		}
 		flag = rmdir(path.c_str()); //success 0, else 1
 	}
 	if (flag != 0)
 	{
-		code404(pfd.fd);//500 later //reminder
+		code500(pfd.fd);
 		return ;
 	}
 
