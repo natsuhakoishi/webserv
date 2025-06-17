@@ -12,7 +12,7 @@ class Http
         string rev;
         string buffer;
         pollfd pfd;
-    
+
         string header;
         string body;
 
@@ -44,6 +44,7 @@ class Http
         string GetContentType(string);
         void GET(pollfd, string);
         void POST(pollfd, string);
+        void DELETE(pollfd, string);
 
         string autoindex(string path);
         string createElement(string file);
@@ -51,7 +52,7 @@ class Http
         //utils
         bool isDirectory(string path);
         bool fileExistis(string path);
-    
+
         void code404(int pfd);
         void code403(int pfd);
         void code301(int pfd, string url);

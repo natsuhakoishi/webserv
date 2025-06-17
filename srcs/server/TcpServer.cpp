@@ -153,14 +153,14 @@ void	TcpServer::handleClientMessage(size_t i)
 		map<int, Http *>::iterator isExisit = this->httpMap.find(this->fds[i].fd);
 		if (isExisit == this->httpMap.end())
 		{
-			cout << YELLOW << "new http" << RESETEND;
+			cout << YELLOW << "new http object created" << RESETEND;
 			this->httpMap[this->fds[i].fd] = new Http(this->fds[i]);;
 		}
 		Http *h = this->httpMap[this->fds[i].fd];
 		h->parse((string(buffer, bytes_read)));
 		if (h->getIsRespond() == true)
 		{
-			cout << RED << "deleted" << RESETEND;
+			cout << RED << "http object deleted" << RESETEND;
 			delete h;
 			this->httpMap.erase(this->fds[i].fd);
 		}

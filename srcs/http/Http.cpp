@@ -50,6 +50,8 @@ void Http::parse(string input)
         readBody();
     if (!this->method.compare("GET"))
         GET(this->pfd, this->filePath);
+    if (!this->method.compare("DELETE"))
+        DELETE(this->pfd, this->filePath);
 
     this->buffer.clear();
 }
@@ -89,7 +91,7 @@ void Http::readBody()
 {
     size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
     this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
-    
+
     // size_t headersEnd = this->rev.find("\r\n\r\n");
     // tempBody.substr(headersEnd + 4);
 
@@ -106,7 +108,8 @@ void Http::respond(pollfd pfd)
         GET(pfd, this->filePath);
     else if (!this->method.compare("POST"))
         POST(pfd, this->filePath);
-    // else if
+    else if (!this->method.compare("DELETE"))
+        DELETE(pfd, this->filePath);
 }
 
 bool Http::getIsRespond() const
