@@ -8,6 +8,7 @@ void Http::code404(int pfd)
 
     ss << "HTTP/1.1 404 Not Found\r\n\r\n";
 
+    this->isRespond = true;
     string content = getContent("./error_page/404.html");
     if (!content.compare(""))
         ss << "<!doctype html><html lang=\"en\"><head><title>404 not found</title></head><body><main><h1>404 Not found</h1></main></body></html>";
@@ -27,6 +28,7 @@ void Http::code403(int pfd)
 
     std::ostringstream ss;
 
+    this->isRespond = true;
     ss << "HTTP/1.1 403 Forbidden\r\n\r\n";
 
     string content = getContent("./error_page/403.html");

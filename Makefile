@@ -11,6 +11,7 @@ SRCS_FILE= \
 	server/TcpServer \
 	http/GET \
 	http/POST \
+    http/DELETE \
 	http/autoindex \
 	http/Http \
 	http/status \
