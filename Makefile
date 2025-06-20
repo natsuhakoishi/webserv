@@ -1,34 +1,87 @@
 NAME= webserv
-CFLAG= -Wall -Wextra -Werror -g3 -fsanitize=address
 
-SRCS=srcs/server/main.cpp \
-	srcs/server/TcpServer.cpp \
-	srcs/http/GET.cpp \
-	srcs/http/autoindex.cpp \
-	srcs/http/Http.cpp \
-	srcs/http/status.cpp \
-	srcs/http/utils.cpp \
+VAL = -ggdb3
+VAL_FLAG = --show-leak-kinds=all --leak-check=full --track-origins=yes
+# comment $ASAN if dw use AddSan
+ASAN = -fsanitize=address -g3
+CXXFLAG= -Wall -Wextra -Werror $(ASAN) -std=c++98 -pedantic -I./includes/
 
-OBJ=$(SRCS:.cpp=.o)
+SRCS_FILE= \
+	server/main \
+	server/TcpServer \
+	http/GET \
+	http/POST \
+    http/DELETE \
+	http/autoindex \
+	http/Http \
+	http/status \
+	http/utils
+SRCS = $(addprefix srcs/, $(addsuffix .cpp, $(SRCS_FILE)))
+
+OBJ_DIR = objs
+OBJ:=$(SRCS:srcs/%.cpp=$(OBJ_DIR)/%.o)
+
+$(OBJ_DIR)/%.o: srcs/%.cpp | $(OBJ_DIR)
+	@c++ $(CXXFLAG) -c $< -o $@
+
 
 all: $(NAME)
 
-%.o: %.cpp
-	@c++ $(CFLAG) -std=c++98 -c $< -o $@
-
 $(NAME): $(OBJ)
-	@c++ $(CFLAG) -std=c++98 -o $(NAME) $(OBJ)
+	@c++ $(CXXFLAG) $(OBJ) -o $(NAME)
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)/server
+	@mkdir -p $(OBJ_DIR)/http
+
+r: $(NAME)
+	@./$(NAME)
+
+#run with valgrind
+v: CXXFLAG += $(VAL)
+v: re $(OBJ)
+	@c++ $(CXXFLAG) $(OBJ) -o $(NAME)
+	@valgrind $VAL_FLAG ./$(NAME)
 
 clean:
-	@rm -rf $(OBJ)
+	@rm -rf $(OBJ_DIR)
 
 fclean: clean
 	@rm -rf $(NAME)
 
 re: fclean all
 
-r: $(NAME)
-	@./$(NAME)
+.PHONY: all r v clean fclean re
 
-v: $(NAME)
-	@valgrind --leak-check=full --track-origins=yes ./$(NAME)
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ###         佛祖保佑           永无BUG
+    ###        God Bless        Never Crash
+    ###                   _oo0oo_
+    ###                  o8888888o
+    ###                  88" . "88
+    ###                  (| -_- |)
+    ###                  0\  =  /0
+    ###                ___/`---'\___
+    ###              .' \\|     |// '.
+    ###             | \\|||  :  |||// |
+    ###            / _||||| -:- |||||- \
+    ###           |   | \\\  -  /// |   |
+    ###           | \_|  ''\---/''  |_/ |
+    ###           \  .-\__  '-'  ___/-. /
+    ###         ___'. .'  /--.--\  `. .'___
+    ###      ."" '<  `.___\_<|>_/___.' >' "".
+    ###     | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+    ###     \  \ `_.   \_ __\ /__ _/   .-` /  /
+    ### =====`-.____`.___ \_____/___.-`___.-'=====
+    ###                   `=---='
+    ###     佛曰:
+    ###         写字楼里写字间，写字间里程序员；
+    ###         程序人员写程序，又拿程序换酒钱。
+    ###         酒醒只在网上坐，酒醉还来网下眠；
+    ###         酒醉酒醒日复日，网上网下年复年。
+    ###         但愿老死电脑间，不愿鞠躬老板前；
+    ###         奔驰宝马贵者趣，公交自行程序员。
+    ###         别人笑我忒疯癫，我笑自己命太贱；
+    ###         不见满街漂亮妹，哪个归得程序员？
+    ### ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,13 +1,13 @@
 #include "../../includes/TcpServer.hpp"
 
-TcpServer::TcpServer()
+TcpServer::TcpServer(): canRespond(false)
 {
 	this->ips.push_back("0.0.0.0");
 	this->ports.push_back(80);
 	initServer();
 }
 
-TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp)
+TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp): canRespond(false)
 {
 	for (std::vector<std::pair<std::string, int> >::iterator it = ipp.begin(); it != ipp.end(); it++)
 	{
@@ -93,15 +93,87 @@ void	TcpServer::handleClientConnection(size_t i)
 	}
 }
 
+void	TcpServer::handlePOST(string temp)
+{
+	bool flag = false;
+	if (!this->method.compare("POST"))
+	{
+			this->body = temp;
+			// cout << RED << this->body << RESETEND;
+			this->method = "POST!";
+			flag = true;
+	}
+	else if (!temp.compare("POST"))
+		this->method = "POST";
+	if (!this->body.empty() && flag == false)
+	{
+		size_t bodyLast = temp.find(this->body);
+		if (bodyLast != string::npos)
+			this->canRespond = true;
+	}
+}
+
+void	TcpServer::handleMethod(string input)
+{
+    // this->body = this->rev.substr(headersEnd + 4);
+    // cout << "headers: " << YELLOW << header << endl;
+
+    std::istringstream ss(input);
+    std::string line;
+	string temp;
+
+    std::getline(ss, line);
+    std::istringstream requestLine(line);
+    requestLine >> temp;
+
+	this->recvBuffer.append(input);
+
+	// cout << YELLOW << temp << RESETEND;
+	if (!temp.compare("GET") || !this->method.compare("GET"))
+	{
+		this->method = "GET";
+		size_t headerEnd = input.find("\r\n\r\n");
+		if (headerEnd != string::npos)
+			this->canRespond = true;
+	}
+	else if (!temp.compare("POST") || !this->method.compare("POST") || !this->method.compare("POST!"))
+	{
+		handlePOST(temp);
+	}
+	// cout << YELLOW << this->canRespond << endl;
+	// cout << GREEN << this->recvBuffer << RESETEND;
+}
+
 void	TcpServer::handleClientMessage(size_t i)
 {
 	char	buffer[1024] = { 0 };
 	ssize_t bytes_read = recv(this->fds[i].fd, buffer, sizeof(buffer), 0);
 	if (bytes_read > 0)
 	{
-		// std::cout << "Client (fd: " << this->fds[i].fd << "): " << buffer << std::endl;
-		Http h((string(buffer)));
-		h.respond(this->fds[i]);
+		map<int, Http *>::iterator isExisit = this->httpMap.find(this->fds[i].fd);
+		if (isExisit == this->httpMap.end())
+		{
+			cout << YELLOW << "new http object created" << RESETEND;
+			this->httpMap[this->fds[i].fd] = new Http(this->fds[i]);;
+		}
+		Http *h = this->httpMap[this->fds[i].fd];
+		h->parse((string(buffer, bytes_read)));
+		if (h->getIsRespond() == true)
+		{
+			cout << RED << "http object deleted" << RESETEND;
+			delete h;
+			this->httpMap.erase(this->fds[i].fd);
+		}
+		// handleMethod((string(buffer, bytes_read)));
+		// if (this->canRespond == true)
+		// {
+		// 	Http h(this->recvBuffer, this->fds[i]);
+		// 	h.respond(this->fds[i]);
+		// 	this->recvBuffer.clear();
+		// 	this->method.clear();
+		// 	this->body.clear();
+		// 	this->canRespond = false;
+		// }
 	}
 	else if (bytes_read == 0)
 	{
