@@ -64,6 +64,7 @@ void Http::code301(int pfd, string url)
     cout << BLUE << "GET: Respond 301 successful" << endl; //debug
     cout << BLUE << "Respond:" << RED << ss.str() << RESETEND; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    this->isRespond = true;
     close(pfd);
 }
 
