@@ -32,13 +32,15 @@ void Http::POST(pollfd pfd, string path)
     string pureBody = this->body.substr(start, this->body.rfind("\r\n------") - start);
 
     // cout << pureBody << endl;
+    cout << BLUE << "POST: Client sent: " << GREEN << path + "/" + filename << RESETEND;
 
     mkdir(path.c_str(), 0777);
     std::ofstream outFile((path + "/" + filename).c_str());
     outFile << pureBody;
     outFile.close();
-    string content = getContent("./index/yeah.html");
 
+    //respond sucessful page
+    string content = getContent("./index/yeah.html");
     std::ostringstream oss;
 
     oss << "HTTP/1.1 200 OK\r\n";
@@ -49,7 +51,7 @@ void Http::POST(pollfd pfd, string path)
     send(pfd.fd, oss.str().c_str(), oss.str().length(), 0);
     this->isRespond = true;
 
-    cout << BLUE << "POST: Respond successful" << RESETEND;
+    cout << BLUE << "POST: Respond sucessful" << RESETEND;
     std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
     close(pfd.fd);
 }

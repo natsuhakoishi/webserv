@@ -37,9 +37,7 @@ class Http
         void readHeaders();
         void readBody();
 
-        void respond(pollfd);
-
-        //GET method
+        //method
         string getContent(string);
         string GetContentType(string);
         void GET(pollfd, string);

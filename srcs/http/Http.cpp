@@ -43,8 +43,8 @@ void Http::parse(string input)
 {
     // cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
-    this->rev.append(buffer);
-    if (header.empty())
+    this->rev.append(this->buffer);
+    if (this->header.empty())
         readHeaders();
     if (!this->method.compare("POST"))
         readBody();
@@ -83,8 +83,6 @@ void Http::readHeaders()
         this->headers[key] = value;
         // cout << YELLOW << "key:" << RESET << key << YELLOW << " value:" << RESET << value << "$" << RESETEND;
     }
-
-    //parse headers
 }
 
 void Http::readBody()
@@ -100,16 +98,6 @@ void Http::readBody()
 
     if (this->body.length() == ContentLenght)
         POST(this->pfd, this->filePath);
-}
-
-void Http::respond(pollfd pfd)
-{
-    if (!this->method.compare("GET"))
-        GET(pfd, this->filePath);
-    else if (!this->method.compare("POST"))
-        POST(pfd, this->filePath);
-    else if (!this->method.compare("DELETE"))
-        DELETE(pfd, this->filePath);
 }
 
 bool Http::getIsRespond() const

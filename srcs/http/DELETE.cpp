@@ -3,6 +3,7 @@
 void	Http::DELETE(pollfd pfd, string path)
 {
 	struct stat	s;
+	cout << BLUE << "DELETE: client request: " << GREEN << path << RESETEND;
 
 	if (stat(path.c_str(), &s) != 0) //0 means it have files or folder, 1 means no
 	{
