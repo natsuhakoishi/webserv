@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configRoute.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/16 17:01:19 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/23 18:16:34 by yyean-wa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,17 @@
 
 //--------------[OCCF]--------------------------------------------------
 
-cfgRoute::cfgRoute() {
+cfgRoute::cfgRoute()
+{
+	this->_request_path = "/index";
+	this->_rootDir_path = "/";
+	this->_indexFile_path = "index.html";
+	this->_autoIndex_state = true;
+	this->_http_method.push_back("GET");
+	this->_http_method.push_back("POST");
+	this->_http_method.push_back("DELETE");
+	this->_redirection_path = "/error_page/42.html";
+	this->_upload_path = "/upload";
 }
 
 cfgRoute::cfgRoute(const cfgRoute &other)

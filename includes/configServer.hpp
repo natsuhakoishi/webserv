@@ -4,6 +4,7 @@
 //Containers
 # include <string>
 # include <vector>
+# include <map>
 # include <utility> //for std::pair
 //Libraries & Headers
 # include "Config.hpp"
@@ -13,6 +14,7 @@
 using std::string;
 using std::vector;
 using std::pair;
+using std::map;
 
 class cfgRoute;
 
@@ -22,9 +24,10 @@ class cfgServer {
 		string						_server_name;
 		vector<string>				_hostPort;
 		int							_clientBodySize;
-		vector<pair<int,string> >	_errorCodes_map;
+		map<int, string>			_errorCodes_map;
 		vector<cfgRoute>			_Routes;
 	public:
+		cfgServer();
 		cfgServer(string &content, int id);
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);
@@ -34,7 +37,7 @@ class cfgServer {
 		string							get_serverName() const;
 		std::vector<string>				get_hostPort() const;
 		int								get_clientBodySize() const;
-		std::vector<pair<int,string> >	get_errorCodesMap() const;
+		map<int, string>				get_errorCodesMap() const;
 		std::vector<cfgRoute>			get_routes() const;
 		//setter
 			// void	set_serverName(const string &input);

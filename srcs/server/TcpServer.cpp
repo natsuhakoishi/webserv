@@ -2,17 +2,33 @@
 
 TcpServer::TcpServer(): canRespond(false)
 {
-	this->ips.push_back("0.0.0.0");
-	this->ports.push_back(80);
-	initServer();
 }
 
-TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp): canRespond(false)
+TcpServer::TcpServer(std::vector<std::string> hostPorts): canRespond(false)
 {
-	for (std::vector<std::pair<std::string, int> >::iterator it = ipp.begin(); it != ipp.end(); it++)
+	for (size_t i = 0; i < hostPorts.size(); ++i)
 	{
-		this->ips.push_back((*it).first);
-		this->ports.push_back((*it).second);
+		size_t	separate_pos = hostPorts[i].find(":");
+		if (separate_pos == string::npos)
+		{
+			cout << "Error: Invalid HostPort" << endl;
+			exit(1);
+		}
+		string host = hostPorts[i].substr(0, separate_pos);
+		string port_str = hostPorts[i].substr(separate_pos + 1);
+
+		if (port_str.empty())
+		{
+			cout << "Invalid Port" << endl;
+			exit(1);
+		}
+
+		int port = atoi(port_str.c_str());
+
+		cout << GREEN << "Host " << host << " Port " << port << RESETEND << endl;
+
+		this->ips.push_back(host);
+		this->ports.push_back(port);
 	}
 	initServer();
 }

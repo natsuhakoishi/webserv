@@ -6,7 +6,7 @@
 /*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/23 15:29:16 by yyean-wa         ###   ########.fr       */
+/*   Updated: 2025/06/23 18:38:19 by yyean-wa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,16 @@ Config&	Config::operator=(const Config &other) {
 	return (*this);
 }
 
-Config::~Config() {
+Config::~Config()
+{
+}
+
+Config::Config()
+{
+	this->_blockCount = 1;
+	cfgServer	*temp = new cfgServer();
+	this->_Servers.push_back(*temp);
+	delete temp;
 }
 
 //--------------[Getter]--------------------------------------------------
