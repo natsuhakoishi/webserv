@@ -5,6 +5,8 @@
 
 class Http;
 
+class Config;
+
 class TcpServer
 {
 	public:

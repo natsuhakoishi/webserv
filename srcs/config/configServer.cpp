@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configServer.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/16 17:14:17 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/23 16:15:12 by yyean-wa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,11 @@ cfgServer::cfgServer(string &content, int id) {
 	(void)content;
 	// (void)id;
 	this->_id = id;
-}	
+	this->_hostPort.push_back("0.0.0.0:8080");
+	this->_hostPort.push_back("127.0.0.1:9090");
+	this->_hostPort.push_back("127.0.0.1:4242");
+	this->_hostPort.push_back("172.17.0.1:4242");
+}
 
 cfgServer::cfgServer(const cfgServer &other)
 : _id(other._id), _server_name(other._server_name), _hostPort(other._hostPort),
