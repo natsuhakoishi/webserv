@@ -3,6 +3,8 @@
 
 #include "Webserv.hpp"
 
+class Http;
+
 class TcpServer
 {
 	public:
@@ -24,6 +26,16 @@ class TcpServer
 
 		TcpServer(const TcpServer &copy);
 		TcpServer	&operator = (const TcpServer &copy);
+
+		string recvBuffer;
+		string method;
+		string body;
+		bool canRespond;
+		void	handleMethod(string input);
+		void	handlePOST(string input);
+
+		map<int, Http *> httpMap;
+
 };
 
 #endif

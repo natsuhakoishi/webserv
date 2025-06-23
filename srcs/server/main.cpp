@@ -10,9 +10,10 @@ int main() {
     temp = std::make_pair("0.0.0.0", 9090);
     ipp.push_back(temp);
 
-    TcpServer server(ipp);
-    server.runServer();
+    TcpServer *server = new TcpServer(ipp);
+    server->runServer();
 
+    delete server;
     return 0;
 }
 
