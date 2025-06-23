@@ -19,8 +19,16 @@ TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp): canRespond(
 
 void	TcpServer::initServer()
 {
+	std::vector<int> used_ports;
+
 	for(size_t i = 0; i < this->ports.size(); i++)
 	{
+		if (std::find(used_ports.begin(), used_ports.end(), this->ports[i]) != used_ports.end())
+		{
+			std::cerr << "Failure: Port " << this->ports[i] << " is in used." << std::endl;
+			exit(1);
+		}
+
 		int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
 		if (server_fd < 0)
@@ -40,17 +48,18 @@ void	TcpServer::initServer()
 			std::cerr << "Error: Invalid Address: " << this->ips[i] << std::endl;
 			exit(1);
 		}
-		address.sin_port = htons(ports[i]);
+		address.sin_port = htons(this->ports[i]);
 
 		if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		{
-			std::cerr << "Failure: Bind on port " << ports[i] << std::endl;
+			std::cerr << "Failure: Bind on port " << this->ports[i] << std::endl;
 			exit(1);
 		}
+		used_ports.push_back(this->ports[i]);
 
 		if (listen(server_fd, 3) < 0)
 		{
-			std::cerr << "Failure: Listen on port " << ports[i] << std::endl;
+			std::cerr << "Failure: Listen on port " << this->ports[i] << std::endl;
 			exit(1);
 		}
 
@@ -65,7 +74,7 @@ void	TcpServer::initServer()
 		this->fds.push_back(pfd);
 		this->server_fds.push_back(server_fd);
 
-		std::cout << "Listening on port " << ports[i] << "..." << std::endl;
+		std::cout << "Listening on port " << this->ports[i] << "..." << " | IP: " << this->ips[i] << std::endl;
 	}
 }
 
