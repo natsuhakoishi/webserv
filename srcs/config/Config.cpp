@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/16 17:06:13 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/23 15:29:16 by yyean-wa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
 
-Config::Config(string &filepath) {
+Config::Config(const string &filepath) {
 	std::ifstream	infile;
 
 	try
@@ -38,7 +38,7 @@ Config::Config(string &filepath) {
 	}
 }
 
-Config::Config(const Config &other) 
+Config::Config(const Config &other)
 : _Servers(other._Servers), _SocketTable(other._SocketTable) {
 }
 
@@ -63,7 +63,7 @@ int	Config::get_blockCount() const {
 
 //memo blocking basic test
 vector<cfgServer>	Config::get_Servers() const {
-	
+
 	return (this->_Servers);
 }
 
