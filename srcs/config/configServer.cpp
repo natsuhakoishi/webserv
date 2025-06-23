@@ -6,7 +6,7 @@
 /*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/23 16:15:12 by yyean-wa         ###   ########.fr       */
+/*   Updated: 2025/06/23 18:42:33 by yyean-wa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,25 @@
 
 //--------------[OCCF]--------------------------------------------------
 
+cfgServer::cfgServer()
+{
+	cfgRoute *temp = new cfgRoute();
+
+	this->_Routes.push_back(*temp);
+	this->_id = 0;
+	this->_server_name = "localhost";
+	this->_hostPort.push_back("0.0.0.0:4242");
+	this->_hostPort.push_back("127.0.0.1:8080");
+	this->_clientBodySize = 1024;
+	this->_errorCodes_map[404] = "/error_page/404.html";
+	delete temp;
+}
+
 cfgServer::cfgServer(string &content, int id) {
 	//remove the body's close brace
 	(void)content;
 	// (void)id;
 	this->_id = id;
-	this->_hostPort.push_back("0.0.0.0:8080");
-	this->_hostPort.push_back("127.0.0.1:9090");
-	this->_hostPort.push_back("127.0.0.1:4242");
-	this->_hostPort.push_back("172.17.0.1:4242");
 }
 
 cfgServer::cfgServer(const cfgServer &other)
@@ -43,7 +53,8 @@ cfgServer&	cfgServer::operator=(const cfgServer &other) {
 	return (*this);
 }
 
-cfgServer::~cfgServer() {
+cfgServer::~cfgServer()
+{
 }
 
 //--------------[Getter]--------------------------------------------------
@@ -64,7 +75,7 @@ int	cfgServer::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
-std::vector<pair<int,string> >	cfgServer::get_errorCodesMap() const {
+std::map<int, string>	cfgServer::get_errorCodesMap() const {
 	return (this->_errorCodes_map);
 }
 

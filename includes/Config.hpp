@@ -24,6 +24,7 @@ class Config {
 		vector<cfgServer>			_Servers;
 		map<string,vector<int> >	_SocketTable;
 	public:
+		Config();
 		Config(const string &filepath);
 		Config(const Config &other);
 		Config&	operator=(const Config &other);
