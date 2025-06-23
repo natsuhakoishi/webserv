@@ -4,7 +4,7 @@
 //Containers
 # include <string>
 # include <vector>
-# include <utility> //for std::pair
+# include <map>
 //Libraries & Headers
 # include "Config.hpp"
 # include "configServer.hpp"
@@ -12,41 +12,34 @@
 
 using std::string;
 using std::vector;
-using std::pair;
+using std::map;
 
 class cfgRoute {
 	private:
-		string							_request_path;
-		string							_rootDir_path;
-		string							_indexFile_path;
-		bool							_autoIndex_state;
-		vector<string>					_http_method;
-		string							_redirection_path;
-		string							_upload_path;
-		vector<pair<string,string> >	_cgi_info;
+		string				_path; //update: rename
+		string				_root_path; //update: rename
+		string				_index_path; //update: rename
+		bool				_autoIndex; //update: rename
+		vector<string>		_http_method;
+		string				_redirection_path;
+		string				_upload_path;
+		int					_clientBodySize; //update: newly added
+		map<string,string>	_cgi_info; //update: change container
 	public:
 		cfgRoute();
 		cfgRoute(const cfgRoute &other);
 		cfgRoute&	operator=(const cfgRoute &other);
 		~cfgRoute();
 
-		string							get_requestPath() const;
-		string							get_rootDirPath() const;
-		string							get_indexFilePath() const;
-		bool							get_autoIndexState() const;
-		vector<string>					get_httpMethod() const;
-		string							get_redirectionPath() const;
-		string							get_uploadPath() const;
-		vector<pair<string,string> >	get_cgiInfo() const;
-		//setter
-			// void	set_requestPath(const string &input); 
-			// void	set_rootDirPath(const string &input);
-			// void	set_indexFilePath(const string &input);
-			// void	set_autoIndexState(bool input);
-			// void	set_httpMethod(const std::vector<string> &inputS);
-			// void	set_redirectionPath(const string &input);
-			// void	set_uploadPath(const string &input);
-			// void	set_cgiInfo(const std::vector<pair<string,string> > &inputS);
+		string				get_path() const; //update: rename
+		string				get_rootPath() const; //update: rename
+		string				get_indexPath() const; //update: rename
+		bool				get_autoIndex() const; //update: rename
+		vector<string>		get_httpMethod() const;
+		string				get_redirectionPath() const;
+		string				get_uploadPath() const;
+		int					get_clientBodySize() const; //update: newly added
+		map<string,string>	get_cgiInfo() const; //update: return type changed
 };
 
 #endif

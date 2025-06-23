@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/16 17:14:17 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/23 21:02:06 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,18 +22,21 @@ cfgServer::cfgServer(string &content, int id) {
 }	
 
 cfgServer::cfgServer(const cfgServer &other)
-: _id(other._id), _server_name(other._server_name), _hostPort(other._hostPort),
-  _clientBodySize(other._clientBodySize), _errorCodes_map(other._errorCodes_map), _Routes(other._Routes) {
+: _id(other._id), _serverName(other._serverName), _hostPort(other._hostPort),
+  _errorCodes_map(other._errorCodes_map), _clientBodySize(other._clientBodySize),
+  _root_path(other._root_path), _index_path(other._index_path), _Routes(other._Routes) {
 }
 
 cfgServer&	cfgServer::operator=(const cfgServer &other) {
 	if (this != &other)
 	{
 		this->_id = other._id;
-		this->_server_name = other._server_name;
+		this->_serverName = other._serverName;
 		this->_hostPort = other._hostPort;
-		this->_clientBodySize = other._clientBodySize;
 		this->_errorCodes_map = other._errorCodes_map;
+		this->_clientBodySize = other._clientBodySize;
+		this->_root_path = other._root_path;
+		this->_index_path = other._index_path;
 		this->_Routes = other._Routes;
 	}
 	return (*this);
@@ -49,21 +52,29 @@ int	cfgServer::get_id() const {
 }
 
 string	cfgServer::get_serverName() const {
-	return (this->_server_name);
+	return (this->_serverName);
 }
 
-std::vector<string>	cfgServer::get_hostPort() const {
+vector<string>	cfgServer::get_hostPort() const {
 	return (this->_hostPort);
+}
+
+map<int,string>	cfgServer::get_errorCodesMap() const { //update: return type changed
+	return (this->_errorCodes_map);
 }
 
 int	cfgServer::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
-std::vector<pair<int,string> >	cfgServer::get_errorCodesMap() const {
-	return (this->_errorCodes_map);
+string	cfgServer::get_rootPath() const { //update: newly added
+	return (this->_root_path);
 }
 
-std::vector<cfgRoute>	cfgServer::get_routes() const {
+string	cfgServer::get_indexPath() const { //update: newly added
+	return (this->_index_path);
+}
+
+vector<cfgRoute>	cfgServer::get_routes() const {
 	return (this->_Routes);
 }

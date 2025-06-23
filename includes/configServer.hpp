@@ -4,7 +4,7 @@
 //Containers
 # include <string>
 # include <vector>
-# include <utility> //for std::pair
+# include <map>
 //Libraries & Headers
 # include "Config.hpp"
 # include "configRoute.hpp"
@@ -12,36 +12,34 @@
 
 using std::string;
 using std::vector;
-using std::pair;
+using std::map;
 
 class cfgRoute;
 
 class cfgServer {
 	private:
-		int							_id;
-		string						_server_name;
-		vector<string>				_hostPort;
-		int							_clientBodySize;
-		vector<pair<int,string> >	_errorCodes_map;
-		vector<cfgRoute>			_Routes;
+		int					_id;
+		string				_serverName; //update: rename
+		vector<string>		_hostPort;
+		map<int,string>		_errorCodes_map; //update: change container
+		int					_clientBodySize;
+		string				_root_path; //update: newly added
+		string				_index_path; //update: newly added
+		vector<cfgRoute>	_Routes;
 	public:
 		cfgServer(string &content, int id);
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);
 		~cfgServer();
 
-		int								get_id() const;
-		string							get_serverName() const;
-		std::vector<string>				get_hostPort() const;
-		int								get_clientBodySize() const;
-		std::vector<pair<int,string> >	get_errorCodesMap() const;
-		std::vector<cfgRoute>			get_routes() const;
-		//setter
-			// void	set_serverName(const string &input);
-			// void	set_hostPort(const std::vector<string> &inputS);
-			// void	set_clientBodySize(int input);
-			// void	set_errorCodesMap(const std::vector<pair<int,string> > &inputS);
-			// void	set_routesMap(const std::vector<cfgRoute> &inputS);
+		int					get_id() const;
+		string				get_serverName() const;
+		vector<string>		get_hostPort() const; //update: remove std namespace
+		map<int,string>		get_errorCodesMap() const; //update: return type
+		int					get_clientBodySize() const;
+		string				get_rootPath() const; //update: newly added
+		string				get_indexPath() const; //update: newly added
+		vector<cfgRoute>	get_routes() const; //update: remove std namespace
 };
 
 #endif
