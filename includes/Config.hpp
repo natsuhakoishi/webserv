@@ -37,9 +37,9 @@ class Config {
 
 		class ConfigError : public std::exception {
 			private:
-				const char	*_err_msg;
+				string	_errMsg;
 			public:
-				ConfigError(const char *msg) throw();
+				ConfigError(string msg) throw();
 				virtual const char*	what() const throw();
 		};
 

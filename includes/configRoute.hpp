@@ -40,6 +40,24 @@ class cfgRoute {
 		string				get_uploadPath() const;
 		int					get_clientBodySize() const; //update: newly added
 		map<string,string>	get_cgiInfo() const; //update: return type changed
+
+		class SemicolonMissing : public std::exception {
+			public:
+				virtual const char*	what() const throw();
+		};
+		class DirectiveError : public std::exception {
+			public:
+				virtual const char*	what() const throw();
+		};
+		class ArgError : public std::exception {
+			public:
+				ArgError(string msg) throw();
+				virtual const char*	what() const throw();
+			private:
+				string	_errMsg;
+		};
+
+		void	parseLocation(string &content);
 };
 
 #endif

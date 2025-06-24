@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/16 17:06:13 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/25 03:48:11 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ Config::Config(string &filepath) {
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << "\033[31mParse(File): " << e.what() << "\033[0m\n";
+		std::cerr << "\033[31m" << e.what() << "\033[0m\n";
 	}
 }
 
@@ -149,18 +149,18 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 						brace_count--;
 					++i;
 				}
-				server_body.append(line).append("\n");
 				if (brace_count)
+				{
+					server_body.append(line).append("\n");
 					continue ;
+				}
 				else
 				{
 					in_body = false;
 					first_Obrace = false;
 					this->_blockCount++;
-					//memo uncomment 2 lines below to see what happen in this function
-						// std::cout << this->_blockCount << "th" << std::endl;
-						// std::cout << server_body << std::endl;
-					cfgServer a_block = cfgServer(server_body, this->_blockCount - 1);
+					cfgServer a_block = cfgServer(this->_blockCount - 1);
+					a_block.parseServer(server_body);
 					this->_Servers.push_back(a_block);
 					server_body.clear();
 				}
@@ -168,15 +168,16 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		}
 	}
 	if (brace_count)
-		throw ConfigError("Body not enclosed properly with brace.");
+		throw ConfigError("Braces' issue");
 	if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
 }
 
-Config::ConfigError::ConfigError(const char *msg) throw() {
-	this->_err_msg = msg;
+//--------------[Exception]--------------------------------------------------
+
+Config::ConfigError::ConfigError(string msg) throw() : _errMsg("Config: " + msg) {
 }
 
 const char*	Config::ConfigError::what() const throw() {
-	return (this->_err_msg);
+	return (this->_errMsg.c_str());
 }

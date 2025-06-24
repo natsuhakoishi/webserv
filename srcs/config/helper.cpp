@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/15 00:39:21 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/24 22:15:15 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ string trim_inlineComment(string &line) {
 	size_t hash = line.find('#');
 	if (hash == std::string::npos)
 		return ("");
-	return (line.substr(0, hash));
+	return (line.erase(hash));
 }
 
 }

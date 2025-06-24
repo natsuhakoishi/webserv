@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/23 21:02:06 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/25 03:48:05 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,8 @@
 
 //--------------[OCCF]--------------------------------------------------
 
-cfgServer::cfgServer(string &content, int id) {
-	//remove the body's close brace
-	(void)content;
-	// (void)id;
-	this->_id = id;
-}	
+cfgServer::cfgServer(int id) : _id(id), _clientBodySize(0) {
+}
 
 cfgServer::cfgServer(const cfgServer &other)
 : _id(other._id), _serverName(other._serverName), _hostPort(other._hostPort),
@@ -77,4 +73,28 @@ string	cfgServer::get_indexPath() const { //update: newly added
 
 vector<cfgRoute>	cfgServer::get_routes() const {
 	return (this->_Routes);
+}
+
+//--------------[Exception]--------------------------------------------------
+
+const char*	cfgServer::SemicolonMissing::what() const throw() {
+	return ("Server: Semicolon is missing!");
+}
+
+const char*	cfgServer::DirectiveError::what() const throw() {
+	return ("Server: Invalid directive detected!");
+}
+
+cfgServer::ArgError::ArgError(string msg) throw() : _errMsg("Server: argument invalid: " + msg) {
+}
+
+const char*	cfgServer::ArgError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+//--------------[Functions]--------------------------------------------------
+
+void	cfgServer::parseServer(string &content) {
+	std::cout << "\n" << this->_id << "th" << std::endl;
+	std::cout << content;
 }

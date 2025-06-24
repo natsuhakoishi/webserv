@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/23 21:25:17 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/25 03:50:34 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,20 +44,20 @@ cfgRoute::~cfgRoute() {
 
 //--------------[Getter]--------------------------------------------------
 
-string	cfgRoute::get_requestPath() const {
-	return (this->_request_path);
+string	cfgRoute::get_path() const { //update: rename
+	return (this->_path);
 }
 
-string	cfgRoute::get_rootDirPath() const {
-	return (this->_rootDir_path);
+string	cfgRoute::get_rootPath() const { //update: rename
+	return (this->_root_path);
 }
 
-string	cfgRoute::get_indexFilePath() const {
-	return (this->_indexFile_path);
+string	cfgRoute::get_indexPath() const { //update: rename
+	return (this->_index_path);
 }
 
-bool	cfgRoute::get_autoIndexState() const {
-	return (this->_autoIndex_state);
+bool	cfgRoute::get_autoIndex() const { //update: rename
+	return (this->_autoIndex);
 }
 
 vector<string>	cfgRoute::get_httpMethod() const {
@@ -79,3 +79,22 @@ int	cfgRoute::get_clientBodySize() const {
 map<string,string>	cfgRoute::get_cgiInfo() const { //update: return type changed
 	return (this->_cgi_info);
 }
+
+//--------------[Exception]--------------------------------------------------
+
+const char*	cfgRoute::SemicolonMissing::what() const throw() {
+	return ("Route: Semicolon is missing!");
+}
+
+const char*	cfgRoute::DirectiveError::what() const throw() {
+	return ("Route: Invalid directive detected!");
+}
+
+cfgRoute::ArgError::ArgError(string msg) throw() : _errMsg("Route: argument invalid: " + msg) {
+}
+
+const char*	cfgRoute::ArgError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+//--------------[Functions]--------------------------------------------------
