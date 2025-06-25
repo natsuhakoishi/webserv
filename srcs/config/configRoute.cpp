@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 03:50:34 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/25 21:39:44 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 //--------------[OCCF]--------------------------------------------------
 
 cfgRoute::cfgRoute() {
+	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
 }
 
 cfgRoute::cfgRoute(const cfgRoute &other)
@@ -98,3 +99,7 @@ const char*	cfgRoute::ArgError::what() const throw() {
 }
 
 //--------------[Functions]--------------------------------------------------
+
+void	cfgRoute::parseLocation(string &content) {
+	(void)content;
+}

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 03:48:11 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/25 04:13:51 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			if (pos != std::string::npos && line[pos] == 's')
 			{
 				string temp_buf;
-				temp_buf = Utils::trim_line(line);
+				temp_buf = Utils::trim_whitespaces(line);
 				//todo will die to evil one-whole-line format, because this if statement
 				if (temp_buf == "server" || temp_buf == "server {" || temp_buf == "server	{")
 				{

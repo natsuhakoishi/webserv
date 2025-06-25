@@ -9,6 +9,7 @@
 # include "Config.hpp"
 # include "configRoute.hpp"
 # include "helper.hpp"
+# include <sstream>
 
 using std::string;
 using std::vector;
@@ -64,6 +65,12 @@ class cfgServer {
 		};
 
 		void	parseServer(string &content);
+		void	handle_serverName(string &line);
+		void	handle_hostPort(string &line);
+		void	handle_errorCodes(string &line);
+		void	handle_clientBodySize(string &line);
+		void	handle_serverRoot(string &line);
+		void	handle_serverIndex(string &line);
 };
 
 #endif
