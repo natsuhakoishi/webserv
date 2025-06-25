@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 00:56:32 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 02:21:16 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,8 +85,10 @@ const char*	cfgServer::DirectiveError::what() const throw() {
 	return ("Server: Invalid directive detected!");
 }
 
-cfgServer::ArgError::ArgError(string dir, string msg) throw()
-: _errMsg("Server: [" + dir + "]: argument invalid: " + msg) {
+cfgServer::ArgError::ArgError(int id, string dir, string msg) throw() {
+	std::ostringstream	oss;
+	oss << "Server(" << id << "):  [" << dir << "]: argument invalid: " << msg;
+	this->_errMsg = oss.str();
 }
 
 const char*	cfgServer::ArgError::what() const throw() {
@@ -98,9 +100,9 @@ const char*	cfgServer::ArgError::what() const throw() {
 void	cfgServer::handle_serverIndex(vector<string> &line) {
 		// std::cout << "server - index handler called!" << std::endl;
 	if (line.size() < 2)
-		throw cfgServer::ArgError(line[0], "No argument provided.");
+		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(line[0], "Too many arguments!");
+		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments!");
 	
 	this->_index_path = line[1];
 }
@@ -108,9 +110,9 @@ void	cfgServer::handle_serverIndex(vector<string> &line) {
 void	cfgServer::handle_serverRoot(vector<string> &line) {
 		// std::cout << "server - root handler called!" << std::endl;
 	if (line.size() < 2)
-		throw cfgServer::ArgError(line[0], "No argument provided.");
+		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(line[0], "Too many arguments!");
+		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments!");
 
 	this->_root_path = line[1];
 }
@@ -118,9 +120,9 @@ void	cfgServer::handle_serverRoot(vector<string> &line) {
 void	cfgServer::handle_clientBodySize(vector<string> &line) {
 		// std::cout << "server - client max body size handler called!" << std::endl;
 	if (line.size() < 2)
-		throw cfgServer::ArgError(line[0], "No argument provided.");
+		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(line[0], "Too many arguments!");
+		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments!");
 
 	int		byteSize;
 	string	suffix;
@@ -143,45 +145,61 @@ void	cfgServer::handle_clientBodySize(vector<string> &line) {
 	else if (suffix == "g" || suffix == "gb")
 		byteSize = byteSize * (1024 * 1024 * 1024);
 	else
-		throw cfgServer::ArgError(line[0], "Invalid file size.");
+		throw cfgServer::ArgError(this->_id,line[0], "Invalid file size.");
 	this->_clientBodySize = byteSize;
 }
 
 void	cfgServer::handle_errorCodes(vector<string> &line) {
 		// std::cout << "error pages handler called!" << std::endl;
 	if (line.size() < 2)
-		throw cfgServer::ArgError(line[0], "No argument provided.");
+		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
 	else if (line.size() > 3)
-		throw cfgServer::ArgError(line[0], "Too many arguments! Format: <error_code> <HTML_filepath>");
+		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments! Format: <error_code> <HTML_filepath>");
 	int	temp;
 		
 	temp = std::atoi(line[1].c_str());
 	//todo the range need confirm again
 	if (temp < 400 && temp > 600)
-		throw cfgServer::ArgError(line[0], "Given error status code is out of range!");
+		throw cfgServer::ArgError(this->_id,line[0], "Given error status code is out of range!");
 	this->_errorCodes_map[temp] = line[2];
 	//check the path provided? //memo atleast not now, later when validate stage
 }
 
 void	cfgServer::handle_hostPort(vector<string> &line) {
 		// std::cout << "socket address / port handler called!" << std::endl;
-		// std::cout << "\033[38;5;199m" << "NO!!!!!! IS TODO FAKKK MA LIFE <-- socket address, don't mind\033[0m" << std::endl;
 	if (line.size() < 2)
-		throw cfgServer::ArgError(line[0], "No argument provided.");
+		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(line[0], "Too many arguments! Please seperate to different line.");
+		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments! Please seperate to different line.");
 
-	//check the format, accept socket address or port only
-	//if is only port, then combine the port with ip 0.0.0.0, ex. 0.0.0.0:port
-	//todo build up the table in cfgServer, ideally should be do here, so..
+	if (line[1].find_first_not_of("0123456789:.") != std::string::npos)
+		throw cfgServer::ArgError(this->_id,line[0], "Non-numeric value found?");
+	size_t pos = line[1].find(":");
+	if (pos != std::string::npos)
+	{
+		//check port without ip but have ":"?
+		this->_hostPort.push_back(line[1]);
+	}
+	else
+	{
+		if (line[1].find(".") == std::string::npos)
+		{
+			string	temp = "0.0.0.0";
+			temp.append(":").append(line[1]);
+			this->_hostPort.push_back(temp);
+		}
+		else
+			throw cfgServer::ArgError(this->_id,line[0], "No port given!");
+	}
 }
 
 void	cfgServer::handle_serverName(vector<string> &line) {
 		// std::cout << "server name handler called!" << std::endl;
-	if (line.size() < 2) //memo server_name accept NULL
+	 //memo server_name accept NULL
+	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(line[0], "Too many arguments!");
+		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments!");
 
 	//todo handle multiple server name
 	this->_serverName = line[1];
@@ -202,8 +220,6 @@ void	cfgServer::parseServer(string &content) {
 	list["root"] = &cfgServer::handle_serverRoot;
 	list["index"] = &cfgServer::handle_serverIndex;
 
-	try
-	{
 		//memo display conntent pass to here
 			// std::cout << "\n" << this->_id << "th" << std::endl;
 			// std::cout << content;
@@ -261,16 +277,11 @@ void	cfgServer::parseServer(string &content) {
 				throw cfgServer::DirectiveError();
 			}
 		}
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << "\033[31m" << e.what() << "\033[0m\n";
-	}
 }
 
 void	cfgServer::display_parsedContent(void) {
-	std::cout << "\033[38;5;69m-----" << this->_id + 1 << "th-----\033[0m" << std::endl;
-	std::cout << "server_name: ";
+	std::cout << "\033[38;5;69m----- Server ID: " << this->_id << " -----\033[0m" << std::endl;
+	std::cout << "\033[38;5;68mserver_name: \033[0m";
 	if (this->_serverName.empty())
 		std::cout << "- \n";
 	else
@@ -279,7 +290,7 @@ void	cfgServer::display_parsedContent(void) {
 		vector<string>::iterator it = this->_hostPort.begin();
 		while (it != this->_hostPort.end())
 		{
-			std::cout << "listen on: " << *it << std::endl;
+			std::cout << "\033[38;5;68mlisten on: \033[0m" << *it << std::endl;
 			++it;
 		}
 	}
@@ -287,11 +298,11 @@ void	cfgServer::display_parsedContent(void) {
 		map<int,string>::iterator it = this->_errorCodes_map.begin();
 		while (it != this->_errorCodes_map.end())
 		{
-			std::cout << "error_page: [" << it->first << "] " << it->second << std::endl;
+			std::cout << "\033[38;5;68merror_page: \033[0m[" << it->first << "] " << it->second << std::endl;
 			++it;
 		}
 	}
-	std::cout << "client_max_body_size: " << this->_clientBodySize << std::endl;
-	std::cout << "root: " << this->_root_path << std::endl;
-	std::cout << "index: " << this->_index_path << std::endl << std::endl;
+	std::cout << "\033[38;5;68mclient_max_body_size: \033[0m" << this->_clientBodySize << std::endl;
+	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
+	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl << std::endl;
 }

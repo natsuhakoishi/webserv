@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 00:57:32 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 02:21:03 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				else
 				{
 					size_t Obrace = line.find_first_not_of(" \n\t\r\v\f");
-					if (Obrace != std::string::npos)
+					if (Obrace != std::string::npos && line[Obrace] == '{')
 					{
 						//found the open brace as first character(other than blankspace); sequence correct
 						first_Obrace = true;
@@ -171,7 +171,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 	}
 	if (brace_count)
 		throw ConfigError("Braces' issue");
-	if (!this->_blockCount)
+	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
 }
 

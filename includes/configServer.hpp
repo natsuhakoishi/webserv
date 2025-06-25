@@ -60,7 +60,7 @@ class cfgServer {
 		//2. the argument value is invalid
 		class ArgError : public std::exception {
 			public:
-				ArgError(string dir, string msg) throw();
+				ArgError(int id, string dir, string msg) throw();
 				virtual const char*	what() const throw();
 			private:
 				string	_errMsg;
