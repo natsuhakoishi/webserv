@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 22:10:46 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/25 23:49:11 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,16 +68,20 @@ vector<string>	tokenizer(string &line) {
 		start = pos;
 		if (pos == std::string::npos)
 		{
-			std::cout << "AAAAAAAAAAAAAAAAAA" << std::endl;
-			break ;
+			//memo debug message; basically when no args provided
+				// std::cout << "\t" << line << std::endl;
+				// std::cout << "AAAAA" << std::endl;
+			return result;
 		}
 		while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t')
 			++pos;
-		if (pos == line.size() - 1)
-		{
-			std::cout << "AAAAAAAAAAAAAAAAAA" << std::endl;
-			break ;
-		}
+		// if (pos == line.size())
+		// {
+		// 	std::cout << "\t" << line << std::endl;
+		// 	std::cout << "AAAAAAAAAAAAAAAAAA" << std::endl;
+		// 	return result;
+		// }
+		//memo i want to avoid accidently push a empty string
 		result.push_back(line.substr(start,pos-start));
 	}
 	return result;

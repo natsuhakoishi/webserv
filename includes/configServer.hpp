@@ -10,6 +10,8 @@
 # include "configRoute.hpp"
 # include "helper.hpp"
 # include <sstream>
+# include <cstdlib>
+# include <cctype>
 
 using std::string;
 using std::vector;
@@ -58,19 +60,20 @@ class cfgServer {
 		//2. the argument value is invalid
 		class ArgError : public std::exception {
 			public:
-				ArgError(string msg) throw();
+				ArgError(string dir, string msg) throw();
 				virtual const char*	what() const throw();
 			private:
 				string	_errMsg;
 		};
 
 		void	parseServer(string &content);
-		void	handle_serverName(string &line);
-		void	handle_hostPort(string &line);
-		void	handle_errorCodes(string &line);
-		void	handle_clientBodySize(string &line);
-		void	handle_serverRoot(string &line);
-		void	handle_serverIndex(string &line);
+		void	handle_serverName(vector<string> &line);
+		void	handle_hostPort(vector<string> &line);
+		void	handle_errorCodes(vector<string> &line);
+		void	handle_clientBodySize(vector<string> &line);
+		void	handle_serverRoot(vector<string> &line);
+		void	handle_serverIndex(vector<string> &line);
+		void	display_parsedContent(void);
 };
 
 #endif

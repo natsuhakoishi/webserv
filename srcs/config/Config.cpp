@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 04:13:51 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 00:57:32 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 
 	while (std::getline(infile, line))
 	{
+		line = Utils::trim_whitespaces(line);
 		if (line.empty() || line.at(0) == '#' || Utils::is_blankLine(line)) //no matter in block or not, both this need to skip
 			continue ;
 		else if (!in_body) //searching for Server body
@@ -161,6 +162,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 					this->_blockCount++;
 					cfgServer a_block = cfgServer(this->_blockCount - 1);
 					a_block.parseServer(server_body);
+					// a_block.display_parsedContent();
 					this->_Servers.push_back(a_block);
 					server_body.clear();
 				}
