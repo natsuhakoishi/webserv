@@ -41,6 +41,10 @@ class cfgRoute {
 		int					get_clientBodySize() const; //update: newly added
 		map<string,string>	get_cgiInfo() const; //update: return type changed
 
+		class RouteError : public std::exception {
+			public:
+				virtual const char*	what() const throw();
+		};
 		class SemicolonMissing : public std::exception {
 			public:
 				virtual const char*	what() const throw();
@@ -51,13 +55,15 @@ class cfgRoute {
 		};
 		class ArgError : public std::exception {
 			public:
-				ArgError(string msg) throw();
+				ArgError(string route, string dir, string msg) throw();
 				virtual const char*	what() const throw();
+				~ArgError() throw();
 			private:
 				string	_errMsg;
 		};
 
 		void	parseLocation(string &content);
+		string	splitRoute(string &line);
 };
 
 #endif

@@ -42,6 +42,7 @@ class Config {
 			public:
 				ConfigError(string msg) throw();
 				virtual const char*	what() const throw();
+				~ConfigError() throw();
 		};
 
 		void	scan_serverBody(std::ifstream &infile);

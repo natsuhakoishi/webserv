@@ -48,6 +48,7 @@ class cfgServer {
 			public:
 				OtherError(string msg) throw();
 				virtual const char*	what() const throw();
+				~OtherError() throw();
 			private:
 				string	_errMsg;
 		};
@@ -65,6 +66,7 @@ class cfgServer {
 			public:
 				ArgError(int id, string dir, string msg) throw();
 				virtual const char*	what() const throw();
+				~ArgError() throw();
 			private:
 				string	_errMsg;
 		};
