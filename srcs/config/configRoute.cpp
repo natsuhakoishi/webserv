@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configRoute.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/23 18:16:34 by yyean-wa         ###   ########.fr       */
+/*   Updated: 2025/06/25 21:39:44 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,35 +14,27 @@
 
 //--------------[OCCF]--------------------------------------------------
 
-cfgRoute::cfgRoute()
-{
-	this->_request_path = "/index";
-	this->_rootDir_path = "/";
-	this->_indexFile_path = "index.html";
-	this->_autoIndex_state = true;
-	this->_http_method.push_back("GET");
-	this->_http_method.push_back("POST");
-	this->_http_method.push_back("DELETE");
-	this->_redirection_path = "/error_page/42.html";
-	this->_upload_path = "/upload";
+cfgRoute::cfgRoute() {
+	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
 }
 
 cfgRoute::cfgRoute(const cfgRoute &other)
-: _request_path(other._request_path), _rootDir_path(other._rootDir_path), _indexFile_path(other._indexFile_path)
-, _autoIndex_state(other._autoIndex_state), _http_method(other._http_method), _redirection_path(other._redirection_path)
-, _upload_path(other._upload_path), _cgi_info(other._cgi_info) {
+: _path(other._path), _root_path(other._root_path), _index_path(other._index_path),
+  _autoIndex(other._autoIndex), _http_method(other._http_method), _redirection_path(other._redirection_path),
+  _upload_path(other._upload_path), _clientBodySize(other._clientBodySize), _cgi_info(other._cgi_info) {
 }
 
 cfgRoute&	cfgRoute::operator=(const cfgRoute &other) {
 	if (this != &other)
 	{
-		this->_request_path = other._request_path;
-		this->_rootDir_path = other._rootDir_path;
-		this->_indexFile_path = other._indexFile_path;
-		this->_autoIndex_state = other._autoIndex_state;
+		this->_path = other._path;
+		this->_root_path = other._root_path;
+		this->_index_path = other._index_path;
+		this->_autoIndex = other._autoIndex;
 		this->_http_method = other._http_method;
 		this->_redirection_path = other._redirection_path;
 		this->_upload_path = other._upload_path;
+		this->_clientBodySize = other._clientBodySize;
 		this->_cgi_info = other._cgi_info;
 	}
 	return (*this);
@@ -53,20 +45,20 @@ cfgRoute::~cfgRoute() {
 
 //--------------[Getter]--------------------------------------------------
 
-string	cfgRoute::get_requestPath() const {
-	return (this->_request_path);
+string	cfgRoute::get_path() const { //update: rename
+	return (this->_path);
 }
 
-string	cfgRoute::get_rootDirPath() const {
-	return (this->_rootDir_path);
+string	cfgRoute::get_rootPath() const { //update: rename
+	return (this->_root_path);
 }
 
-string	cfgRoute::get_indexFilePath() const {
-	return (this->_indexFile_path);
+string	cfgRoute::get_indexPath() const { //update: rename
+	return (this->_index_path);
 }
 
-bool	cfgRoute::get_autoIndexState() const {
-	return (this->_autoIndex_state);
+bool	cfgRoute::get_autoIndex() const { //update: rename
+	return (this->_autoIndex);
 }
 
 vector<string>	cfgRoute::get_httpMethod() const {
@@ -81,6 +73,33 @@ string	cfgRoute::get_uploadPath() const {
 	return (this->_upload_path);
 }
 
-vector<pair<string,string> >	cfgRoute::get_cgiInfo() const {
+int	cfgRoute::get_clientBodySize() const {
+	return (this->_clientBodySize);
+}
+
+map<string,string>	cfgRoute::get_cgiInfo() const { //update: return type changed
 	return (this->_cgi_info);
+}
+
+//--------------[Exception]--------------------------------------------------
+
+const char*	cfgRoute::SemicolonMissing::what() const throw() {
+	return ("Route: Semicolon is missing!");
+}
+
+const char*	cfgRoute::DirectiveError::what() const throw() {
+	return ("Route: Invalid directive detected!");
+}
+
+cfgRoute::ArgError::ArgError(string msg) throw() : _errMsg("Route: argument invalid: " + msg) {
+}
+
+const char*	cfgRoute::ArgError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+//--------------[Functions]--------------------------------------------------
+
+void	cfgRoute::parseLocation(string &content) {
+	(void)content;
 }
