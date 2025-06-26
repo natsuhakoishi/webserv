@@ -12,8 +12,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 17:18:08 by zgoh             ###   ########.fr       */
->>>>>>> main
+/*   Updated: 2025/06/26 18:00:02 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +90,9 @@ const char*	cfgServer::OtherError::what() const throw() {
 	return (this->_errMsg.c_str());
 }
 
+cfgServer::OtherError::~OtherError() throw() {
+}
+
 const char*	cfgServer::DirectiveError::what() const throw() {
 	return ("Server: Invalid directive detected!");
 }
@@ -103,6 +105,9 @@ cfgServer::ArgError::ArgError(int id, string dir, string msg) throw() {
 
 const char*	cfgServer::ArgError::what() const throw() {
 	return (this->_errMsg.c_str());
+}
+
+cfgServer::ArgError::~ArgError() throw() {
 }
 
 //--------------[Functions]--------------------------------------------------

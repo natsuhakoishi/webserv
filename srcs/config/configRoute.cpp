@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 21:39:44 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 17:58:16 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,10 @@ map<string,string>	cfgRoute::get_cgiInfo() const { //update: return type changed
 
 //--------------[Exception]--------------------------------------------------
 
+const char*	cfgRoute::RouteError::what() const throw() {
+	return ("Route: No specific route mentioned with the location block!");
+}
+
 const char*	cfgRoute::SemicolonMissing::what() const throw() {
 	return ("Route: Semicolon is missing!");
 }
@@ -91,15 +95,33 @@ const char*	cfgRoute::DirectiveError::what() const throw() {
 	return ("Route: Invalid directive detected!");
 }
 
-cfgRoute::ArgError::ArgError(string msg) throw() : _errMsg("Route: argument invalid: " + msg) {
+cfgRoute::ArgError::ArgError(string route, string dir, string msg) throw()
+: _errMsg("Location " + route + ":  [" + dir + "]: argument invalid: " + msg) {
 }
 
 const char*	cfgRoute::ArgError::what() const throw() {
 	return (this->_errMsg.c_str());
 }
 
+cfgRoute::ArgError::~ArgError() throw() {
+}
+
 //--------------[Functions]--------------------------------------------------
 
 void	cfgRoute::parseLocation(string &content) {
+	//same, while loop + std::getline
+	//throw the first line to splitRoute then move on
+	//flag: indicate first line
+	//ignore closed braces
 	(void)content;
 }
+
+// string	cfgRoute::splitRoute(string &line) {
+// 	//locate route after keyword
+// 	//extract the route with start & index
+// 	size_t	start;
+// 	size_t pos = line.find("/", 7);
+// 	if (pos == std::string::npos)
+// 		throw cfgRoute::RouteError();
+// 	start = pos;
+// }

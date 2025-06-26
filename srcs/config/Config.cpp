@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 17:40:33 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/26 18:13:28 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,6 @@ int	Config::get_blockCount() const {
 
 //memo blocking basic test
 vector<cfgServer>	Config::get_Servers() const {
-	
 	return (this->_Servers);
 }
 
@@ -187,4 +186,7 @@ Config::ConfigError::ConfigError(string msg) throw() : _errMsg("Config: " + msg)
 
 const char*	Config::ConfigError::what() const throw() {
 	return (this->_errMsg.c_str());
+}
+
+Config::ConfigError::~ConfigError() throw() {
 }
