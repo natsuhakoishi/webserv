@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 02:28:12 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/27 02:46:29 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ cfgServer::ArgError::~ArgError() throw() {
 
 //--------------[Functions]--------------------------------------------------
 
-void	cfgServer::handle_autoIndex(vector<string> &line) {
+void	cfgServer::handle_autoIndexS(vector<string> &line) {
 		//std::cout << "server - autoIndex handler called!" << std::endl;
 	//memo if no value then autoindex off
 	if (line.size() < 2)
@@ -272,7 +272,7 @@ void	cfgServer::parseServer(string &content) {
 	list["error_page"] = &cfgServer::handle_errorCodes;
 	list["root"] = &cfgServer::handle_serverRoot;
 	list["index"] = &cfgServer::handle_serverIndex;
-	list["autoindex"] = &cfgServer::handle_autoIndex;
+	list["autoindex"] = &cfgServer::handle_autoIndexS;
 
 	while (std::getline(iss, line))
 	{

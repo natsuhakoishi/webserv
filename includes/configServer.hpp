@@ -77,7 +77,7 @@ class cfgServer {
 		void	handle_clientBodySize(vector<string> &line);
 		void	handle_serverRoot(vector<string> &line);
 		void	handle_serverIndex(vector<string> &line);
-		void	handle_autoIndex(vector<string> &line); //update
+		void	handle_autoIndexS(vector<string> &line); //update
 		void	display_parsedContent(void);
 };
 

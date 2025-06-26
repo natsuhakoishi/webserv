@@ -64,6 +64,14 @@ class cfgRoute {
 
 		void	parseLocation(string &content);
 		string	splitRoute(string &line);
+		void	handle_root(vector<string> &line);
+		void	handle_index(vector<string> &line);
+		void	handle_autoIndex(vector<string> &line);
+		void	handle_methods(vector<string> &line);
+		void	handle_redirect(vector<string> &line);
+		void	handle_upload(vector<string> &line);
+		void	handle_client(vector<string> &line);
+		void	handle_cgi(vector<string> &line);
 };
 
 #endif
