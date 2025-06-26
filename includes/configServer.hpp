@@ -30,6 +30,7 @@ class cfgServer {
 		string				_index_path; //update: newly added
 		vector<cfgRoute>	_Routes;
 	public:
+		cfgServer();
 		cfgServer(int id); //update: split logic out from constructor
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);

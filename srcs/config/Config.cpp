@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 18:01:30 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 19:21:01 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,12 @@
 int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
+
+Config::Config()
+{
+	this->_blockCount = 1;
+	this->_Servers.push_back(cfgServer());
+}
 
 Config::Config(string &filepath) {
 	std::ifstream	infile;
