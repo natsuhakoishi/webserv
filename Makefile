@@ -48,7 +48,7 @@ r: $(NAME)
 v: CXXFLAG += $(VAL)
 v: re $(OBJ)
 	@c++ $(CXXFLAG) $(OBJ) -o $(NAME)
-	@valgrind $VAL_FLAG ./$(NAME)
+	@valgrind $(VAL_FLAG) ./$(NAME)
 
 clean:
 	@rm -rf $(OBJ_DIR)

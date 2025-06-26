@@ -6,12 +6,17 @@
 # define DEBUG 0
 #endif
 
+class Config;
+
 class Http
 {
     private:
+        pollfd pfd;
+        const Config &cf;
+        cfgServer cs;
+
         string rev;
         string buffer;
-        pollfd pfd;
 
         string header;
         string body;
@@ -27,7 +32,7 @@ class Http
         Http();
 
     public:
-        Http(pollfd _pfd);
+        Http(pollfd _pfd, const Config &_cf);
         Http(const Http &);
         ~Http();
 
@@ -36,6 +41,7 @@ class Http
         void parse(string input);
         void readHeaders();
         void readBody();
+        void readConfig();
 
         //method
         string getContent(string);

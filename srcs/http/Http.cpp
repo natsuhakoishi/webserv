@@ -1,18 +1,18 @@
 #include "../../includes/Http.hpp"
 
-Http::Http()
-{
-    if (DEBUG)
-        cout << GREEN << "Default constructor called" << endl;
-}
+// Http::Http()//: cf(Config())
+// {
+//     if (DEBUG)
+//         cout << GREEN << "Default constructor called" << endl;
+// }
 
-Http::Http(pollfd _pfd): pfd(_pfd), isRespond(false)
+Http::Http(pollfd _pfd, const Config &_cf): pfd(_pfd), cf(_cf), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
 }
 
-Http::Http(const Http &other)
+Http::Http(const Http &other): cf(other.cf)
 {
     if (DEBUG)
         cout << GREEN << "Copy constructor called" << endl;
@@ -41,7 +41,7 @@ Http &Http::operator=(const Http &other)
 
 void Http::parse(string input)
 {
-    // cout << GREEN << "Client: " << input << RESETEND;
+    cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
@@ -68,7 +68,7 @@ void Http::readHeaders()
 
     requestLine >> this->method >> this->url >> this->HttpVersion;
 
-    this->filePath = "." + this->url;
+    // this->filePath = "." + this->url; //todo: update to root
 
     // cout << YELLOW << "method:" << method << ", " << "url:" << url << ", " << "httpVer:" << HttpVersion << RESETEND;
     // cout << "headers: " << YELLOW << this->header << RESETEND;
@@ -83,6 +83,32 @@ void Http::readHeaders()
         this->headers[key] = value;
         // cout << YELLOW << "key:" << RESET << key << YELLOW << " value:" << RESET << value << "$" << RESETEND;
     }
+    readConfig();
+}
+
+void Http::readConfig()
+{
+    vector<cfgServer> csVec = this->cf.get_Servers();
+    vector<cfgServer>::iterator iter = csVec.begin();
+    string requestHost = this->headers["Host"].substr(this->headers["Host"].find(':') + 1);
+
+    for (; iter != csVec.end(); ++iter) //search which server Iphost is macth
+    {
+        vector<string> hosts = iter->get_hostPort();
+        vector<string>::iterator hostsIter = hosts.begin();
+        for (; hostsIter != hosts.end(); ++hostsIter)
+        {
+            // cout << YELLOW << "debug:" << *hostsIter << " " << this->headers["Host"] << RESETEND; 
+            if (hostsIter->substr(hostsIter->find(':') + 1) == requestHost)
+            {
+                this->cs = *iter;
+                break ;
+            }
+        }
+    }
+
+    
+    // cout << YELLOW << this->cs.get_serverName() << RESETEND;
 }
 
 void Http::readBody()
