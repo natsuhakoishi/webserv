@@ -2,25 +2,49 @@
 
 TcpServer::TcpServer(): canRespond(false)
 {
-	this->ips.push_back("0.0.0.0");
-	this->ports.push_back(80);
-	initServer();
 }
 
-TcpServer::TcpServer(std::vector<std::pair<std::string, int> > ipp): canRespond(false)
+TcpServer::TcpServer(std::vector<std::string> hostPorts): canRespond(false)
 {
-	for (std::vector<std::pair<std::string, int> >::iterator it = ipp.begin(); it != ipp.end(); it++)
+	for (size_t i = 0; i < hostPorts.size(); ++i)
 	{
-		this->ips.push_back((*it).first);
-		this->ports.push_back((*it).second);
+		size_t	separate_pos = hostPorts[i].find(":");
+		if (separate_pos == string::npos)
+		{
+			cout << "Error: Invalid HostPort" << endl;
+			exit(1);
+		}
+		string host = hostPorts[i].substr(0, separate_pos);
+		string port_str = hostPorts[i].substr(separate_pos + 1);
+
+		if (port_str.empty())
+		{
+			cout << "Invalid Port" << endl;
+			exit(1);
+		}
+
+		int port = atoi(port_str.c_str());
+
+		cout << GREEN << "Host " << host << " Port " << port << RESETEND << endl;
+
+		this->ips.push_back(host);
+		this->ports.push_back(port);
 	}
 	initServer();
 }
 
 void	TcpServer::initServer()
 {
+	std::vector<int> used_ports;
+
 	for(size_t i = 0; i < this->ports.size(); i++)
 	{
+		if (std::find(used_ports.begin(), used_ports.end(), this->ports[i]) != used_ports.end())
+		{
+			std::cerr << "Failure: Port " << this->ports[i] << " is in used." << std::endl;
+			exit(1);
+		}
+
 		int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
 		if (server_fd < 0)
@@ -40,17 +64,18 @@ void	TcpServer::initServer()
 			std::cerr << "Error: Invalid Address: " << this->ips[i] << std::endl;
 			exit(1);
 		}
-		address.sin_port = htons(ports[i]);
+		address.sin_port = htons(this->ports[i]);
 
 		if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		{
-			std::cerr << "Failure: Bind on port " << ports[i] << std::endl;
+			std::cerr << "Failure: Bind on port " << this->ports[i] << std::endl;
 			exit(1);
 		}
+		used_ports.push_back(this->ports[i]);
 
 		if (listen(server_fd, 3) < 0)
 		{
-			std::cerr << "Failure: Listen on port " << ports[i] << std::endl;
+			std::cerr << "Failure: Listen on port " << this->ports[i] << std::endl;
 			exit(1);
 		}
 
@@ -65,7 +90,7 @@ void	TcpServer::initServer()
 		this->fds.push_back(pfd);
 		this->server_fds.push_back(server_fd);
 
-		std::cout << "Listening on port " << ports[i] << "..." << std::endl;
+		std::cout << "Listening on port " << this->ports[i] << "..." << " | IP: " << this->ips[i] << std::endl;
 	}
 }
 

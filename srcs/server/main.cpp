@@ -1,25 +1,17 @@
 #include "../../includes/Webserv.hpp"
 
-int main() {
-    std::vector<std::pair<std::string, int> > ipp;
-    std::pair<std::string, int> temp;
+int main()
+{
+	Config  *config = new Config();
+	vector<cfgServer> servers = config->get_Servers();
 
-    temp = std::make_pair("127.0.0.1", 8080);
-    ipp.push_back(temp);
+	vector<cfgServer>::iterator it = servers.begin();
+	std::vector<std::string> hostPorts = it->get_hostPort();
 
-    temp = std::make_pair("0.0.0.0", 9090);
-    ipp.push_back(temp);
+	TcpServer *server = new TcpServer(hostPorts);
+	server->runServer();
 
-    TcpServer *server = new TcpServer(ipp);
-    server->runServer();
-
-    delete server;
-    return 0;
+	delete server;
+	return 0;
 }
 
-// int main()
-// {
-//     Http h("/");
-
-//     h.autoindex("./srcs");
-// }
