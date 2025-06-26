@@ -24,7 +24,8 @@ class Config {
 		vector<cfgServer>			_Servers;
 		map<string,vector<int> >	_SocketTable;
 	public:
-		Config(string &filepath);
+		Config();
+		Config(const string &filepath);
 		Config(const Config &other);
 		Config&	operator=(const Config &other);
 		~Config();
@@ -32,7 +33,7 @@ class Config {
 		int							get_blockCount() const;
 		vector<cfgServer>			get_Servers() const;
 		map<string,vector<int> >	get_SocketTable() const;
-		
+
 		void	set_SocketTable(string newAddress, int id);
 
 		class ConfigError : public std::exception {

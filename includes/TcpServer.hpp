@@ -5,11 +5,13 @@
 
 class Http;
 
+class Config;
+
 class TcpServer
 {
 	public:
 		TcpServer();
-		TcpServer(std::vector<std::pair<std::string, int> > ipp);
+		TcpServer(std::vector<std::string> hostPorts);
 		~TcpServer();
 
 		void	runServer();
