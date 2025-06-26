@@ -3,16 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   configServer.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 18:00:02 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 19:23:17 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "configServer.hpp"
 
 //--------------[OCCF]--------------------------------------------------
+
+cfgServer::cfgServer()
+{
+	cfgRoute *temp = new cfgRoute();
+
+	this->_Routes.push_back(*temp);
+	this->_id = 0;
+	this->_serverName = "localhost";
+	this->_clientBodySize = 1024;
+	this->_hostPort.push_back("0.0.0.0:4242");
+	this->_hostPort.push_back("127.0.0.1:8080");
+	this->_errorCodes_map[404] = "/error_page/404.html";
+	delete temp;
+}
 
 cfgServer::cfgServer(int id) : _id(id), _clientBodySize(0) {
 }

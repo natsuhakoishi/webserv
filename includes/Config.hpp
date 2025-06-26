@@ -25,7 +25,7 @@ class Config {
 		map<string,vector<int> >	_SocketTable;
 	public:
 		Config();
-		Config(const string &filepath);
+		Config(string &filepath);
 		Config(const Config &other);
 		Config&	operator=(const Config &other);
 		~Config();
