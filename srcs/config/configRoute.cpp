@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 03:23:44 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/27 05:36:19 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 //--------------[OCCF]--------------------------------------------------
 
-cfgRoute::cfgRoute() {
+cfgRoute::cfgRoute() : _autoIndex(false), _clientBodySize(0) {
 		// this->_path = "/index";
 		// this->_root_path = "/";
 		// this->_index_path = "index.html";
@@ -118,8 +118,21 @@ cfgRoute::ArgError::~ArgError() throw() {
 //--------------[Functions]--------------------------------------------------
 
 void	cfgRoute::handle_cgi(vector<string> &line) {
-		std::cout << "CGI handler called!" << std::endl;
-	(void)line;
+		// std::cout << "CGI handler called!" << std::endl;
+	if (line.size() < 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+	else if (line.size() > 3)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+
+	//memo assume Python first
+	size_t	pos = line[1].find(".");
+	if (pos == std::string::npos)
+	throw cfgRoute::ArgError(this->_path, line[0], "Please provide file extension.");
+	string	temp = line[1].substr(pos, 3);
+	if (temp != ".py")
+		throw cfgRoute::ArgError(this->_path, line[0], "Server accept Python only.");
+
+	this->_cgi_info[temp] = line[2];
 }
 
 void	cfgRoute::handle_client(vector<string> &line) {
@@ -155,18 +168,37 @@ void	cfgRoute::handle_client(vector<string> &line) {
 }
 
 void	cfgRoute::handle_upload(vector<string> &line) {
-		std::cout << "upload handler called!" << std::endl;
-	(void)line;
+		// std::cout << "upload handler called!" << std::endl;
+	if (line.size() < 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+
+	this->_upload_path = line[1];
 }
 
 void	cfgRoute::handle_redirect(vector<string> &line) {
-		std::cout << "return handler called!" << std::endl;
-	(void)line;
+		// std::cout << "return handler called!" << std::endl;
+	if (line.size() < 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+
+	this->_redirection_path = line[1];
 }
 
 void	cfgRoute::handle_methods(vector<string> &line) {
-		std::cout << "allowed method handler called!" << std::endl;
-	(void)line;
+		// std::cout << "allowed method handler called!" << std::endl;
+	if (line.size() < 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+
+	vector<string>::iterator	it = line.begin();
+	++it;
+	while (it != line.end())
+	{
+		this->_http_method.push_back(*it);
+		++it;
+	}
 }
 
 void	cfgRoute::handle_autoIndex(vector<string> &line) {
@@ -264,4 +296,36 @@ string	cfgRoute::splitRoute(string &line) {
 	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t')
 		++pos;
 	return (line.substr(start, pos-start));
+}
+
+void	cfgRoute::displayContent(void) {
+	std::cout << "\033[38;5;69m----- Route: \033[0m" << this->_path << " -----" << std::endl;
+	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
+	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
+	std::cout << "\033[38;5;68mauto index: \033[0m" << (this->_autoIndex==true ? "on" : "off") << std::endl;
+	{
+		vector<string>::iterator	it = this->_http_method.begin();
+		std::cout << "\033[38;5;68mallowed method: \033[0m";
+		while (it != this->_http_method.end())
+		{
+			std::cout << *it << " ";
+			++it;
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "\033[38;5;68mredirect: \033[0m" << this->_redirection_path << std::endl;
+	std::cout << "\033[38;5;68mupload: \033[0m" << this->_upload_path << std::endl;
+	std::cout << "\033[38;5;68mclient_max_body_size: \033[0m" << this->_clientBodySize << std::endl;
+	{
+		
+		std::cout << "\033[38;5;68mCGI: \033[0m";
+		if (this->_cgi_info.empty())
+			std::cout << "-" << std::endl;
+		else
+		{
+			map<string,string>::iterator	it = (this->_cgi_info.begin());
+			std::cout << it->first << "->" << it->second << std::endl;
+		}
+	}
+	std::cout << std::endl;
 }

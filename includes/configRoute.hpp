@@ -72,6 +72,7 @@ class cfgRoute {
 		void	handle_upload(vector<string> &line);
 		void	handle_client(vector<string> &line);
 		void	handle_cgi(vector<string> &line);
+		void	displayContent(void);
 };
 
 #endif

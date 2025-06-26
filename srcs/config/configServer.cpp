@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 02:46:29 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/27 05:37:24 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,6 +296,7 @@ void	cfgServer::parseServer(string &content) {
 				in_body = false;
 				cfgRoute a_block_found = cfgRoute();
 				a_block_found.parseLocation(location_body);
+				// a_block_found.displayContent();
 				this->_Routes.push_back(a_block_found);
 				location_body.clear();
 			}
@@ -342,5 +343,5 @@ void	cfgServer::display_parsedContent(void) {
 	std::cout << "\033[38;5;68mclient_max_body_size: \033[0m" << this->_clientBodySize << std::endl;
 	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
 	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
-	std::cout << "\033[38;5;68mauto index: \033[0m" << (_autoIndexS==true ? "on" : "off") << std::endl << std::endl;
+	std::cout << "\033[38;5;68mauto index: \033[0m" << (this->_autoIndexS==true ? "on" : "off") << std::endl << std::endl;
 }
