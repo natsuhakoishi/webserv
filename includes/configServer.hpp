@@ -44,9 +44,12 @@ class cfgServer {
 		string				get_indexPath() const; //update: newly added
 		vector<cfgRoute>	get_routes() const; //update: remove std namespace
 
-		class SemicolonMissing : public std::exception {
+		class OtherError : public std::exception {
 			public:
+				OtherError(string msg) throw();
 				virtual const char*	what() const throw();
+			private:
+				string	_errMsg;
 		};
 
 		//situations will throw this exception are:

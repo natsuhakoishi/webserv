@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 02:21:16 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/26 17:18:08 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,11 @@ vector<cfgRoute>	cfgServer::get_routes() const {
 
 //--------------[Exception]--------------------------------------------------
 
-const char*	cfgServer::SemicolonMissing::what() const throw() {
-	return ("Server: Semicolon is missing!");
+cfgServer::OtherError::OtherError(string msg) throw() : _errMsg("Server: " + msg) {
+}
+
+const char*	cfgServer::OtherError::what() const throw() {
+	return (this->_errMsg.c_str());
 }
 
 const char*	cfgServer::DirectiveError::what() const throw() {
@@ -151,24 +154,24 @@ void	cfgServer::handle_clientBodySize(vector<string> &line) {
 
 void	cfgServer::handle_errorCodes(vector<string> &line) {
 		// std::cout << "error pages handler called!" << std::endl;
-	if (line.size() < 2)
-		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
+	if (line.size() < 3)
+		throw cfgServer::ArgError(this->_id,line[0], "Not enough argument. Format: <error_code> <HTML_filepath>");
 	else if (line.size() > 3)
 		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments! Format: <error_code> <HTML_filepath>");
+
+	if (line[1].find_first_not_of("0123456789") != std::string::npos)
+		throw cfgServer::ArgError(this->_id,line[0], "Given error status code mixed with non-numeric value.");
 	int	temp;
-		
 	temp = std::atoi(line[1].c_str());
-	//todo the range need confirm again
 	if (temp < 400 && temp > 600)
 		throw cfgServer::ArgError(this->_id,line[0], "Given error status code is out of range!");
 	this->_errorCodes_map[temp] = line[2];
-	//check the path provided? //memo atleast not now, later when validate stage
 }
 
 void	cfgServer::handle_hostPort(vector<string> &line) {
 		// std::cout << "socket address / port handler called!" << std::endl;
 	if (line.size() < 2)
-		throw cfgServer::ArgError(this->_id,line[0], "No argument provided.");
+		throw cfgServer::ArgError(this->_id,line[0], "Not enough argument.");
 	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments! Please seperate to different line.");
 
@@ -195,13 +198,12 @@ void	cfgServer::handle_hostPort(vector<string> &line) {
 
 void	cfgServer::handle_serverName(vector<string> &line) {
 		// std::cout << "server name handler called!" << std::endl;
-	 //memo server_name accept NULL
+	 //memo server_name accept to be NULL
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id,line[0], "Too many arguments!");
 
-	//todo handle multiple server name
 	this->_serverName = line[1];
 }
 
@@ -225,28 +227,27 @@ void	cfgServer::parseServer(string &content) {
 			// std::cout << content;
 		while (std::getline(iss, line))
 		{
-			//pre-process the line
+			//1 - pre-process the line
 			line = Utils::trim_inlineComment(line);
 			line = Utils::trim_whitespaces(line);
 
-			//checking
-			if (!in_body && line.find("location /") != std::string::npos) //found location block
+			//2 - basic checking
+			if (!in_body && line.find("location") != std::string::npos) //found location block
 				in_body = true;
 			else if (!in_body && line[line.size()-1] != ';')
 			{
 				std::cout << line << std::endl;
-				throw SemicolonMissing();
+				throw OtherError("Semicolon is missing!");
 			}
-			//collect whole location block and throw to cfgRoute
-			//same way of handling server block
+			//todo what if i entered invalid scope again...
+			//2.1 - handle location block
 			if (in_body)
 			{
-				//memo display location block captured
+				//memo display captured location block
 					// std::cout << "\033[33m\t" << line << "\033[0m" << std::endl;
 				location_body.append(line).append("\n");
 				if (line.find_last_of("}") != std::string::npos)
 				{
-					location_body.append("}");
 					in_body = false;
 					cfgRoute a_block_found = cfgRoute();
 					a_block_found.parseLocation(location_body);
@@ -257,7 +258,10 @@ void	cfgServer::parseServer(string &content) {
 			}
 
 			//todo multiple directive inline splitter
+			//3 - tokenize line
 			tokens_holder = Utils::tokenizer(line);
+			if (tokens_holder.empty())
+				throw OtherError("Tokenizing fail.");
 			//memo visualize the generated tokens
 				// vector<string>::iterator	token_it = tokens_holder.begin();
 				// while (token_it != tokens_holder.end())
@@ -267,7 +271,7 @@ void	cfgServer::parseServer(string &content) {
 				// }
 				// std::cout << std::endl;
 
-			//loop through list to match
+			//4 - match directive & called the matched handler
 			map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
 			if (it != list.end())
 				(this->*(it->second))(tokens_holder);
