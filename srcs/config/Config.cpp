@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyean-wa < yyean-wa@student.42kl.edu.my    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/23 18:38:19 by yyean-wa         ###   ########.fr       */
+/*   Updated: 2025/06/26 02:21:03 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
 
-Config::Config(const string &filepath) {
+Config::Config(string &filepath) {
 	std::ifstream	infile;
 
 	try
@@ -34,11 +34,11 @@ Config::Config(const string &filepath) {
 	}
 	catch(const std::exception& e)
 	{
-		std::cerr << "\033[31mParse(File): " << e.what() << "\033[0m\n";
+		std::cerr << "\033[31m" << e.what() << "\033[0m\n";
 	}
 }
 
-Config::Config(const Config &other)
+Config::Config(const Config &other) 
 : _Servers(other._Servers), _SocketTable(other._SocketTable) {
 }
 
@@ -52,16 +52,7 @@ Config&	Config::operator=(const Config &other) {
 	return (*this);
 }
 
-Config::~Config()
-{
-}
-
-Config::Config()
-{
-	this->_blockCount = 1;
-	cfgServer	*temp = new cfgServer();
-	this->_Servers.push_back(*temp);
-	delete temp;
+Config::~Config() {
 }
 
 //--------------[Getter]--------------------------------------------------
@@ -72,7 +63,7 @@ int	Config::get_blockCount() const {
 
 //memo blocking basic test
 vector<cfgServer>	Config::get_Servers() const {
-
+	
 	return (this->_Servers);
 }
 
@@ -98,6 +89,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 
 	while (std::getline(infile, line))
 	{
+		line = Utils::trim_whitespaces(line);
 		if (line.empty() || line.at(0) == '#' || Utils::is_blankLine(line)) //no matter in block or not, both this need to skip
 			continue ;
 		else if (!in_body) //searching for Server body
@@ -107,7 +99,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			if (pos != std::string::npos && line[pos] == 's')
 			{
 				string temp_buf;
-				temp_buf = Utils::trim_line(line);
+				temp_buf = Utils::trim_whitespaces(line);
 				//todo will die to evil one-whole-line format, because this if statement
 				if (temp_buf == "server" || temp_buf == "server {" || temp_buf == "server	{")
 				{
@@ -132,7 +124,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				else
 				{
 					size_t Obrace = line.find_first_not_of(" \n\t\r\v\f");
-					if (Obrace != std::string::npos)
+					if (Obrace != std::string::npos && line[Obrace] == '{')
 					{
 						//found the open brace as first character(other than blankspace); sequence correct
 						first_Obrace = true;
@@ -158,18 +150,19 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 						brace_count--;
 					++i;
 				}
-				server_body.append(line).append("\n");
 				if (brace_count)
+				{
+					server_body.append(line).append("\n");
 					continue ;
+				}
 				else
 				{
 					in_body = false;
 					first_Obrace = false;
 					this->_blockCount++;
-					//memo uncomment 2 lines below to see what happen in this function
-						// std::cout << this->_blockCount << "th" << std::endl;
-						// std::cout << server_body << std::endl;
-					cfgServer a_block = cfgServer(server_body, this->_blockCount - 1);
+					cfgServer a_block = cfgServer(this->_blockCount - 1);
+					a_block.parseServer(server_body);
+					// a_block.display_parsedContent();
 					this->_Servers.push_back(a_block);
 					server_body.clear();
 				}
@@ -177,15 +170,16 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		}
 	}
 	if (brace_count)
-		throw ConfigError("Body not enclosed properly with brace.");
-	if (!this->_blockCount)
+		throw ConfigError("Braces' issue");
+	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
 }
 
-Config::ConfigError::ConfigError(const char *msg) throw() {
-	this->_err_msg = msg;
+//--------------[Exception]--------------------------------------------------
+
+Config::ConfigError::ConfigError(string msg) throw() : _errMsg("Config: " + msg) {
 }
 
 const char*	Config::ConfigError::what() const throw() {
-	return (this->_err_msg);
+	return (this->_errMsg.c_str());
 }
