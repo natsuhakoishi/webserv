@@ -6,13 +6,24 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 23:49:11 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/27 02:06:09 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "helper.hpp"
 
 namespace Utils {
+
+UtilsError::UtilsError(string msg) throw()
+: _errMsg("Utils"+msg) {
+}
+
+const char*	UtilsError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+UtilsError::~UtilsError() throw() {
+}
 
 bool	is_blankLine(string &line) {
 	string::iterator it = line.begin();
@@ -47,42 +58,23 @@ string trim_inlineComment(string &line) {
 
 vector<string>	tokenizer(string &line) {
 	vector<string>	result;
-	size_t	pos;
+	size_t	pos = 0;
 	size_t	start;
-
-	//memo
-	//method using: indexing
-	//split by spaces / tabs
-	//should handle consecutive version of both characters
-	//use substr to generate token
+	string	temp;
 
 	line.erase(line.find(";"));
 	while (pos < line.size())
 	{
-		//memo
-		//record the start of the directive/argument
-		//loop throught until hit delimeter " " or "\t"
-		//provide the start and the end to substr
-		//push the substr into vector
 		pos = line.find_first_not_of(" \t", pos);
-		start = pos;
 		if (pos == std::string::npos)
-		{
-			//memo debug message; basically when no args provided
-				// std::cout << "\t" << line << std::endl;
-				// std::cout << "AAAAA" << std::endl;
 			return result;
-		}
+		start = pos;
 		while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t')
 			++pos;
-		// if (pos == line.size())
-		// {
-		// 	std::cout << "\t" << line << std::endl;
-		// 	std::cout << "AAAAAAAAAAAAAAAAAA" << std::endl;
-		// 	return result;
-		// }
-		//memo i want to avoid accidently push a empty string
-		result.push_back(line.substr(start,pos-start));
+		temp = line.substr(start, pos-start);
+		if (temp.empty())
+			throw Utils::UtilsError("Fail to create token");
+		result.push_back(temp);
 	}
 	return result;
 }

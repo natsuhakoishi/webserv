@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configRoute.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 19:30:29 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/27 02:33:30 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,7 @@ map<string,string>	cfgRoute::get_cgiInfo() const { //update: return type changed
 //--------------[Exception]--------------------------------------------------
 
 const char*	cfgRoute::RouteError::what() const throw() {
-	return ("Route: No specific route mentioned with the location block!");
+	return ("Route: No route specified in the location block!");
 }
 
 const char*	cfgRoute::SemicolonMissing::what() const throw() {
@@ -118,19 +118,40 @@ cfgRoute::ArgError::~ArgError() throw() {
 //--------------[Functions]--------------------------------------------------
 
 void	cfgRoute::parseLocation(string &content) {
-	//same, while loop + std::getline
-	//throw the first line to splitRoute then move on
-	//flag: indicate first line
-	//ignore closed braces
-	(void)content;
+	std::istringstream	iss(content);
+	string				line;
+	bool				firstLine = false;
+	
+	while (std::getline(iss, line))
+	{
+		if (!firstLine)
+		{
+			firstLine = true;
+			this->_path = splitRoute(line);
+			if (this->_path.empty())
+				throw cfgRoute::RouteError();
+			continue ;
+		}
+		line = Utils::trim_inlineComment(line);
+		line = Utils::trim_whitespaces(line);
+		if (line == "}")
+			break ;
+		//called tokenizer
+		//loop list and called each handler
+		std::cout << "\"path: " << this->_path << "\"" << std::endl;
+		std::cout << line << std::endl;
+	}
+	std::cout << "-------------------" << std::endl;
 }
 
-// string	cfgRoute::splitRoute(string &line) {
-// 	//locate route after keyword
-// 	//extract the route with start & index
-// 	size_t	start;
-// 	size_t pos = line.find("/", 7);
-// 	if (pos == std::string::npos)
-// 		throw cfgRoute::RouteError();
-// 	start = pos;
-// }
+string	cfgRoute::splitRoute(string &line) {
+	size_t	start;
+	size_t	pos = line.find("/", 7);
+
+	if (pos == std::string::npos)
+		throw cfgRoute::RouteError();
+	start = pos;
+	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t')
+		++pos;
+	return (line.substr(start, pos-start));
+}

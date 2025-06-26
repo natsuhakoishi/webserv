@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 19:21:01 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/27 02:24:41 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,6 @@ int	Config::get_blockCount() const {
 	return (this->_blockCount);
 }
 
-//memo blocking basic test
 vector<cfgServer>	Config::get_Servers() const {
 	return (this->_Servers);
 }
@@ -95,11 +94,10 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 	while (std::getline(infile, line))
 	{
 		line = Utils::trim_whitespaces(line);
-		if (line.empty() || line.at(0) == '#' || Utils::is_blankLine(line)) //no matter in block or not, both this need to skip
+		if (line.empty() || line.at(0) == '#' || Utils::is_blankLine(line))
 			continue ;
-		else if (!in_body) //searching for Server body
+		else if (!in_body)
 		{
-			//keyword determine where the body start; so find the keyword first
 			pos = line.find_first_not_of(" \n\t\r\v\f");
 			if (pos != std::string::npos && line[pos] == 's')
 			{
@@ -111,39 +109,32 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 					in_body = true;
 					if (temp_buf != "server")
 						brace_count++;
-					//memo server_body.append(temp_buf).append("\n");
 				}
 				continue ;
 			}
-			else //mostly mean detect content outside of block
+			else //memo mostly mean detect content outside of block, but buggy
 				throw ConfigError("Undefined configuration.");
 		}
 		else if (in_body)
 		{
-			//found keyword then find for the open brace; if no one / not the first one then fail
-			//to ensure body properly enclosed in paired braces
 			if (!first_Obrace)
 			{
-				if (brace_count)//already found the open brace when searching & valid for keyword; skip for efficient
+				if (brace_count)
 					first_Obrace = true;
 				else
 				{
 					size_t Obrace = line.find_first_not_of(" \n\t\r\v\f");
 					if (Obrace != std::string::npos && line[Obrace] == '{')
 					{
-						//found the open brace as first character(other than blankspace); sequence correct
 						first_Obrace = true;
 						brace_count++;
-						//memo server_body.append(line).append("\n");
+						continue ;
 					}
 					else
 						throw ConfigError("Other character after keyword. (Expect: Open Brace)");
 				}
 				server_body.append(line).append("\n");
 			}
-			//found the valid format, can get the body's content
-			//what happen now? keep track of brace amount and appending line into server_body
-			//if brace_count hit 0, means is end of one server block; stop and pass to next step
 			else if (first_Obrace)
 			{
 				size_t i = 0;
