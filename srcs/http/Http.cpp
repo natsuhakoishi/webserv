@@ -117,16 +117,31 @@ void Http::readConfig()
 void Http::readRouteConfig()
 {
     this->routes = this->cs.get_routes();
-    int i = 0;
-    for (; i < static_cast<int>(this->routes.size()); ++i)
-        if (this->routes[i].get_path() == this->url)
-            break ;
+    int idx = -1;
 
-    if (i == static_cast<int>(this->routes.size()))
-        this->routesIndex = -1;
-    else
-        this->routesIndex = i;
+    for (int i = 0; i < static_cast<int>(this->routes.size()); ++i)
+        if (IsCorrectPrefix(this->url, this->routes[i].get_path()))
+            idx = i;
+    if (idx == -1)
+        for (int i = 0; i < static_cast<int>(this->routes.size()) && idx != -1; ++i)
+            if (this->routes[i].get_path() == "/")
+                idx = i;
 
+    this->routesIndex = idx;
+    initConfig();
+}
+
+bool Http::IsCorrectPrefix(const string &url, const string &routePath) const
+{
+    if (!url.compare(routePath))
+        return true;
+    if (url.find(routePath) == 0 && url[routePath.length()] == '/')
+        return true;
+    return false;
+}
+
+void Http::initConfig()
+{
     if (this->routesIndex == -1)
     {
         cout << YELLOW << "Debug: Route not found, use server block data:" << endl;
@@ -154,11 +169,10 @@ void Http::readRouteConfig()
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
         cout << "Body size: " << this->bodySize << endl;
-        for (int ii = 0; ii != static_cast<int>(this->allowMethod.size()); ++ii)
-            cout << "Allow method: " << this->allowMethod[ii] << endl;
+        for (int i = 0; i != static_cast<int>(this->allowMethod.size()); ++i)
+            cout << "Allow method: " << this->allowMethod[i] << endl;
         cout << RESETEND;
     }
-
 }
 
 void Http::readBody()

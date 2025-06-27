@@ -35,6 +35,7 @@ void Http::GET(pollfd pfd, string path)
 
     if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
     {
+        cout << RED << "GET: Method not allow" << RESETEND;
         code403(this->pfd.fd);
         return ;
     }

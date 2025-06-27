@@ -6,20 +6,22 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 18:13:28 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/27 03:42:30 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-
-
-
-
 
 #include "Config.hpp"
 
 int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
+
+Config::Config()
+{
+	this->_blockCount = 1;
+	cfgServer cs;
+	this->_Servers.push_back(cs);
+}
 
 Config::Config(string &filepath) {
 	std::ifstream	infile;

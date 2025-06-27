@@ -30,7 +30,7 @@ class TcpServer
 		TcpServer	&operator = (const TcpServer &copy);
 
 		map<int, Http *> httpMap;
-		Config config;
+		Config *config;
 };
 
 #endif

@@ -8,7 +8,6 @@ void Http::code404(int pfd)
 
     ss << "HTTP/1.1 404 Not Found\r\n\r\n";
 
-    this->isRespond = true;
     string content = getContent("./error_page/404.html");
     if (!content.compare(""))
         ss << "<!doctype html><html lang=\"en\"><head><title>404 not found</title></head><body><main><h1>404 Not found</h1></main></body></html>";
@@ -20,6 +19,7 @@ void Http::code404(int pfd)
     cout << BLUE << "GET: Respond 404 successful" << endl; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);
+    this->isRespond = true;
 }
 
 void Http::code403(int pfd)
@@ -28,7 +28,6 @@ void Http::code403(int pfd)
 
     std::ostringstream ss;
 
-    this->isRespond = true;
     ss << "HTTP/1.1 403 Forbidden\r\n\r\n";
 
     string content = getContent("./error_page/403.html");
@@ -42,6 +41,7 @@ void Http::code403(int pfd)
     cout << BLUE << "GET: Respond 403 successful" << endl; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);
+    this->isRespond = true;
 }
 
 void Http::code301(int pfd, string url)
@@ -64,8 +64,8 @@ void Http::code301(int pfd, string url)
     cout << BLUE << "GET: Respond 301 successful" << endl; //debug
     cout << BLUE << "Respond:" << RED << ss.str() << RESETEND; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    this->isRespond = true;
     close(pfd);
+    this->isRespond = true;
 }
 
 void Http::code409(int pfd)
@@ -76,7 +76,6 @@ void Http::code409(int pfd)
 
     ss << "HTTP/1.1 409 Conflict\r\n\r\n";
 
-    this->isRespond = true;
     string content = getContent("./error_page/409.html");
     if (!content.compare(""))
         ss << "<!doctype html><html lang=\"en\"><head><title>409 Conflict</title></head><body><main><h1>404 Conflict</h1></main></body></html>";
@@ -88,6 +87,7 @@ void Http::code409(int pfd)
     cout << BLUE << "GET: Respond 409 successful" << endl; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);
+    this->isRespond = true;
 }
 
 void Http::code500(int pfd)
@@ -98,7 +98,6 @@ void Http::code500(int pfd)
 
     ss << "HTTP/1.1 500 Internal Server Error\r\n\r\n";
 
-    this->isRespond = true;
     string content = getContent("./error_page/500.html");
     if (!content.compare(""))
         ss << "<!doctype html><html lang=\"en\"><head><title>500 Internal Server Error</title></head><body><main><h1>500 Internal Server Error</h1></main></body></html>";
@@ -110,4 +109,27 @@ void Http::code500(int pfd)
     cout << BLUE << "GET: Respond 500 successful" << endl; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);
+    this->isRespond = true;
+}
+
+void Http::code413(int pfd)
+{
+    cout << RED << "413!" << RESETEND; //debug
+
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 413 Request Entity Too Large\r\n\r\n";
+
+    string content = getContent("./error_page/413.html");
+    if (!content.compare(""))
+        ss << "<!doctype html><html lang=\"en\"><head><title>413 SizeTooLarge</title></head><body><main><h1>413 SizeTooLarge</h1></main></body></html>";
+    else
+        ss << content;
+
+    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+
+    cout << BLUE << "GET: Respond 413 successful" << endl; //debug
+    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    close(pfd);
+    this->isRespond = true;
 }

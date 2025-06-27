@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configRoute.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 17:58:16 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/27 20:59:59 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,15 @@
 
 cfgRoute::cfgRoute() {
 	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
+	this->_path = "/index";
+	this->_root_path = ".";
+	this->_index_path = "upload.html";
+	this->_autoIndex = false;
+	this->_http_method.push_back("GET");
+	this->_http_method.push_back("POST");
+	this->_http_method.push_back("DELETE");
+	this->_redirection_path = "/error_page/42.html";
+	this->_upload_path = "/upload";
 }
 
 cfgRoute::cfgRoute(const cfgRoute &other)

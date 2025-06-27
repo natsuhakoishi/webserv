@@ -14,6 +14,14 @@ class Http
         pollfd pfd;
         const Config &cf;
         cfgServer cs;
+        int routesIndex;
+        vector<cfgRoute> routes;
+        bool autoindex;
+        string indexFile;
+        int bodySize;
+
+        map<string, string> headers;
+        vector<string> allowMethod;
 
         string rev;
         string buffer;
@@ -25,8 +33,6 @@ class Http
         string url;
         string filePath;
         string HttpVersion;
-
-        map<string, string> headers;
 
         bool isRespond;
         Http();
@@ -42,6 +48,10 @@ class Http
         void readHeaders();
         void readBody();
         void readConfig();
+        void readRouteConfig();
+        void raedAllowMethod(vector<string> allow);
+        void initConfig();
+        bool IsCorrectPrefix(const string &url, const string &routePath) const;
 
         //method
         string getContent(string);
@@ -50,7 +60,7 @@ class Http
         void POST(pollfd, string);
         void DELETE(pollfd, string);
 
-        string autoindex(string path);
+        string handleAutoindex(string path);
         string createElement(string file);
 
         //utils
@@ -61,6 +71,7 @@ class Http
         void code403(int pfd);
         void code301(int pfd, string url);
         void code409(int pfd);
+        void code413(int pfd);
         void code500(int pfd);
 
         //getter

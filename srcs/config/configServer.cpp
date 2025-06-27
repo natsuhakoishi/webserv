@@ -3,16 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configServer.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-<<<<<<< HEAD
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 00:24:11 by yyan-bin         ###   ########.fr       */
-=======
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/26 18:00:02 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/27 21:33:51 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +14,29 @@
 
 //--------------[OCCF]--------------------------------------------------
 
+cfgServer::cfgServer()
+{
+	this->_Routes.push_back(cfgRoute());
+	this->_id = 0;
+	this->_serverName = "localhost";
+	this->_clientBodySize = 1024;
+	this->_hostPort.push_back("0.0.0.0:4242");
+	this->_hostPort.push_back("127.0.0.1:8080");
+	this->_errorCodes_map[404] = "/error_page/404.html";
+	this->_root_path = ".";
+	this->_autoIndex = true;
+	this->_index_path = "upload.html";
+}
+
 cfgServer::cfgServer(int id) : _id(id), _clientBodySize(0) {
 }
 
 cfgServer::cfgServer(const cfgServer &other)
 : _id(other._id), _serverName(other._serverName), _hostPort(other._hostPort),
   _errorCodes_map(other._errorCodes_map), _clientBodySize(other._clientBodySize),
-  _root_path(other._root_path), _index_path(other._index_path), _Routes(other._Routes) {
+  _root_path(other._root_path), _index_path(other._index_path), _autoIndex(other._autoIndex),
+  _Routes(other._Routes)
+{
 }
 
 cfgServer&	cfgServer::operator=(const cfgServer &other) {
@@ -39,7 +49,9 @@ cfgServer&	cfgServer::operator=(const cfgServer &other) {
 		this->_clientBodySize = other._clientBodySize;
 		this->_root_path = other._root_path;
 		this->_index_path = other._index_path;
+		this->_autoIndex = other._autoIndex;
 		this->_Routes = other._Routes;
+		this->_autoIndex = other._autoIndex;
 	}
 	return (*this);
 }
@@ -79,6 +91,10 @@ string	cfgServer::get_indexPath() const { //update: newly added
 
 vector<cfgRoute>	cfgServer::get_routes() const {
 	return (this->_Routes);
+}
+
+bool	cfgServer::get_autoIndex() const {
+	return (this->_autoIndex);
 }
 
 //--------------[Exception]--------------------------------------------------

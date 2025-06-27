@@ -28,8 +28,10 @@ class cfgServer {
 		int					_clientBodySize;
 		string				_root_path; //update: newly added
 		string				_index_path; //update: newly added
+		bool				_autoIndex; //update: newly added
 		vector<cfgRoute>	_Routes;
 	public:
+		cfgServer();
 		cfgServer(int id); //update: split logic out from constructor
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);
@@ -43,6 +45,7 @@ class cfgServer {
 		string				get_rootPath() const; //update: newly added
 		string				get_indexPath() const; //update: newly added
 		vector<cfgRoute>	get_routes() const; //update: remove std namespace
+		bool				get_autoIndex() const; //update: remove std namespace
 
 		class OtherError : public std::exception {
 			public:

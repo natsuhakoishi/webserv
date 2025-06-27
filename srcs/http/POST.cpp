@@ -19,6 +19,12 @@ void Http::POST(pollfd pfd, string path)
     string line;
     string thrLine;
 
+    if (this->body.length() > this->bodySize)
+    {
+        code413(this->pfd.fd);
+        return ;
+    }
+
     std::getline(ss, boundary);
     std::getline(ss, line);
     std::getline(ss, thrLine);
