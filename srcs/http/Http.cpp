@@ -6,7 +6,8 @@
 //         cout << GREEN << "Default constructor called" << endl;
 // }
 
-Http::Http(pollfd _pfd, const Config &_cf): pfd(_pfd), cf(_cf), isRespond(false)
+Http::Http(pollfd _pfd, const Config &_cf)
+: pfd(_pfd), cf(_cf), cs(), routesIndex(-1), autoindex(false), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -68,7 +69,6 @@ void Http::readHeaders()
 
     requestLine >> this->method >> this->url >> this->HttpVersion;
 
-    // this->filePath = "." + this->url; //todo: update to root
 
     // cout << YELLOW << "method:" << method << ", " << "url:" << url << ", " << "httpVer:" << HttpVersion << RESETEND;
     // cout << "headers: " << YELLOW << this->header << RESETEND;
@@ -84,6 +84,12 @@ void Http::readHeaders()
         // cout << YELLOW << "key:" << RESET << key << YELLOW << " value:" << RESET << value << "$" << RESETEND;
     }
     readConfig();
+    readRouteConfig();
+
+    // this->filePath = this->cs.get_rootPath() + this->url; // example ./index + /
+    cout << YELLOW << "file path: " << this->filePath << RESETEND;
+    // cout << YELLOW << this->cs.get_serverName() << RESETEND;
+
 }
 
 void Http::readConfig()
@@ -106,21 +112,59 @@ void Http::readConfig()
             }
         }
     }
+}
 
-    
-    // cout << YELLOW << this->cs.get_serverName() << RESETEND;
+void Http::readRouteConfig()
+{
+    this->routes = this->cs.get_routes();
+    int i = 0;
+    for (; i < static_cast<int>(this->routes.size()); ++i)
+        if (this->routes[i].get_path() == this->url)
+            break ;
+
+    if (i == static_cast<int>(this->routes.size()))
+        this->routesIndex = -1;
+    else
+        this->routesIndex = i;
+
+    if (this->routesIndex == -1)
+    {
+        cout << YELLOW << "Debug: Route not found, use server block data:" << endl;
+        this->filePath = this->cs.get_rootPath() + this->url;
+        this->indexFile = this->cs.get_indexPath();
+        this->autoindex = this->cs.get_autoIndex();
+        this->bodySize = this->cs.get_clientBodySize();
+        this->allowMethod.push_back("GET");
+        this->allowMethod.push_back("POST");
+        this->allowMethod.push_back("DELETE");
+        cout << "Root path: " << this->cs.get_rootPath() << endl;
+        cout << "Index file: " << this->indexFile << endl;
+        cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
+        cout << "Body size: " << this->bodySize << RESETEND;
+    }
+    else
+    {
+        cout << YELLOW << "Debug: Found route, using route block data: " << this->routes[this->routesIndex].get_path() << endl;
+        this->filePath = this->routes[this->routesIndex].get_rootPath() + this->url;
+        this->indexFile = this->routes[this->routesIndex].get_indexPath();
+        this->autoindex = this->routes[this->routesIndex].get_autoIndex();
+        this->bodySize = this->routes[this->routesIndex].get_clientBodySize();
+        this->allowMethod = this->routes[this->routesIndex].get_httpMethod();
+        cout << "Root path: " << this->cs.get_rootPath() << endl;
+        cout << "Index file: " << this->indexFile << endl;
+        cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
+        cout << "Body size: " << this->bodySize << endl;
+        for (int ii = 0; ii != static_cast<int>(this->allowMethod.size()); ++ii)
+            cout << "Allow method: " << this->allowMethod[ii] << endl;
+        cout << RESETEND;
+    }
+
 }
 
 void Http::readBody()
 {
     size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
     this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
-
-    // size_t headersEnd = this->rev.find("\r\n\r\n");
-    // tempBody.substr(headersEnd + 4);
-
-    // cout << YELLOW << this->body << RESETEND;
-    // cout << YELLOW << ContentLenght << " , " << this->body.length() << RESETEND;
 
     if (this->body.length() == ContentLenght)
         POST(this->pfd, this->filePath);

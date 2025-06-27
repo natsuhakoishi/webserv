@@ -32,7 +32,12 @@ void Http::GET(pollfd pfd, string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
-    int autoindexFlag = 1;
+
+    if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
+    {
+        code403(this->pfd.fd);
+        return ;
+    }
 
     if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
     {
@@ -46,18 +51,21 @@ void Http::GET(pollfd pfd, string path)
     }
     else if (path[path.length() - 1] == '/')
     {
-        if (!fileExistis(path + "index.html") && autoindexFlag == 1) //if index.html not found, show directory (autoindex)
+        if ((this->indexFile.empty() || !fileExistis(path + this->indexFile)) && this->autoindex) //if index.html not found, show directory (autoindex)
         {
             Autoindex = true;
             cout << RED << "Auto index" << RESETEND;
         }
-        else if (!fileExistis(path + "index.html"))
+        else if (fileExistis(path + this->indexFile))
+        {
+            cout << RED << "append" << RESETEND;
+            path.append(this->indexFile);
+        }
+        else if (this->autoindex == false)
         {
             code403(pfd.fd);
             return ;
         }
-        else
-            path.append("index.html");
     }
 
     // cout << RED << "debug " << path << RESETEND;
@@ -67,7 +75,7 @@ void Http::GET(pollfd pfd, string path)
 
     if (Autoindex == true)
     {
-        content = autoindex(path);
+        content = handleAutoindex(path);
         type = "text/html";
     }
     else

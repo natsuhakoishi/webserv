@@ -7,7 +7,7 @@ string Http::createElement(string path)
     return "<a href=\"/" + path + "\">" + path + "</a>"; //file
 }
 
-string Http::autoindex(string path)
+string Http::handleAutoindex(string path)
 {
     std::ostringstream ss;
     DIR *dir = opendir(path.c_str());
