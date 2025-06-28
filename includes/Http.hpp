@@ -12,13 +12,14 @@ class Http
 {
     private:
         pollfd pfd;
+        string rootPath;
         const Config &cf;
         cfgServer cs;
-        int routesIndex;
         vector<cfgRoute> routes;
         bool autoindex;
         string indexFile;
         int bodySize;
+		map<int,string>		errorCodeMap;
 
         map<string, string> headers;
         vector<string> allowMethod;
@@ -50,12 +51,13 @@ class Http
         void readConfig();
         void readRouteConfig();
         void raedAllowMethod(vector<string> allow);
-        void initConfig();
+        void initConfig(int idx);
         bool IsCorrectPrefix(const string &url, const string &routePath) const;
 
         //method
         string getContent(string);
-        string GetContentType(string);
+        string getContentType(string);
+        string getErrorCodePath(int code);
         void GET(pollfd, string);
         void POST(pollfd, string);
         void DELETE(pollfd, string);

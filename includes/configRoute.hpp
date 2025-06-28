@@ -27,6 +27,7 @@ class cfgRoute {
 		map<string,string>	_cgi_info; //update: change container
 	public:
 		cfgRoute();
+		cfgRoute(int); //for testing use
 		cfgRoute(const cfgRoute &other);
 		cfgRoute&	operator=(const cfgRoute &other);
 		~cfgRoute();

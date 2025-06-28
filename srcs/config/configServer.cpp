@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 21:33:51 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/28 13:15:10 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,42 @@
 
 //--------------[OCCF]--------------------------------------------------
 
+// cfgServer::cfgServer()
+// {
+// 	this->_Routes.push_back(cfgRoute());
+// 	this->_id = 0;
+// 	this->_serverName = "localhost";
+// 	this->_clientBodySize = 1024;
+// 	this->_hostPort.push_back("0.0.0.0:4242");
+// 	this->_hostPort.push_back("127.0.0.1:8080");
+// 	this->_errorCodes_map[404] = "/error_page/404.html";
+// 	this->_errorCodes_map[403] = "/error_page/403.html";
+// 	this->_errorCodes_map[409] = "/error_page/409.html";
+// 	this->_errorCodes_map[500] = "/error_page/500.html";
+// 	this->_errorCodes_map[413] = "/error_page/413.html";
+// 	this->_root_path = ".";
+// 	this->_autoIndex = true;
+// 	this->_index_path = "upload.html";
+// }
+
 cfgServer::cfgServer()
 {
-	this->_Routes.push_back(cfgRoute());
+	this->_Routes.push_back(cfgRoute(0));
+	this->_Routes.push_back(cfgRoute(1));
+	this->_Routes.push_back(cfgRoute(2));
 	this->_id = 0;
 	this->_serverName = "localhost";
 	this->_clientBodySize = 1024;
 	this->_hostPort.push_back("0.0.0.0:4242");
 	this->_hostPort.push_back("127.0.0.1:8080");
 	this->_errorCodes_map[404] = "/error_page/404.html";
-	this->_root_path = ".";
+	this->_errorCodes_map[403] = "/error_page/403.html";
+	this->_errorCodes_map[409] = "/error_page/409.html";
+	this->_errorCodes_map[500] = "/error_page/500.html";
+	this->_errorCodes_map[413] = "/error_page/413.html";
+	this->_root_path = "./servers/server1";
 	this->_autoIndex = true;
-	this->_index_path = "upload.html";
+	this->_index_path = "index.html";
 }
 
 cfgServer::cfgServer(int id) : _id(id), _clientBodySize(0) {

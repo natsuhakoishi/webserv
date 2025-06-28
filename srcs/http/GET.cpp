@@ -1,6 +1,6 @@
 #include "../../includes/Http.hpp"
 
-string Http::GetContentType(string c)
+string Http::getContentType(string c)
 {
     if (!c.compare("./")) return "text/html";
     // cout << "eeeeeeeee:" << c.substr(c.length() - 5) << endl;
@@ -82,7 +82,7 @@ void Http::GET(pollfd pfd, string path)
     else
     {
         content = getContent(path);
-        type = GetContentType(path);
+        type = getContentType(path);
     }
     // cout << RED << "debug" << content << RESETEND;
 

@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), cs(), routesIndex(-1), autoindex(false), isRespond(false)
+: pfd(_pfd), rootPath("."), cf(_cf), cs(), autoindex(false), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -112,6 +112,7 @@ void Http::readConfig()
             }
         }
     }
+    this->errorCodeMap = this->cs.get_errorCodesMap();
 }
 
 void Http::readRouteConfig()
@@ -123,12 +124,11 @@ void Http::readRouteConfig()
         if (IsCorrectPrefix(this->url, this->routes[i].get_path()))
             idx = i;
     if (idx == -1)
-        for (int i = 0; i < static_cast<int>(this->routes.size()) && idx != -1; ++i)
+        for (int i = 0; i < static_cast<int>(this->routes.size()) && idx == -1; ++i)
             if (this->routes[i].get_path() == "/")
                 idx = i;
 
-    this->routesIndex = idx;
-    initConfig();
+    initConfig(idx);
 }
 
 bool Http::IsCorrectPrefix(const string &url, const string &routePath) const
@@ -140,12 +140,13 @@ bool Http::IsCorrectPrefix(const string &url, const string &routePath) const
     return false;
 }
 
-void Http::initConfig()
+void Http::initConfig(int idx)
 {
-    if (this->routesIndex == -1)
+    if (idx == -1)
     {
         cout << YELLOW << "Debug: Route not found, use server block data:" << endl;
-        this->filePath = this->cs.get_rootPath() + this->url;
+        this->rootPath = this->cs.get_rootPath();
+        this->filePath = this->rootPath + this->url;
         this->indexFile = this->cs.get_indexPath();
         this->autoindex = this->cs.get_autoIndex();
         this->bodySize = this->cs.get_clientBodySize();
@@ -155,17 +156,18 @@ void Http::initConfig()
         cout << "Root path: " << this->cs.get_rootPath() << endl;
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
-        cout << "Body size: " << this->bodySize << RESETEND;
+        cout << "Body size: " << this->bodySize << " " << this->cs.get_clientBodySize() << RESETEND;
     }
     else
     {
-        cout << YELLOW << "Debug: Found route, using route block data: " << this->routes[this->routesIndex].get_path() << endl;
-        this->filePath = this->routes[this->routesIndex].get_rootPath() + this->url;
-        this->indexFile = this->routes[this->routesIndex].get_indexPath();
-        this->autoindex = this->routes[this->routesIndex].get_autoIndex();
-        this->bodySize = this->routes[this->routesIndex].get_clientBodySize();
-        this->allowMethod = this->routes[this->routesIndex].get_httpMethod();
-        cout << "Root path: " << this->cs.get_rootPath() << endl;
+        cout << YELLOW << "Debug: Found route, using route block data: " << this->routes[idx].get_path() << endl;
+        this->rootPath = this->routes[idx].get_rootPath();
+        this->filePath = this->rootPath + this->url;
+        this->indexFile = this->routes[idx].get_indexPath();
+        this->autoindex = this->routes[idx].get_autoIndex();
+        this->bodySize = this->routes[idx].get_clientBodySize();
+        this->allowMethod = this->routes[idx].get_httpMethod();
+        cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
         cout << "Body size: " << this->bodySize << endl;

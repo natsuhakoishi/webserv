@@ -19,8 +19,16 @@ void Http::POST(pollfd pfd, string path)
     string line;
     string thrLine;
 
-    if (this->body.length() > this->bodySize)
+    if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end() ||
+            std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") == this->allowMethod.end())
     {
+        cout << RED << "POST: Method not allow" << RESETEND;
+        code403(this->pfd.fd);
+        return ;
+    }
+    if (static_cast<int>(this->body.length()) > this->bodySize)
+    {
+        cout << RED << "POST: Size too large" << RESETEND;
         code413(this->pfd.fd);
         return ;
     }
@@ -46,7 +54,9 @@ void Http::POST(pollfd pfd, string path)
     outFile.close();
 
     //respond sucessful page
-    string content = getContent("./index/yeah.html");
+    string content = getContent(this->rootPath + "/index/yeah.html");
+    if (!content.compare(""))
+        content = "<!doctype html><html lang=\"en\"><head><title>Upload Page [DefalutPage]</title></head><body><main><h1>Upload sucessful!</h1></main></body></html>";
     std::ostringstream oss;
 
     oss << "HTTP/1.1 200 OK\r\n";

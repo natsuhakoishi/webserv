@@ -22,13 +22,13 @@ string Http::handleAutoindex(string path)
     ss << "<!DOCTYPE html>";
     ss << "<html lang=\"en\">";
     ss << "<body>";
-    ss << "<h1>" << "index of " << path << "</h1>";
+    ss << "<h1>" << "index of " << "." + path.substr(this->rootPath.size()) << "</h1>";
     while ((entry = readdir(dir)) != NULL)
     {
         string filename = entry->d_name;
         if (filename == ".") // || filename == ".."
             continue ;
-        string fullPath = path + filename;
+        string fullPath = "." + path.substr(this->rootPath.size()) + filename;
         // cout << GREEN << fullPath << RESETEND;
         ss << "<div>";
         ss << createElement(fullPath);

@@ -6,13 +6,50 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 20:59:59 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/28 13:56:39 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "configRoute.hpp"
 
 //--------------[OCCF]--------------------------------------------------
+
+cfgRoute::cfgRoute(int x): _clientBodySize(0)
+{
+	if (x == 0)
+	{
+		this->_path = "/index";
+		this->_root_path = "./servers/server1";
+		this->_index_path = "upload.html";
+		this->_autoIndex = false;
+		this->_http_method.push_back("GET");
+		this->_http_method.push_back("POST");
+		this->_http_method.push_back("DELETE");
+		this->_redirection_path = "/error_page/42.html";
+		this->_upload_path = "/upload";
+	}
+	else if (x == 1)
+	{
+		this->_path = "/index2";
+		this->_root_path = "./servers/server1";
+		this->_index_path = "index.html";
+		this->_autoIndex = false;
+		this->_http_method.push_back("GET");
+		this->_http_method.push_back("POST");
+		this->_http_method.push_back("DELETE");
+		this->_redirection_path = "/error_page/42.html";
+	}
+	else if (x == 2)
+	{
+		this->_path = "/";
+		this->_root_path = "./servers/server1";
+		this->_index_path = "index.html";
+		this->_clientBodySize = 1000000000;
+		this->_autoIndex = true;
+		this->_http_method.push_back("GET");
+		this->_http_method.push_back("POST");
+	}
+}
 
 cfgRoute::cfgRoute() {
 	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
