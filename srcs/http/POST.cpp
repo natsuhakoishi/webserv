@@ -46,6 +46,8 @@ void Http::POST(pollfd pfd, string path)
     string pureBody = this->body.substr(start, this->body.rfind("\r\n------") - start);
 
     // cout << pureBody << endl;
+    if (!this->uplaodPath.empty())
+        path = this->rootPath + this->uplaodPath;
     cout << BLUE << "POST: Client sent: " << GREEN << path + "/" + filename << RESETEND;
 
     mkdir(path.c_str(), 0777);
@@ -53,6 +55,11 @@ void Http::POST(pollfd pfd, string path)
     outFile << pureBody;
     outFile.close();
 
+    if (!this->redirectPath.empty())
+    {
+        code303(this->pfd.fd);
+        return ;
+    }
     //respond sucessful page
     string content = getContent(this->rootPath + "/index/yeah.html");
     if (!content.compare(""))

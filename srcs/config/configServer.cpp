@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/28 13:15:10 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/28 18:28:47 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ cfgServer::cfgServer()
 	this->_Routes.push_back(cfgRoute(0));
 	this->_Routes.push_back(cfgRoute(1));
 	this->_Routes.push_back(cfgRoute(2));
+	this->_Routes.push_back(cfgRoute(3));
+	this->_Routes.push_back(cfgRoute(4));
 	this->_id = 0;
 	this->_serverName = "localhost";
 	this->_clientBodySize = 1024;

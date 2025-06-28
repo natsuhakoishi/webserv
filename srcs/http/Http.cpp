@@ -42,7 +42,7 @@ Http &Http::operator=(const Http &other)
 
 void Http::parse(string input)
 {
-    cout << GREEN << "Client: " << input << RESETEND;
+    // cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
@@ -70,7 +70,7 @@ void Http::readHeaders()
     requestLine >> this->method >> this->url >> this->HttpVersion;
 
 
-    // cout << YELLOW << "method:" << method << ", " << "url:" << url << ", " << "httpVer:" << HttpVersion << RESETEND;
+    cout << YELLOW << "method:" << method << ", " << "url:" << url << RESETEND;
     // cout << "headers: " << YELLOW << this->header << RESETEND;
 
     while (getline(ss, line))
@@ -127,7 +127,6 @@ void Http::readRouteConfig()
         for (int i = 0; i < static_cast<int>(this->routes.size()) && idx == -1; ++i)
             if (this->routes[i].get_path() == "/")
                 idx = i;
-
     initConfig(idx);
 }
 
@@ -162,15 +161,19 @@ void Http::initConfig(int idx)
     {
         cout << YELLOW << "Debug: Found route, using route block data: " << this->routes[idx].get_path() << endl;
         this->rootPath = this->routes[idx].get_rootPath();
+        this->redirectPath = this->routes[idx].get_redirectionPath();
         this->filePath = this->rootPath + this->url;
         this->indexFile = this->routes[idx].get_indexPath();
         this->autoindex = this->routes[idx].get_autoIndex();
         this->bodySize = this->routes[idx].get_clientBodySize();
         this->allowMethod = this->routes[idx].get_httpMethod();
+        this->uplaodPath = this->routes[idx].get_uploadPath();
         cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
         cout << "Body size: " << this->bodySize << endl;
+        cout << "Redirect: " << (this->redirectPath.empty() ? "no" : "yes ->" + this->redirectPath) << endl;
+        cout << "Upload Path: " << this->uplaodPath << endl;
         for (int i = 0; i != static_cast<int>(this->allowMethod.size()); ++i)
             cout << "Allow method: " << this->allowMethod[i] << endl;
         cout << RESETEND;

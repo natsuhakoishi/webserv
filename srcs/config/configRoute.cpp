@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/28 13:56:39 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/06/28 18:30:59 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 //--------------[OCCF]--------------------------------------------------
 
-cfgRoute::cfgRoute(int x): _clientBodySize(0)
+cfgRoute::cfgRoute(int x): _autoIndex(false), _clientBodySize(0)
 {
 	if (x == 0)
 	{
@@ -25,8 +25,6 @@ cfgRoute::cfgRoute(int x): _clientBodySize(0)
 		this->_http_method.push_back("GET");
 		this->_http_method.push_back("POST");
 		this->_http_method.push_back("DELETE");
-		this->_redirection_path = "/error_page/42.html";
-		this->_upload_path = "/upload";
 	}
 	else if (x == 1)
 	{
@@ -37,7 +35,6 @@ cfgRoute::cfgRoute(int x): _clientBodySize(0)
 		this->_http_method.push_back("GET");
 		this->_http_method.push_back("POST");
 		this->_http_method.push_back("DELETE");
-		this->_redirection_path = "/error_page/42.html";
 	}
 	else if (x == 2)
 	{
@@ -48,6 +45,23 @@ cfgRoute::cfgRoute(int x): _clientBodySize(0)
 		this->_autoIndex = true;
 		this->_http_method.push_back("GET");
 		this->_http_method.push_back("POST");
+	}
+	else if (x == 3)
+	{
+		this->_path = "/clickHereToRedirectTo42";
+		this->_root_path = "./servers/server1";
+		this->_http_method.push_back("GET");
+		this->_redirection_path = "/42/42.html";
+	}
+	else if (x == 4)
+	{
+		this->_path = "/upload";
+		this->_root_path = "./servers/server1";
+		this->_clientBodySize = 1000000000;
+		this->_http_method.push_back("GET");
+		this->_http_method.push_back("POST");
+		this->_upload_path = "/uploadTest";
+		this->_redirection_path = "/index/yeah.html";
 	}
 }
 

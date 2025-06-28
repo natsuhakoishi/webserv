@@ -20,6 +20,8 @@ class Http
         string indexFile;
         int bodySize;
 		map<int,string>		errorCodeMap;
+        string redirectPath;
+        string uplaodPath;
 
         map<string, string> headers;
         vector<string> allowMethod;
@@ -69,12 +71,13 @@ class Http
         bool isDirectory(string path);
         bool fileExistis(string path);
 
-        void code404(int pfd);
-        void code403(int pfd);
-        void code301(int pfd, string url);
-        void code409(int pfd);
-        void code413(int pfd);
-        void code500(int pfd);
+        void code404(int pfd); //error not found
+        void code403(int pfd); //forbidden
+        void code301(int pfd, string url); //redirection
+        void code409(int pfd); //conflict
+        void code500(int pfd); //server error
+        void code413(int pfd); //post body too large
+        void code303(int pfd); //see other
 
         //getter
         bool getIsRespond() const;

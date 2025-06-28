@@ -140,3 +140,20 @@ void Http::code413(int pfd)
     close(pfd);
     this->isRespond = true;
 }
+
+void Http::code303(int pfd)
+{
+    cout << RED << "303!" << RESETEND; //debug
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 303 See Other\r\n";
+    ss << "Location: " << this->redirectPath << "\r\n";
+    ss << "\r\n";
+
+    send(pfd, ss.str().c_str(), ss.str().size(), 0);
+
+    cout << BLUE << "GET: Respond 303 successful" << endl; //debug
+    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    close(pfd);
+    this->isRespond = true;
+}

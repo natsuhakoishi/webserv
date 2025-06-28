@@ -39,8 +39,12 @@ void Http::GET(pollfd pfd, string path)
         code403(this->pfd.fd);
         return ;
     }
-
-    if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
+    else if (!this->redirectPath.empty())
+    {
+        code303(this->pfd.fd); //redirection
+        return ;
+    }
+    else if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
     {
         code404(pfd.fd);
         return ;
@@ -77,6 +81,11 @@ void Http::GET(pollfd pfd, string path)
     if (Autoindex == true)
     {
         content = handleAutoindex(path);
+        if (!content.compare(""))
+        {
+            code404(this->pfd.fd); //can change to server error 
+            return ;
+        }
         type = "text/html";
     }
     else
