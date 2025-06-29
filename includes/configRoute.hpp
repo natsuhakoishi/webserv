@@ -20,6 +20,7 @@ class cfgRoute {
 		string				_root_path; //update: rename
 		string				_index_path; //update: rename
 		bool				_autoIndex; //update: rename
+		bool				_autoIndex_flag; //latest update
 		vector<string>		_http_method;
 		string				_redirection_path;
 		string				_upload_path;
@@ -35,11 +36,19 @@ class cfgRoute {
 		string				get_rootPath() const; //update: rename
 		string				get_indexPath() const; //update: rename
 		bool				get_autoIndex() const; //update: rename
+		bool				get_autoIndex_flag() const; //latest update
 		vector<string>		get_httpMethod() const;
 		string				get_redirectionPath() const;
 		string				get_uploadPath() const;
 		int					get_clientBodySize() const; //update: newly added
 		map<string,string>	get_cgiInfo() const; //update: return type changed
+
+
+		void	set_rootPath(const string &path);
+		void	set_indexPath(const string &path);
+		void	set_autoIndex(bool state);
+		void	set_clientSize(int	size);
+		void	set_httpMethod(const vector<string> &methods);
 
 		class RouteError : public std::exception {
 			public:

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 02:24:41 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/30 05:26:21 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,24 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Braces' issue");
 	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
+	this->print_parse(*this);
+}
+
+void	Config::print_parse(Config &the_parsed) {
+	vector<cfgServer>::iterator	it = the_parsed._Servers.begin();
+	while (it != the_parsed._Servers.end())
+	{
+		(*it).display_parsedContent();
+		vector<cfgRoute> temp_route = (*it).get_routes();
+		vector<cfgRoute>::iterator	it2 = temp_route.begin();
+		while (it2 != temp_route.end())
+		{
+			(*it2).displayContent();
+			++it2;
+		}
+		std::cout << "\033[38;5;202m" << "/////////////////////////////////////////////////////////////////" << "\033[0m\n" << std::endl;
+		++it;
+	}
 }
 
 //--------------[Exception]--------------------------------------------------

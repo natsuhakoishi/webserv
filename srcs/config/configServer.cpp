@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/27 05:37:24 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/06/30 06:05:07 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,17 @@ const char*	cfgServer::OtherError::what() const throw() {
 cfgServer::OtherError::~OtherError() throw() {
 }
 
-const char*	cfgServer::DirectiveError::what() const throw() {
-	return ("Server: Invalid directive detected!");
+cfgServer::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
+	std::ostringstream	oss;
+	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
+	this->_errMsg = oss.str();
+}
+
+const char*	cfgServer::CheckingError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+cfgServer::CheckingError::~CheckingError() throw() {
 }
 
 cfgServer::ArgError::ArgError(int id, string dir, string msg) throw() {
@@ -134,7 +143,7 @@ void	cfgServer::handle_autoIndexS(vector<string> &line) {
 	//memo if no value then autoindex off
 	if (line.size() < 2)
 	{
-		std::cout << "\033[31mWarning: auto index argument not given. Set as default value (off).\033[0m\n";
+		std::cout << "\033[31mWarning: auto index argument not given. It will set as off.\033[0m\n";
 		this->_autoIndexS = false;
 		return ;
 	}
@@ -151,9 +160,8 @@ void	cfgServer::handle_autoIndexS(vector<string> &line) {
 
 void	cfgServer::handle_serverIndex(vector<string> &line) {
 		// std::cout << "server - index handler called!" << std::endl;
-	if (line.size() < 2)
-		throw cfgServer::ArgError(this->_id, line[0], "No argument provided.");
-	else if (line.size() > 2)
+	//memo handle empty argument ltr
+	if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
 	
 	this->_index_path = line[1];
@@ -161,9 +169,8 @@ void	cfgServer::handle_serverIndex(vector<string> &line) {
 
 void	cfgServer::handle_serverRoot(vector<string> &line) {
 		// std::cout << "server - root handler called!" << std::endl;
-	if (line.size() < 2)
-		throw cfgServer::ArgError(this->_id, line[0], "No argument provided.");
-	else if (line.size() > 2)
+	//memo handle empty argument ltr
+	if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
 
 	this->_root_path = line[1];
@@ -171,9 +178,8 @@ void	cfgServer::handle_serverRoot(vector<string> &line) {
 
 void	cfgServer::handle_clientBodySize(vector<string> &line) {
 		// std::cout << "server - client max body size handler called!" << std::endl;
-	if (line.size() < 2)
-		throw cfgServer::ArgError(this->_id, line[0], "No argument provided.");
-	else if (line.size() > 2)
+	//memo handle empty argument ltr
+	if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
 
 	int		byteSize;
@@ -312,8 +318,63 @@ void	cfgServer::parseServer(string &content) {
 		else
 		{
 			std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
-			throw cfgServer::DirectiveError();
+			throw cfgServer::OtherError(this->_id, nl, "Invalid directive!");
 		}
+	}
+	this->general_check(*this);
+}
+
+void	cfgServer::general_check(cfgServer &block) {
+	vector<cfgRoute>::iterator	it = block._Routes.begin();
+
+	//memo idea of this function
+	//check if all important directives in one server have value; important = must have
+	//and also check if route-level directive is set, else, inherit value from server-level
+	//todo i have no idea about redirection's path
+	while (it != block._Routes.end())
+	{
+		cfgRoute &current = *it;
+		
+		if (current.get_rootPath().empty())
+		{
+			if (block.get_rootPath().empty())
+				throw cfgServer::CheckingError(block.get_id(), current.get_path(), "root", "Root path is not set!");
+			current.set_rootPath(block.get_rootPath());
+		}
+		if (current.get_indexPath().empty()) {
+			current.set_indexPath(block.get_indexPath());}
+		if (current.get_autoIndex_flag() == false)
+		{
+			std::cout << "\033[31mWarning: " << current.get_path() << ": auto index not given. Follow server-rule.\033[0m\n";
+			current.set_autoIndex(block.get_autoIndexS());
+		}
+		if (current.get_clientBodySize() == 0)
+			current.set_clientSize(block.get_clientBodySize());
+		if (current.get_httpMethod().empty())
+		{
+			vector<string> temp;
+			temp.push_back("GET");
+			temp.push_back("POST");
+			temp.push_back("DELETE");
+			current.set_httpMethod(temp);
+		}
+		else
+		{
+			const vector<string>& method = current.get_httpMethod();
+			if (std::find(method.begin(), method.end(), "POST") != method.end())
+			{
+				if (std::find(method.begin(), method.end(), "GET") == method.end())
+					throw CheckingError(block.get_id(), current.get_path(), "allowed_methods", "POST is allowed but GET not!");
+				if (current.get_uploadPath().empty())
+					throw CheckingError(block.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
+			}
+			else if (std::find(method.begin(), method.end(), "DELETE") != method.end())
+			{
+				if (std::find(method.begin(), method.end(), "GET") == method.end())
+					throw CheckingError(block.get_id(), current.get_path(), "allowed_methods", "DELETE is allowed but GET not!");
+			}
+		}
+		++it;
 	}
 }
 

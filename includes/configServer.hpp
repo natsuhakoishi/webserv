@@ -12,6 +12,7 @@
 # include <sstream>
 # include <cstdlib>
 # include <cctype>
+# include <algorithm>
 
 using std::string;
 using std::vector;
@@ -55,17 +56,21 @@ class cfgServer {
 			private:
 				string	_errMsg;
 		};
-		//memo can merge into OtherError
-		class DirectiveError : public std::exception {
-			public:
-				virtual const char*	what() const throw();
-		};
 
 		class ArgError : public std::exception {
 			public:
 				ArgError(int id, string dir, string msg) throw();
 				virtual const char*	what() const throw();
 				~ArgError() throw();
+			private:
+				string	_errMsg;
+		};
+		
+		class CheckingError : public std::exception {
+			public:
+				CheckingError(int id, string path, string dir, string msg) throw();
+				virtual const char*	what() const throw();
+				~CheckingError() throw();
 			private:
 				string	_errMsg;
 		};
@@ -79,6 +84,7 @@ class cfgServer {
 		void	handle_serverIndex(vector<string> &line);
 		void	handle_autoIndexS(vector<string> &line); //update
 		void	display_parsedContent(void);
+		void	general_check(cfgServer &block);
 };
 
 #endif

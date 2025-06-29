@@ -46,6 +46,7 @@ class Config {
 		};
 
 		void	scan_serverBody(std::ifstream &infile);
+		void	print_parse(Config &the_parsed);
 };
 
 #endif
