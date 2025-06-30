@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/30 05:26:21 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/01 00:33:40 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			{
 				string temp_buf;
 				temp_buf = Utils::trim_whitespaces(line);
-				//todo will die to evil one-whole-line format, because this if statement
 				if (temp_buf == "server" || temp_buf == "server {" || temp_buf == "server	{")
 				{
 					in_body = true;

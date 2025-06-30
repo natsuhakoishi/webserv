@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/30 06:05:07 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/01 00:27:46 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,11 +139,9 @@ cfgServer::ArgError::~ArgError() throw() {
 //--------------[Functions]--------------------------------------------------
 
 void	cfgServer::handle_autoIndexS(vector<string> &line) {
-		//std::cout << "server - autoIndex handler called!" << std::endl;
-	//memo if no value then autoindex off
 	if (line.size() < 2)
 	{
-		std::cout << "\033[31mWarning: auto index argument not given. It will set as off.\033[0m\n";
+		// std::cout << "\033[31mWarning: auto index argument not given. It will set as off.\033[0m\n";
 		this->_autoIndexS = false;
 		return ;
 	}
@@ -159,27 +157,25 @@ void	cfgServer::handle_autoIndexS(vector<string> &line) {
 }
 
 void	cfgServer::handle_serverIndex(vector<string> &line) {
-		// std::cout << "server - index handler called!" << std::endl;
-	//memo handle empty argument ltr
-	if (line.size() > 2)
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
-	
 	this->_index_path = line[1];
 }
 
 void	cfgServer::handle_serverRoot(vector<string> &line) {
-		// std::cout << "server - root handler called!" << std::endl;
-	//memo handle empty argument ltr
-	if (line.size() > 2)
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
-
 	this->_root_path = line[1];
 }
 
 void	cfgServer::handle_clientBodySize(vector<string> &line) {
-		// std::cout << "server - client max body size handler called!" << std::endl;
-	//memo handle empty argument ltr
-	if (line.size() > 2)
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
 
 	int		byteSize;
@@ -208,14 +204,13 @@ void	cfgServer::handle_clientBodySize(vector<string> &line) {
 }
 
 void	cfgServer::handle_errorCodes(vector<string> &line) {
-		// std::cout << "error pages handler called!" << std::endl;
 	if (line.size() < 3)
 		throw cfgServer::ArgError(this->_id, line[0], "Not enough argument. Format: <error_code> <HTML_filepath>");
 	else if (line.size() > 3)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments! Format: <error_code> <HTML_filepath>");
-
-	if (line[1].find_first_not_of("0123456789") != std::string::npos)
+	else if (line[1].find_first_not_of("0123456789") != std::string::npos)
 		throw cfgServer::ArgError(this->_id, line[0], "Given error status code mixed with non-numeric value.");
+
 	int	temp;
 	temp = std::atoi(line[1].c_str());
 	if (temp < 400 && temp > 600)
@@ -224,14 +219,13 @@ void	cfgServer::handle_errorCodes(vector<string> &line) {
 }
 
 void	cfgServer::handle_hostPort(vector<string> &line) {
-		// std::cout << "socket address / port handler called!" << std::endl;
 	if (line.size() < 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Not enough argument.");
 	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments! Please seperate to different line.");
-
-	if (line[1].find_first_not_of("0123456789:.") != std::string::npos)
+	else if (line[1].find_first_not_of("0123456789:.") != std::string::npos)
 		throw cfgServer::ArgError(this->_id, line[0], "Non-numeric value found?");
+
 	size_t pos = line[1].find(":");
 	if (pos != std::string::npos)
 	{
@@ -253,13 +247,10 @@ void	cfgServer::handle_hostPort(vector<string> &line) {
 }
 
 void	cfgServer::handle_serverName(vector<string> &line) {
-		// std::cout << "server name handler called!" << std::endl;
-	 //memo server_name accept to be NULL
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
 		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
-
 	this->_serverName = line[1];
 }
 
@@ -282,7 +273,6 @@ void	cfgServer::parseServer(string &content) {
 
 	while (std::getline(iss, line))
 	{
-		//memo have offset when server and first open brace not in same line
 		++nl;
 		line = Utils::trim_inlineComment(line);
 		line = Utils::trim_whitespaces(line);
@@ -308,9 +298,6 @@ void	cfgServer::parseServer(string &content) {
 			}
 			continue ;
 		}
-
-		//todo multiple directive inline splitter
-
 		tokens_holder = Utils::tokenizer(line);
 		map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
 		if (it != list.end())
@@ -327,14 +314,9 @@ void	cfgServer::parseServer(string &content) {
 void	cfgServer::general_check(cfgServer &block) {
 	vector<cfgRoute>::iterator	it = block._Routes.begin();
 
-	//memo idea of this function
-	//check if all important directives in one server have value; important = must have
-	//and also check if route-level directive is set, else, inherit value from server-level
-	//todo i have no idea about redirection's path
 	while (it != block._Routes.end())
 	{
 		cfgRoute &current = *it;
-		
 		if (current.get_rootPath().empty())
 		{
 			if (block.get_rootPath().empty())
@@ -344,10 +326,7 @@ void	cfgServer::general_check(cfgServer &block) {
 		if (current.get_indexPath().empty()) {
 			current.set_indexPath(block.get_indexPath());}
 		if (current.get_autoIndex_flag() == false)
-		{
-			std::cout << "\033[31mWarning: " << current.get_path() << ": auto index not given. Follow server-rule.\033[0m\n";
 			current.set_autoIndex(block.get_autoIndexS());
-		}
 		if (current.get_clientBodySize() == 0)
 			current.set_clientSize(block.get_clientBodySize());
 		if (current.get_httpMethod().empty())
@@ -365,13 +344,8 @@ void	cfgServer::general_check(cfgServer &block) {
 			{
 				if (std::find(method.begin(), method.end(), "GET") == method.end())
 					throw CheckingError(block.get_id(), current.get_path(), "allowed_methods", "POST is allowed but GET not!");
-				if (current.get_uploadPath().empty())
-					throw CheckingError(block.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
-			}
-			else if (std::find(method.begin(), method.end(), "DELETE") != method.end())
-			{
-				if (std::find(method.begin(), method.end(), "GET") == method.end())
-					throw CheckingError(block.get_id(), current.get_path(), "allowed_methods", "DELETE is allowed but GET not!");
+				// if (current.get_uploadPath().empty())
+				// 	throw CheckingError(block.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
 			}
 		}
 		++it;

@@ -25,12 +25,6 @@ bool	is_blankLine(string &line);
 string	trim_whitespaces(string &line);
 string	trim_inlineComment(string &line);
 vector<string>	tokenizer(string &line);
-
-//todo: handle multiple directive in one line
-//delimeter is ;
-// vector<string>	split();
-
-//help to build up cfgServer::_SocketTable
 int		find_socketAddress(string &line);
 
 }

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/30 05:55:54 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/01 00:33:13 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,6 @@
 //--------------[OCCF]--------------------------------------------------
 
 cfgRoute::cfgRoute() : _autoIndex(false), _autoIndex_flag(false), _clientBodySize(0) {
-		// this->_path = "/index";
-		// this->_root_path = "/";
-		// this->_index_path = "index.html";
-		// this->_autoIndex = true;
-		// this->_http_method.push_back("GET");
-		// this->_http_method.push_back("POST");
-		// this->_http_method.push_back("DELETE");
-		// this->_redirection_path = "/error_page/42.html";
-		// this->_upload_path = "/upload";
 	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
 }
 
@@ -56,23 +47,23 @@ cfgRoute::~cfgRoute() {
 
 //--------------[Getter]--------------------------------------------------
 
-string	cfgRoute::get_path() const { //update: rename
+string	cfgRoute::get_path() const {
 	return (this->_path);
 }
 
-string	cfgRoute::get_rootPath() const { //update: rename
+string	cfgRoute::get_rootPath() const {
 	return (this->_root_path);
 }
 
-string	cfgRoute::get_indexPath() const { //update: rename
+string	cfgRoute::get_indexPath() const {
 	return (this->_index_path);
 }
 
-bool	cfgRoute::get_autoIndex() const { //update: rename
+bool	cfgRoute::get_autoIndex() const {
 	return (this->_autoIndex);
 }
 
-bool	cfgRoute::get_autoIndex_flag() const { //latest update
+bool	cfgRoute::get_autoIndex_flag() const {
 	return (this->_autoIndex_flag);
 }
 
@@ -92,7 +83,7 @@ int	cfgRoute::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
-map<string,string>	cfgRoute::get_cgiInfo() const { //update: return type changed
+map<string,string>	cfgRoute::get_cgiInfo() const {
 	return (this->_cgi_info);
 }
 
@@ -146,7 +137,6 @@ cfgRoute::ArgError::~ArgError() throw() {
 //--------------[Functions]--------------------------------------------------
 
 void	cfgRoute::handle_cgi(vector<string> &line) {
-		// std::cout << "CGI handler called!" << std::endl;
 	if (line.size() < 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
 	else if (line.size() > 3)
@@ -164,8 +154,6 @@ void	cfgRoute::handle_cgi(vector<string> &line) {
 }
 
 void	cfgRoute::handle_client(vector<string> &line) {
-		// std::cout << "client max body size handler called!" << std::endl;
-	//memo valid empty args ltr
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
@@ -197,30 +185,24 @@ void	cfgRoute::handle_client(vector<string> &line) {
 }
 
 void	cfgRoute::handle_upload(vector<string> &line) {
-		// std::cout << "upload handler called!" << std::endl;
-	if (line.size() < 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+	if (line.size() == 1) //memo assume directive mentioned, but no arg given
+		throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
 	else if (line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
-
 	this->_upload_path = line[1];
 }
 
 void	cfgRoute::handle_redirect(vector<string> &line) {
-		// std::cout << "return handler called!" << std::endl;
-	if (line.size() < 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+	if (line.size() == 1) //memo assume directive mentioned, but no arg given
+		throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
 	else if (line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
-
 	this->_redirection_path = line[1];
 }
 
 void	cfgRoute::handle_methods(vector<string> &line) {
-		// std::cout << "allowed method handler called!" << std::endl;
 	if (line.size() < 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
-
+		return ;
 	vector<string>::iterator	it = line.begin();
 	++it;
 	while (it != line.end())
@@ -231,13 +213,11 @@ void	cfgRoute::handle_methods(vector<string> &line) {
 }
 
 void	cfgRoute::handle_autoIndex(vector<string> &line) {
-		// std::cout << "autoIndex handler called!" << std::endl;
-	//memo if no value then autoindex off
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
-	
+
 	if (line[1] == "on")
 		this->_autoIndex = true;
 	else if (line[1] == "off")
@@ -248,24 +228,18 @@ void	cfgRoute::handle_autoIndex(vector<string> &line) {
 }
 
 void	cfgRoute::handle_index(vector<string> &line) {
-		// std::cout << "index handler called!" << std::endl;
-	//memo handle no arg ltr
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
-	
 	this->_index_path = line[1];
 }
 
 void	cfgRoute::handle_root(vector<string> &line) {
-		// std::cout << "root handler called!" << std::endl;
-	//memo handle no arg ltr
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
-
 	this->_root_path = line[1];
 }
 

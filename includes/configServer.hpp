@@ -29,7 +29,7 @@ class cfgServer {
 		int					_clientBodySize;
 		string				_root_path;
 		string				_index_path;
-		bool				_autoIndexS; //update
+		bool				_autoIndexS;
 		vector<cfgRoute>	_Routes;
 	public:
 		cfgServer();
@@ -45,7 +45,7 @@ class cfgServer {
 		int					get_clientBodySize() const;
 		string				get_rootPath() const;
 		string				get_indexPath() const;
-		bool				get_autoIndexS() const; //update
+		bool				get_autoIndexS() const;
 		vector<cfgRoute>	get_routes() const;
 
 		class OtherError : public std::exception {
@@ -82,7 +82,7 @@ class cfgServer {
 		void	handle_clientBodySize(vector<string> &line);
 		void	handle_serverRoot(vector<string> &line);
 		void	handle_serverIndex(vector<string> &line);
-		void	handle_autoIndexS(vector<string> &line); //update
+		void	handle_autoIndexS(vector<string> &line);
 		void	display_parsedContent(void);
 		void	general_check(cfgServer &block);
 };
