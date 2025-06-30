@@ -12,9 +12,9 @@ class Http
 {
     private:
         pollfd pfd;
-        string rootPath;
         const Config &cf;
         cfgServer cs;
+        string rootPath;
         vector<cfgRoute> routes;
         bool autoindex;
         string indexFile;

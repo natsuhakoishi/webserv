@@ -3,7 +3,6 @@
 string Http::getContentType(string c)
 {
     if (!c.compare("./")) return "text/html";
-    // cout << "eeeeeeeee:" << c.substr(c.length() - 5) << endl;
     if (!c.substr(c.length() - 5).compare(".html")) return "text/html";
     if (!c.substr(c.length() - 4).compare(".png")) return "image/png";
     if (!c.substr(c.length() - 4).compare(".gif")) return "image/gif";
@@ -11,23 +10,8 @@ string Http::getContentType(string c)
     if (!c.substr(c.length() - 4).compare(".csv")) return "text/csv";
 
     return "text/plain";
-    // return "text/css";
 }
 
-/*
-如果GET路径
-檢查路徑 /index 是否是目錄：
-
-    -是的話，看是否尾部缺 /：
-        -缺 / → 301 Redirect 到 /index/
-
-    -然後檢查 /index/index.html 是否存在：
-        -存在就讀檔、送出 200
-
-    -如果沒有 index 檔，看是否開啟「列目錄」：
-        -有 → 回 HTML directory listing
-        -沒有 → 回 403/404
-*/
 void Http::GET(pollfd pfd, string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
@@ -61,7 +45,7 @@ void Http::GET(pollfd pfd, string path)
             Autoindex = true;
             cout << RED << "Auto index" << RESETEND;
         }
-        else if (fileExistis(path + this->indexFile))
+        else if (!this->indexFile.empty() && fileExistis(path + this->indexFile))
         {
             cout << RED << "append" << RESETEND;
             path.append(this->indexFile);

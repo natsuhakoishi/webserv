@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), rootPath("."), cf(_cf), cs(), autoindex(false), isRespond(false)
+: pfd(_pfd), cf(_cf), cs(), rootPath("."), autoindex(false), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -22,20 +22,37 @@ Http::Http(const Http &other): cf(other.cf)
 
 Http::~Http() {}
 
-Http &Http::operator=(const Http &other)
+Http &Http::operator=(const Http &q)
 {
-    if (this == &other)
+    if (this == &q)
         return *this;
-    this->rev = other.rev;
-    this->buffer = other.buffer;
-    this->pfd = other.pfd;
-    this->header = other.header;
-    this->body = other.body;
-    this->method = other.method;
-    this->filePath = other.filePath;
-    this->HttpVersion = other.HttpVersion;
-    this->headers = other.headers;
-    this->isRespond = other.isRespond;
+    this->pfd = q.pfd;
+    this->cs = q.cs;
+    this->rootPath = q.rootPath;
+    this->routes = q.routes;
+    this->autoindex = q.autoindex;
+    this->indexFile = q.indexFile;
+    this->bodySize = q.bodySize;
+    this->errorCodeMap = q.errorCodeMap;
+    this->redirectPath = q.rootPath;
+    this->uplaodPath = q.uplaodPath;
+
+    this->headers = q.headers;
+    this->allowMethod = q.allowMethod;
+
+    this->rev = q.rev;
+    this->buffer = q.buffer;
+
+    this->header = q.header;
+    this->body = q.body;
+
+    this->method = q.method;
+    this->url = q.url;
+    this->filePath = q.filePath;
+    this->headers = q.headers;
+    this->HttpVersion = q.HttpVersion;
+    
+    this->isRespond = q.isRespond;
 
     return *this;
 }
