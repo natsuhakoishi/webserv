@@ -6,13 +6,15 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 01:14:06 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 02:38:16 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "configServer.hpp"
 
 //--------------[OCCF]--------------------------------------------------
+
+cfgServer::cfgServer() {}
 
 cfgServer::cfgServer(int id) : _id(id), _clientBodySize(0), _autoIndexS(false) {
 }
@@ -61,7 +63,7 @@ map<int,string>	cfgServer::get_errorCodesMap() const {
 	return (this->_errorCodes_map);
 }
 
-int	cfgServer::get_clientBodySize() const {
+size_t	cfgServer::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
@@ -78,6 +80,10 @@ bool	cfgServer::get_autoIndexS() const {
 }
 
 vector<cfgRoute>	cfgServer::get_routes() const {
+	return (this->_Routes);
+}
+
+vector<cfgRoute>&	cfgServer::get_routes() {
 	return (this->_Routes);
 }
 
@@ -199,7 +205,7 @@ void	cfgServer::handle_errorCodes(vector<string> &line) {
 
 	int	temp;
 	temp = std::atoi(line[1].c_str());
-	if (temp < 400 && temp > 600)
+	if (temp < 400 || temp > 600)
 		throw cfgServer::ArgError(this->_id,line[0], "Given error status code is out of range!");
 	this->_errorCodes_map[temp] = line[2];
 }

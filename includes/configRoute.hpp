@@ -24,11 +24,10 @@ class cfgRoute {
 		vector<string>		_http_method;
 		string				_redirection_path;
 		string				_upload_path;
-		int					_clientBodySize;
+		size_t				_clientBodySize;
 		map<string,string>	_cgi_info;
 	public:
 		cfgRoute();
-		cfgRoute(int); //for testing use
 		cfgRoute(const cfgRoute &other);
 		cfgRoute&	operator=(const cfgRoute &other);
 		~cfgRoute();
@@ -41,9 +40,8 @@ class cfgRoute {
 		vector<string>		get_httpMethod() const;
 		string				get_redirectionPath() const;
 		string				get_uploadPath() const;
-		int					get_clientBodySize() const;
+		size_t				get_clientBodySize() const;
 		map<string,string>	get_cgiInfo() const;
-
 
 		void	set_rootPath(const string &path);
 		void	set_indexPath(const string &path);

@@ -11,7 +11,7 @@ class TcpServer
 {
 	public:
 		TcpServer();
-		TcpServer(std::vector<std::string> hostPorts);
+		TcpServer(std::vector<std::string> hostPorts, Config *_cf);
 		~TcpServer();
 
 		void	runServer();

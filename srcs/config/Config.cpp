@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 01:11:17 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 03:42:49 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,32 +16,25 @@ int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
 
-Config::Config()
-{
-	this->_blockCount = 1;
-	this->_Servers.push_back(cfgServer());
-}
+// Config::Config()
+// {
+// 	this->_blockCount = 1;
+// 	this->_Servers.push_back(cfgServer());
+// }
 
 Config::Config(string &filepath) {
 	std::ifstream	infile;
 
-	try
+	infile.open(filepath.c_str(), std::ios::in);
+	if (!infile.fail())
 	{
-		infile.open(filepath.c_str(), std::ios::in);
-		if (!infile.fail())
-		{
-			if (infile.eof())
-				throw ConfigError("Configuration file is empty!");
-			scan_serverBody(infile);
-			infile.close();
-		}
-		else
-			throw ConfigError("Configuration file fail to open!");
+		if (infile.eof())
+			throw ConfigError("Configuration file is empty!");
+		scan_serverBody(infile);
+		infile.close();
 	}
-	catch(const std::exception& e)
-	{
-		std::cerr << "\033[31m" << e.what() << "\033[0m\n";
-	}
+	else
+		throw ConfigError("Configuration file fail to open!");
 }
 
 Config::Config(const Config &other) 
@@ -169,8 +162,8 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
 	this->general_check(*this);
-	std::cout << "\033[10m[Checking success]\033[0m" << std::endl;
-	this->print_parse(*this);
+	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
+	// this->print_parse(*this);
 }
 
 void	Config::general_check(Config &the_parsed) {

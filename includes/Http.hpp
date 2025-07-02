@@ -18,7 +18,7 @@ class Http
         vector<cfgRoute> routes;
         bool autoindex;
         string indexFile;
-        int bodySize;
+        size_t  bodySize;
 		map<int,string>		errorCodeMap;
         string redirectPath;
         string uplaodPath;

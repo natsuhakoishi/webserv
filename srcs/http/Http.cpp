@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), cs(), rootPath("."), autoindex(false), isRespond(false)
+: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -164,7 +164,7 @@ void Http::initConfig(int idx)
         this->rootPath = this->cs.get_rootPath();
         this->filePath = this->rootPath + this->url;
         this->indexFile = this->cs.get_indexPath();
-        this->autoindex = this->cs.get_autoIndex();
+        this->autoindex = this->cs.get_autoIndexS();
         this->bodySize = this->cs.get_clientBodySize();
         this->allowMethod.push_back("GET");
         this->allowMethod.push_back("POST");
@@ -200,7 +200,7 @@ void Http::initConfig(int idx)
 void Http::readBody()
 {
     size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
-    if (ContentLenght > static_cast<size_t>(this->bodySize))
+    if (ContentLenght > this->bodySize)
     {
         cout << RED << "POST: Size too large" << RESETEND;
         code413(this->pfd.fd);

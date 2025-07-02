@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 01:11:21 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 03:37:55 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,68 +14,7 @@
 
 //--------------[OCCF]--------------------------------------------------
 
-cfgRoute::cfgRoute(int x): _autoIndex(false), _clientBodySize(0)
-{
-	if (x == 0)
-	{
-		this->_path = "/index";
-		this->_root_path = "./servers/server1";
-		this->_index_path = "upload.html";
-		this->_autoIndex = false;
-		this->_http_method.push_back("GET");
-		this->_http_method.push_back("POST");
-		this->_http_method.push_back("DELETE");
-	}
-	else if (x == 1)
-	{
-		this->_path = "/index2";
-		this->_root_path = "./servers/server1";
-		this->_index_path = "index.html";
-		this->_autoIndex = false;
-		this->_http_method.push_back("GET");
-		this->_http_method.push_back("POST");
-		this->_http_method.push_back("DELETE");
-	}
-	else if (x == 2)
-	{
-		this->_path = "/";
-		this->_root_path = "./servers/server1";
-		this->_index_path = "index.html";
-		this->_clientBodySize = 10;
-		this->_autoIndex = true;
-		this->_http_method.push_back("GET");
-		this->_http_method.push_back("POST");
-	}
-	else if (x == 3)
-	{
-		this->_path = "/clickHereToRedirectTo42";
-		this->_root_path = "./servers/server1";
-		this->_http_method.push_back("GET");
-		this->_redirection_path = "/42/42.html";
-	}
-	else if (x == 4)
-	{
-		this->_path = "/upload";
-		this->_root_path = "./servers/server1";
-		this->_clientBodySize = 100000000;
-		this->_http_method.push_back("GET");
-		this->_http_method.push_back("POST");
-		this->_upload_path = "/uploadTest";
-		this->_redirection_path = "/index/yeah.html";
-	}
-}
-
 cfgRoute::cfgRoute() : _autoIndex(false), _autoIndex_flag(false), _clientBodySize(0) {
-	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
-	this->_path = "/index";
-	this->_root_path = ".";
-	this->_index_path = "upload.html";
-	this->_autoIndex = false;
-	this->_http_method.push_back("GET");
-	this->_http_method.push_back("POST");
-	this->_http_method.push_back("DELETE");
-	this->_redirection_path = "/error_page/42.html";
-	this->_upload_path = "/upload";
 }
 
 cfgRoute::cfgRoute(const cfgRoute &other)
@@ -139,7 +78,7 @@ string	cfgRoute::get_uploadPath() const {
 	return (this->_upload_path);
 }
 
-int	cfgRoute::get_clientBodySize() const {
+size_t	cfgRoute::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
@@ -304,19 +243,92 @@ void	cfgRoute::handle_root(vector<string> &line) {
 }
 
 void	cfgRoute::parseLocation(string &content) {
-	//same, while loop + std::getline
-	//throw the first line to splitRoute then move on
-	//flag: indicate first line
-	//ignore closed braces
-	(void)content;
+	std::istringstream	iss(content);
+	string				line;
+	bool				firstLine = false;
+	vector<string>		tokens_holder;
+	map<string,void(cfgRoute::*)(vector<string>&)>	list;
+
+	list["root"] = &cfgRoute::handle_root;
+	list["index"] = &cfgRoute::handle_index;
+	list["autoindex"] = &cfgRoute::handle_autoIndex;
+	list["allowed_methods"] = &cfgRoute::handle_methods;
+	list["return"] = &cfgRoute::handle_redirect;
+	list["upload"] = &cfgRoute::handle_upload;
+	list["client_max_body_size"] = &cfgRoute::handle_client;
+	list["cgi"] = &cfgRoute::handle_cgi;
+
+	while (std::getline(iss, line))
+	{
+		if (!firstLine)
+		{
+			firstLine = true;
+			this->_path = splitRoute(line);
+			if (this->_path.empty())
+				throw cfgRoute::RouteError();
+			continue ;
+		}
+		line = Utils::trim_inlineComment(line);
+		line = Utils::trim_whitespaces(line);
+		if (line == "}")
+			break ;
+		else if (line == "{")
+			continue ;
+		if (line[line.size()-1] != ';')
+			throw SemicolonMissing();
+
+		tokens_holder = Utils::tokenizer(line);
+		map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+		if (it != list.end())
+			(this->*(it->second))(tokens_holder);
+		else
+		{
+			std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
+			throw cfgRoute::DirectiveError();
+		}
+	}
 }
 
-// string	cfgRoute::splitRoute(string &line) {
-// 	//locate route after keyword
-// 	//extract the route with start & index
-// 	size_t	start;
-// 	size_t pos = line.find("/", 7);
-// 	if (pos == std::string::npos)
-// 		throw cfgRoute::RouteError();
-// 	start = pos;
-// }
+string	cfgRoute::splitRoute(string &line) {
+	size_t	start;
+	size_t	pos = line.find("/", 7);
+
+	if (pos == std::string::npos)
+		throw cfgRoute::RouteError();
+	start = pos;
+	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t')
+		++pos;
+	return (line.substr(start, pos-start));
+}
+
+void	cfgRoute::displayContent(void) {
+	std::cout << "\033[38;5;69m----- Route: \033[0m" << this->_path << " -----" << std::endl;
+	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
+	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
+	std::cout << "\033[38;5;68mauto index: \033[0m" << (this->_autoIndex==true ? "on" : "off") << std::endl;
+	{
+		vector<string>::iterator	it = this->_http_method.begin();
+		std::cout << "\033[38;5;68mallowed method: \033[0m";
+		while (it != this->_http_method.end())
+		{
+			std::cout << *it << " ";
+			++it;
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "\033[38;5;68mredirect: \033[0m" << this->_redirection_path << std::endl;
+	std::cout << "\033[38;5;68mupload: \033[0m" << this->_upload_path << std::endl;
+	std::cout << "\033[38;5;68mclient_max_body_size: \033[0m" << this->_clientBodySize << std::endl;
+	{
+		
+		std::cout << "\033[38;5;68mCGI: \033[0m";
+		if (this->_cgi_info.empty())
+			std::cout << "-" << std::endl;
+		else
+		{
+			map<string,string>::iterator	it = (this->_cgi_info.begin());
+			std::cout << it->first << " -> " << it->second << std::endl;
+		}
+	}
+	std::cout << std::endl;
+}

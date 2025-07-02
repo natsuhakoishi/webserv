@@ -1,10 +1,10 @@
 #include "../../includes/TcpServer.hpp"
 
-TcpServer::TcpServer()
+TcpServer::TcpServer(): config(NULL)
 {
 }
 
-TcpServer::TcpServer(std::vector<std::string> hostPorts): config(new Config())
+TcpServer::TcpServer(std::vector<std::string> hostPorts, Config *_cf): config(_cf)
 {
 	for (size_t i = 0; i < hostPorts.size(); ++i)
 	{
