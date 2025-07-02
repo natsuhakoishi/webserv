@@ -52,7 +52,7 @@ class Http
         void readBody();
         void readConfig();
         void readRouteConfig();
-        void raedAllowMethod(vector<string> allow);
+        // void readAllowMethod(vector<string> allow);
         void initConfig(int idx);
         bool IsCorrectPrefix(const string &url, const string &routePath) const;
 

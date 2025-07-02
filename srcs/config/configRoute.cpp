@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/30 16:51:02 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 00:45:34 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ cfgRoute::cfgRoute(int x): _autoIndex(false), _clientBodySize(0)
 		this->_path = "/";
 		this->_root_path = "./servers/server1";
 		this->_index_path = "index.html";
-		this->_clientBodySize = 1000000000;
+		this->_clientBodySize = 10;
 		this->_autoIndex = true;
 		this->_http_method.push_back("GET");
 		this->_http_method.push_back("POST");
@@ -57,7 +57,7 @@ cfgRoute::cfgRoute(int x): _autoIndex(false), _clientBodySize(0)
 	{
 		this->_path = "/upload";
 		this->_root_path = "./servers/server1";
-		this->_clientBodySize = 1000000000;
+		this->_clientBodySize = 100000000;
 		this->_http_method.push_back("GET");
 		this->_http_method.push_back("POST");
 		this->_upload_path = "/uploadTest";

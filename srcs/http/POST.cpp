@@ -26,12 +26,12 @@ void Http::POST(pollfd pfd, string path)
         code403(this->pfd.fd);
         return ;
     }
-    if (static_cast<int>(this->body.length()) > this->bodySize)
-    {
-        cout << RED << "POST: Size too large" << RESETEND;
-        code413(this->pfd.fd);
-        return ;
-    }
+    // if (static_cast<int>(this->body.length()) > this->bodySize)
+    // {
+    //     cout << RED << "POST: Size too large" << RESETEND;
+    //     code413(this->pfd.fd);
+    //     return ;
+    // }
 
     std::getline(ss, boundary);
     std::getline(ss, line);
@@ -44,7 +44,7 @@ void Http::POST(pollfd pfd, string path)
     int start = boundary.length() + line.length() + thrLine.length() + 5;
 
     string pureBody = this->body.substr(start, this->body.rfind("\r\n------") - start);
-
+ 
     // cout << pureBody << endl;
     if (!this->uplaodPath.empty())
         path = this->rootPath + this->uplaodPath;

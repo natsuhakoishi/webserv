@@ -7,6 +7,7 @@ string Http::getContentType(string c)
     if (!c.substr(c.length() - 4).compare(".png")) return "image/png";
     if (!c.substr(c.length() - 4).compare(".gif")) return "image/gif";
     if (!c.substr(c.length() - 5).compare(".jpeg")) return "image/jpeg";
+    if (!c.substr(c.length() - 4).compare(".jpg")) return "image/jpg";
     if (!c.substr(c.length() - 4).compare(".csv")) return "text/csv";
 
     return "text/plain";

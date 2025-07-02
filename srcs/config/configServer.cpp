@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/28 18:28:47 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 00:50:20 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ cfgServer::cfgServer()
 	this->_id = 0;
 	this->_serverName = "localhost";
 	this->_clientBodySize = 1024;
-	this->_hostPort.push_back("0.0.0.0:4242");
+	// this->_hostPort.push_back("0.0.0.0:4242");
 	this->_hostPort.push_back("127.0.0.1:8080");
 	this->_errorCodes_map[404] = "/error_page/404.html";
 	this->_errorCodes_map[403] = "/error_page/403.html";
