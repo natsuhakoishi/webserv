@@ -200,7 +200,7 @@ void Http::initConfig(int idx)
 void Http::readBody()
 {
     size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
-    if (ContentLenght > this->bodySize)
+    if (ContentLenght > static_cast<size_t>(this->bodySize))
     {
         cout << RED << "POST: Size too large" << RESETEND;
         code413(this->pfd.fd);

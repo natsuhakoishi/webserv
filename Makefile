@@ -4,7 +4,7 @@ VAL = -ggdb3
 VAL_FLAG = --show-leak-kinds=all --leak-check=full --track-origins=yes
 # comment $ASAN if dw use AddSan
 ASAN = -fsanitize=address -g3
-CXXFLAG=  $(ASAN) -std=c++98 -I./includes/
+CXXFLAG= -Wall -Wextra -Werror $(ASAN) -std=c++98 -pedantic -I./includes/
 
 SRCS_FILE= \
 	server/main \

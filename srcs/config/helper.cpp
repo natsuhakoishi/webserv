@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   helper.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/06/25 23:49:11 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/03 01:06:38 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ string trim_inlineComment(string &line) {
 
 vector<string>	tokenizer(string &line) {
 	vector<string>	result;
-	size_t	pos;
+	size_t	pos = 0;
 	size_t	start;
 
 	//memo

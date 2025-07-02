@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 00:50:20 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 01:06:27 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,7 +217,7 @@ void	cfgServer::handle_errorCodes(vector<string> &line) {
 		throw cfgServer::ArgError(this->_id,line[0], "Given error status code mixed with non-numeric value.");
 	int	temp;
 	temp = std::atoi(line[1].c_str());
-	if (temp < 400 && temp > 600)
+	if (temp < 400 || temp > 600)
 		throw cfgServer::ArgError(this->_id,line[0], "Given error status code is out of range!");
 	this->_errorCodes_map[temp] = line[2];
 }
