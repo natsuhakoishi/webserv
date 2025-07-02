@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 01:06:03 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 01:11:21 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ cfgRoute::cfgRoute(int x): _autoIndex(false), _clientBodySize(0)
 	}
 }
 
-cfgRoute::cfgRoute() {
+cfgRoute::cfgRoute() : _autoIndex(false), _autoIndex_flag(false), _clientBodySize(0) {
 	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
 	this->_path = "/index";
 	this->_root_path = ".";
@@ -80,8 +80,9 @@ cfgRoute::cfgRoute() {
 
 cfgRoute::cfgRoute(const cfgRoute &other)
 : _path(other._path), _root_path(other._root_path), _index_path(other._index_path),
-  _autoIndex(other._autoIndex), _http_method(other._http_method), _redirection_path(other._redirection_path),
-  _upload_path(other._upload_path), _clientBodySize(other._clientBodySize), _cgi_info(other._cgi_info) {
+  _autoIndex(other._autoIndex), _autoIndex_flag(other._autoIndex_flag), _http_method(other._http_method),
+  _redirection_path(other._redirection_path), _upload_path(other._upload_path),
+  _clientBodySize(other._clientBodySize), _cgi_info(other._cgi_info) {
 }
 
 cfgRoute&	cfgRoute::operator=(const cfgRoute &other) {
@@ -91,6 +92,7 @@ cfgRoute&	cfgRoute::operator=(const cfgRoute &other) {
 		this->_root_path = other._root_path;
 		this->_index_path = other._index_path;
 		this->_autoIndex = other._autoIndex;
+		this->_autoIndex_flag = other._autoIndex_flag;
 		this->_http_method = other._http_method;
 		this->_redirection_path = other._redirection_path;
 		this->_upload_path = other._upload_path;
@@ -105,20 +107,24 @@ cfgRoute::~cfgRoute() {
 
 //--------------[Getter]--------------------------------------------------
 
-string	cfgRoute::get_path() const { //update: rename
+string	cfgRoute::get_path() const {
 	return (this->_path);
 }
 
-string	cfgRoute::get_rootPath() const { //update: rename
+string	cfgRoute::get_rootPath() const {
 	return (this->_root_path);
 }
 
-string	cfgRoute::get_indexPath() const { //update: rename
+string	cfgRoute::get_indexPath() const {
 	return (this->_index_path);
 }
 
-bool	cfgRoute::get_autoIndex() const { //update: rename
+bool	cfgRoute::get_autoIndex() const {
 	return (this->_autoIndex);
+}
+
+bool	cfgRoute::get_autoIndex_flag() const {
+	return (this->_autoIndex_flag);
 }
 
 vector<string>	cfgRoute::get_httpMethod() const {
@@ -137,14 +143,36 @@ int	cfgRoute::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
-map<string,string>	cfgRoute::get_cgiInfo() const { //update: return type changed
+map<string,string>	cfgRoute::get_cgiInfo() const {
 	return (this->_cgi_info);
+}
+
+//--------------[Getter]--------------------------------------------------
+
+void	cfgRoute::set_rootPath(const string &path) {
+	this->_root_path = path;
+}
+
+void	cfgRoute::set_indexPath(const string &path) {
+	this->_index_path = path;
+}
+
+void	cfgRoute::set_autoIndex(bool state) {
+	this->_autoIndex = state;
+}
+
+void	cfgRoute::set_clientSize(int size) {
+	this->_clientBodySize = size;
+}
+
+void	cfgRoute::set_httpMethod(const vector<string> &methods) {
+	this->_http_method = methods;
 }
 
 //--------------[Exception]--------------------------------------------------
 
 const char*	cfgRoute::RouteError::what() const throw() {
-	return ("Route: No specific route mentioned with the location block!");
+	return ("Route: No route specified in the location block!");
 }
 
 const char*	cfgRoute::SemicolonMissing::what() const throw() {
@@ -167,6 +195,113 @@ cfgRoute::ArgError::~ArgError() throw() {
 }
 
 //--------------[Functions]--------------------------------------------------
+
+void	cfgRoute::handle_cgi(vector<string> &line) {
+	if (line.size() < 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+	else if (line.size() > 3)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+
+	//memo assume Python first
+	size_t	pos = line[1].find(".");
+	if (pos == std::string::npos)
+	throw cfgRoute::ArgError(this->_path, line[0], "Please provide file extension.");
+	string	temp = line[1].substr(pos, 3);
+	if (temp != ".py")
+		throw cfgRoute::ArgError(this->_path, line[0], "Server accept Python only.");
+
+	this->_cgi_info[temp] = line[2];
+}
+
+void	cfgRoute::handle_client(vector<string> &line) {
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+
+	int		byteSize;
+	string	suffix;
+	size_t	pos = line[1].find_first_not_of("0123456789");
+
+	if (pos != std::string::npos)
+		suffix = line[1].substr(pos);
+	else
+	{
+		this->_clientBodySize = std::atoi(line[1].c_str());
+		return ;
+	}
+	for (size_t i = 0; i < suffix.size(); ++i)
+		suffix[i] = std::tolower(suffix[i]);
+	byteSize = std::atoi(line[1].c_str());
+	if (suffix == "k" || suffix == "kb")
+		byteSize = byteSize * 1024;
+	else if (suffix == "m" || suffix == "mb")
+		byteSize = byteSize * (1024 * 1024);
+	else if (suffix == "g" || suffix == "gb")
+		byteSize = byteSize * (1024 * 1024 * 1024);
+	else
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid file size.");
+	this->_clientBodySize = byteSize;
+}
+
+void	cfgRoute::handle_upload(vector<string> &line) {
+	if (line.size() == 1) //memo assume directive mentioned, but no arg given
+		throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	this->_upload_path = line[1];
+}
+
+void	cfgRoute::handle_redirect(vector<string> &line) {
+	if (line.size() == 1) //memo assume directive mentioned, but no arg given
+		throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	this->_redirection_path = line[1];
+}
+
+void	cfgRoute::handle_methods(vector<string> &line) {
+	if (line.size() < 2)
+		return ;
+	vector<string>::iterator	it = line.begin();
+	++it;
+	while (it != line.end())
+	{
+		this->_http_method.push_back(*it);
+		++it;
+	}
+}
+
+void	cfgRoute::handle_autoIndex(vector<string> &line) {
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+
+	if (line[1] == "on")
+		this->_autoIndex = true;
+	else if (line[1] == "off")
+		this->_autoIndex = false;
+	else
+		throw cfgRoute::ArgError(this->_path, line[0], "Auto index only accept on / off as argument!");
+	this->_autoIndex_flag = true;
+}
+
+void	cfgRoute::handle_index(vector<string> &line) {
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	this->_index_path = line[1];
+}
+
+void	cfgRoute::handle_root(vector<string> &line) {
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	this->_root_path = line[1];
+}
 
 void	cfgRoute::parseLocation(string &content) {
 	//same, while loop + std::getline
