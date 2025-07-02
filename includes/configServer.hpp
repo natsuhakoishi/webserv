@@ -12,6 +12,7 @@
 # include <sstream>
 # include <cstdlib>
 # include <cctype>
+# include <algorithm>
 
 using std::string;
 using std::vector;
@@ -22,52 +23,56 @@ class cfgRoute;
 class cfgServer {
 	private:
 		int					_id;
-		string				_serverName; //update: rename
+		string				_serverName;
 		vector<string>		_hostPort;
-		map<int,string>		_errorCodes_map; //update: change container
+		map<int,string>		_errorCodes_map;
 		int					_clientBodySize;
-		string				_root_path; //update: newly added
-		string				_index_path; //update: newly added
+		string				_root_path;
+		string				_index_path;
+		bool				_autoIndexS;
 		vector<cfgRoute>	_Routes;
+
 	public:
 		cfgServer();
-		cfgServer(int id); //update: split logic out from constructor
+		cfgServer(int id);
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);
 		~cfgServer();
-
+		
 		int					get_id() const;
 		string				get_serverName() const;
-		vector<string>		get_hostPort() const; //update: remove std namespace
-		map<int,string>		get_errorCodesMap() const; //update: return type
+		vector<string>		get_hostPort() const;
+		map<int,string>		get_errorCodesMap() const;
 		int					get_clientBodySize() const;
-		string				get_rootPath() const; //update: newly added
-		string				get_indexPath() const; //update: newly added
-		vector<cfgRoute>	get_routes() const; //update: remove std namespace
+		string				get_rootPath() const;
+		string				get_indexPath() const;
+		bool				get_autoIndexS() const;
+		vector<cfgRoute>	get_routes() const;
+		vector<cfgRoute>&	get_routes();
 
 		class OtherError : public std::exception {
 			public:
-				OtherError(string msg) throw();
+				OtherError(int id, int nl, string msg) throw();
 				virtual const char*	what() const throw();
 				~OtherError() throw();
 			private:
 				string	_errMsg;
 		};
 
-		//situations will throw this exception are:
-		//1. directive not matched @ invalid directive @ directive not handle in this project
-		//2. directive found in wrong scope
-		class DirectiveError : public std::exception {
-			public:
-				virtual const char*	what() const throw();
-		};
-		//1. when no argument value come along with the directive
-		//2. the argument value is invalid
 		class ArgError : public std::exception {
 			public:
 				ArgError(int id, string dir, string msg) throw();
 				virtual const char*	what() const throw();
 				~ArgError() throw();
+			private:
+				string	_errMsg;
+		};
+		
+		class CheckingError : public std::exception {
+			public:
+				CheckingError(int id, string path, string dir, string msg) throw();
+				virtual const char*	what() const throw();
+				~CheckingError() throw();
 			private:
 				string	_errMsg;
 		};
@@ -79,7 +84,9 @@ class cfgServer {
 		void	handle_clientBodySize(vector<string> &line);
 		void	handle_serverRoot(vector<string> &line);
 		void	handle_serverIndex(vector<string> &line);
+		void	handle_autoIndexS(vector<string> &line);
 		void	display_parsedContent(void);
+		void	general_check(cfgServer &block);
 };
 
 #endif
