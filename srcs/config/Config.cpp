@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/01 00:33:40 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/02 21:52:12 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				}
 				continue ;
 			}
-			else //memo mostly mean detect content outside of block, but buggy
+			else //memo mostly mean detect content outside of server, but buggy
 				throw ConfigError("Undefined configuration.");
 		}
 		else if (in_body)
@@ -155,10 +155,10 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 					in_body = false;
 					first_Obrace = false;
 					this->_blockCount++;
-					cfgServer a_block = cfgServer(this->_blockCount - 1);
-					a_block.parseServer(server_body);
-					// a_block.display_parsedContent();
-					this->_Servers.push_back(a_block);
+					cfgServer a_server = cfgServer(this->_blockCount - 1);
+					a_server.parseServer(server_body);
+					// a_server.display_parsedContent();
+					this->_Servers.push_back(a_server);
 					server_body.clear();
 				}
 			}
@@ -168,7 +168,58 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Braces' issue");
 	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
+	this->general_check(*this);
+	std::cout << "\033[10m[Checking success]\033[0m" << std::endl;
 	this->print_parse(*this);
+}
+
+void	Config::general_check(Config &the_parsed) {
+	vector<cfgServer>::iterator	it = the_parsed._Servers.begin();
+	while (it != the_parsed._Servers.end())
+	{
+		cfgServer	&server = *it;
+		vector<cfgRoute>	&temp_route = server.get_routes();
+		vector<cfgRoute>::iterator	it2 = temp_route.begin();
+		
+		while (it2 != temp_route.end())
+		{
+			cfgRoute &current = *it2;
+			if (current.get_rootPath().empty())
+			{
+				if (server.get_rootPath().empty())
+					throw cfgServer::CheckingError(server.get_id(), current.get_path(), "root", "Root path is not set!");
+				current.set_rootPath(server.get_rootPath());
+			}
+			if (current.get_indexPath().empty()) {
+				current.set_indexPath(server.get_indexPath());}
+			if (current.get_autoIndex_flag() == false)
+				current.set_autoIndex(server.get_autoIndexS());
+			if (current.get_clientBodySize() == 0)
+				current.set_clientSize(server.get_clientBodySize());
+			if (current.get_httpMethod().empty())
+			{
+				vector<string> temp;
+				temp.push_back("GET");
+				temp.push_back("POST");
+				temp.push_back("DELETE");
+				current.set_httpMethod(temp);
+			}
+			else
+			{
+				const vector<string>& method = current.get_httpMethod();
+				if (std::find(method.begin(), method.end(), "POST") != method.end())
+				{
+					if (std::find(method.begin(), method.end(), "GET") == method.end())
+						throw CheckingError(server.get_id(), current.get_path(), "allowed_methods", "POST is allowed but GET not!");
+					// if (current.get_uploadPath().empty())
+					// 	throw CheckingError(server.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
+				}
+				//memo did not force method DELETE to have method GET
+			}
+			++it2;
+		}
+		++it;
+	}
 }
 
 void	Config::print_parse(Config &the_parsed) {
@@ -198,4 +249,17 @@ const char*	Config::ConfigError::what() const throw() {
 }
 
 Config::ConfigError::~ConfigError() throw() {
+}
+
+Config::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
+	std::ostringstream	oss;
+	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
+	this->_errMsg = oss.str();
+}
+
+const char*	Config::CheckingError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+Config::CheckingError::~CheckingError() throw() {
 }

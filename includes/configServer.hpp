@@ -31,13 +31,14 @@ class cfgServer {
 		string				_index_path;
 		bool				_autoIndexS;
 		vector<cfgRoute>	_Routes;
+
 	public:
 		cfgServer();
 		cfgServer(int id);
 		cfgServer(const cfgServer &other);
 		cfgServer&	operator=(const cfgServer &other);
 		~cfgServer();
-
+		
 		int					get_id() const;
 		string				get_serverName() const;
 		vector<string>		get_hostPort() const;
@@ -47,6 +48,7 @@ class cfgServer {
 		string				get_indexPath() const;
 		bool				get_autoIndexS() const;
 		vector<cfgRoute>	get_routes() const;
+		vector<cfgRoute>&	get_routes();
 
 		class OtherError : public std::exception {
 			public:

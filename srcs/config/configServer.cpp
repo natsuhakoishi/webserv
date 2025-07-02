@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/01 00:27:46 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/02 21:52:28 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,10 @@ bool	cfgServer::get_autoIndexS() const {
 }
 
 vector<cfgRoute>	cfgServer::get_routes() const {
+	return (this->_Routes);
+}
+
+vector<cfgRoute>&	cfgServer::get_routes() {
 	return (this->_Routes);
 }
 
@@ -308,7 +312,6 @@ void	cfgServer::parseServer(string &content) {
 			throw cfgServer::OtherError(this->_id, nl, "Invalid directive!");
 		}
 	}
-	this->general_check(*this);
 }
 
 void	cfgServer::general_check(cfgServer &block) {
