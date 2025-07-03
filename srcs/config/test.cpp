@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   test.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:50:04 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/01 00:34:05 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/03 11:57:22 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
 			std::string	filepath = argv[1];
 			Config the_config(filepath);
 		}
-		catch (...)
+		catch(const std::exception& e)
 		{
-			std::cout << "Unknown error!" << std::endl;
+			std::cerr << "\033[31m" << e.what() << "\033[0m\n";
 		}
 	}
 	else

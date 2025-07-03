@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 03:42:49 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/03 11:58:23 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,6 @@
 int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
-
-// Config::Config()
-// {
-// 	this->_blockCount = 1;
-// 	this->_Servers.push_back(cfgServer());
-// }
 
 Config::Config(string &filepath) {
 	std::ifstream	infile;
@@ -31,6 +25,7 @@ Config::Config(string &filepath) {
 		if (infile.eof())
 			throw ConfigError("Configuration file is empty!");
 		scan_serverBody(infile);
+		std::cout << "\033[38;5;11mRunning Config: \033[0m" << filepath << std::endl << std::endl;
 		infile.close();
 	}
 	else
@@ -104,7 +99,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				}
 				continue ;
 			}
-			else //memo mostly mean detect content outside of server, but buggy
+			else //memo mostly mean detect content outside of server, but buggy as not showed up correctly based on error situation
 				throw ConfigError("Undefined configuration.");
 		}
 		else if (in_body)
