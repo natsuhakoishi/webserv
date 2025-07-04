@@ -25,7 +25,6 @@ bool	is_blankLine(string &line);
 string	trim_whitespaces(string &line);
 string	trim_inlineComment(string &line);
 vector<string>	tokenizer(string &line);
-int		find_socketAddress(string &line);
 
 }
 

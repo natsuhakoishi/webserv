@@ -44,7 +44,7 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)/http
 	@mkdir -p $(OBJ_DIR)/config
 
-r: re $(OBJ) $(NAME)
+r: $(NAME)
 	@./$(NAME) $(CONF)
 
 #run with valgrind

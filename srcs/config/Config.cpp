@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 11:58:23 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/05 03:32:11 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,12 +61,6 @@ vector<cfgServer>	Config::get_Servers() const {
 
 map<string,vector<int> >	Config::get_SocketTable() const {
 	return (this->_SocketTable);
-}
-
-//--------------[Setter]--------------------------------------------------
-
-void	Config::set_SocketTable(string newAddress, int id) {
-	this->_SocketTable[newAddress].push_back(id);
 }
 
 //--------------[Functions]--------------------------------------------------
@@ -156,14 +150,16 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Braces' issue");
 	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
-	this->general_check(*this);
+	this->general_check();
+	this->build_SocketTable();
 	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
-	// this->print_parse(*this);
+	// this->print_ServerParsed();
+	// this->print_SocketTable();
 }
 
-void	Config::general_check(Config &the_parsed) {
-	vector<cfgServer>::iterator	it = the_parsed._Servers.begin();
-	while (it != the_parsed._Servers.end())
+void	Config::general_check() {
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
 	{
 		cfgServer	&server = *it;
 		vector<cfgRoute>	&temp_route = server.get_routes();
@@ -175,8 +171,9 @@ void	Config::general_check(Config &the_parsed) {
 			if (current.get_rootPath().empty())
 			{
 				if (server.get_rootPath().empty())
-					throw cfgServer::CheckingError(server.get_id(), current.get_path(), "root", "Root path is not set!");
-				current.set_rootPath(server.get_rootPath());
+					current.set_rootPath(".");
+				else
+					current.set_rootPath(server.get_rootPath());
 			}
 			if (current.get_indexPath().empty()) {
 				current.set_indexPath(server.get_indexPath());}
@@ -210,9 +207,26 @@ void	Config::general_check(Config &the_parsed) {
 	}
 }
 
-void	Config::print_parse(Config &the_parsed) {
-	vector<cfgServer>::iterator	it = the_parsed._Servers.begin();
-	while (it != the_parsed._Servers.end())
+void	Config::build_SocketTable()
+{
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
+	{
+		const vector<string> address = (*it).get_hostPort();
+		
+		vector<string>::const_iterator	it2 = address.begin();
+		while (it2 != address.end())
+		{
+			this->_SocketTable[*it2].push_back((*it).get_id());
+			++it2;
+		}
+		++it;
+	}
+}
+
+void	Config::print_ServerParsed() {
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
 	{
 		(*it).display_parsedContent();
 		vector<cfgRoute> temp_route = (*it).get_routes();
@@ -225,6 +239,24 @@ void	Config::print_parse(Config &the_parsed) {
 		std::cout << "\033[38;5;202m" << "/////////////////////////////////////////////////////////////////" << "\033[0m\n" << std::endl;
 		++it;
 	}
+}
+
+void	Config::print_SocketTable() {
+	map<string, vector<int> >::iterator	test = this->_SocketTable.begin();
+	std::cout << "-------Table--------\n";
+	while (test != this->_SocketTable.end())
+	{
+		std::cout << test->first << "\033[0;96m -> \033[0m";
+		vector<int>::iterator	test2 = test->second.begin();
+		while (test2 != test->second.end())
+		{
+			std::cout << *test2 << " ";
+			++test2;
+		}
+		std::cout << std::endl;
+		++test;
+	}
+	std::cout << "--------------------\n";
 }
 
 //--------------[Exception]--------------------------------------------------
