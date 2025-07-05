@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/05 03:32:11 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/05 21:07:32 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -189,18 +189,17 @@ void	Config::general_check() {
 				temp.push_back("DELETE");
 				current.set_httpMethod(temp);
 			}
-			else
-			{
-				const vector<string>& method = current.get_httpMethod();
-				if (std::find(method.begin(), method.end(), "POST") != method.end())
-				{
-					if (std::find(method.begin(), method.end(), "GET") == method.end())
-						throw CheckingError(server.get_id(), current.get_path(), "allowed_methods", "POST is allowed but GET not!");
-					// if (current.get_uploadPath().empty())
-					// 	throw CheckingError(server.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
-				}
-				//memo did not force method DELETE to have method GET
-			}
+			// else
+			// {
+			// 	const vector<string>& method = current.get_httpMethod();
+			// 	if (std::find(method.begin(), method.end(), "POST") != method.end())
+			// 	{
+			// 		if (std::find(method.begin(), method.end(), "GET") == method.end())
+			// 			Utils::print_warning(server.get_id(), current.get_path(), "allowed_methods", "GET is missing.");
+			// 	}
+			// }
+			// if (!current.get_redirectionPath().empty())
+			// 	Utils::print_warning(server.get_id(), current.get_path(), "return", "Others setup hidden by return.");
 			++it2;
 		}
 		++it;
@@ -271,15 +270,15 @@ const char*	Config::ConfigError::what() const throw() {
 Config::ConfigError::~ConfigError() throw() {
 }
 
-Config::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
-	std::ostringstream	oss;
-	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
-	this->_errMsg = oss.str();
-}
+// Config::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
+// 	std::ostringstream	oss;
+// 	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
+// 	this->_errMsg = oss.str();
+// }
 
-const char*	Config::CheckingError::what() const throw() {
-	return (this->_errMsg.c_str());
-}
+// const char*	Config::CheckingError::what() const throw() {
+// 	return (this->_errMsg.c_str());
+// }
 
-Config::CheckingError::~CheckingError() throw() {
-}
+// Config::CheckingError::~CheckingError() throw() {
+// }

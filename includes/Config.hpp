@@ -42,14 +42,14 @@ class Config {
 				~ConfigError() throw();
 		};
 
-		class CheckingError : public std::exception {
-			public:
-				CheckingError(int id, string path, string dir, string msg) throw();
-				virtual const char*	what() const throw();
-				~CheckingError() throw();
-			private:
-				string	_errMsg;
-		};
+		// class CheckingError : public std::exception {
+		// 	public:
+		// 		CheckingError(int id, string path, string dir, string msg) throw();
+		// 		virtual const char*	what() const throw();
+		// 		~CheckingError() throw();
+		// 	private:
+		// 		string	_errMsg;
+		// };
 
 		void	scan_serverBody(std::ifstream &infile);
 		void	print_ServerParsed();

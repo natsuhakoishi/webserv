@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   helper.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 01:14:18 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/05 21:04:25 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,19 @@ vector<string>	tokenizer(string &line) {
 		result.push_back(temp);
 	}
 	return result;
+}
+
+void	print_warning(int server_id, string request_route, string directive, string msg)
+{
+	std::cout << "\033[0;31mWarning: \033[0m";
+	if (server_id >= 0)
+		std::cout << "Server(" << server_id << ") ";
+	if (!request_route.empty())
+		std::cout << "Location <" << request_route << ">:  ";
+	if (!directive.empty())
+		std::cout << "[" << directive << "]: ";
+	if (!msg.empty())
+		std::cout << msg << std::endl;
 }
 
 }
