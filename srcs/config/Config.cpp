@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/02 21:52:12 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 02:09:57 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,32 +16,20 @@ int Config::_blockCount = 0;
 
 //--------------[OCCF]--------------------------------------------------
 
-Config::Config()
-{
-	this->_blockCount = 1;
-	this->_Servers.push_back(cfgServer());
-}
-
 Config::Config(string &filepath) {
 	std::ifstream	infile;
 
-	try
+	infile.open(filepath.c_str(), std::ios::in);
+	if (!infile.fail())
 	{
-		infile.open(filepath.c_str(), std::ios::in);
-		if (!infile.fail())
-		{
-			if (infile.eof())
-				throw ConfigError("Configuration file is empty!");
-			scan_serverBody(infile);
-			infile.close();
-		}
-		else
-			throw ConfigError("Configuration file fail to open!");
+		if (infile.eof())
+			throw ConfigError("Configuration file is empty!");
+		scan_serverBody(infile);
+		std::cout << "\033[38;5;11mRunning Config: \033[0m" << filepath << std::endl << std::endl;
+		infile.close();
 	}
-	catch(const std::exception& e)
-	{
-		std::cerr << "\033[31m" << e.what() << "\033[0m\n";
-	}
+	else
+		throw ConfigError("Configuration file fail to open!");
 }
 
 Config::Config(const Config &other) 
@@ -75,12 +63,6 @@ map<string,vector<int> >	Config::get_SocketTable() const {
 	return (this->_SocketTable);
 }
 
-//--------------[Setter]--------------------------------------------------
-
-void	Config::set_SocketTable(string newAddress, int id) {
-	this->_SocketTable[newAddress].push_back(id);
-}
-
 //--------------[Functions]--------------------------------------------------
 
 void	Config::scan_serverBody(std::ifstream &infile) {
@@ -111,7 +93,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				}
 				continue ;
 			}
-			else //memo mostly mean detect content outside of server, but buggy
+			else //memo mostly mean detect content outside of server, but buggy as not showed up correctly based on error situation
 				throw ConfigError("Undefined configuration.");
 		}
 		else if (in_body)
@@ -168,14 +150,16 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Braces' issue");
 	else if (!this->_blockCount)
 		throw ConfigError("Couldn't find Server body.");
-	this->general_check(*this);
-	std::cout << "\033[10m[Checking success]\033[0m" << std::endl;
-	this->print_parse(*this);
+	this->general_check();
+	this->build_SocketTable();
+	// this->print_ServerParsed();
+	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
+	// this->print_SocketTable();
 }
 
-void	Config::general_check(Config &the_parsed) {
-	vector<cfgServer>::iterator	it = the_parsed._Servers.begin();
-	while (it != the_parsed._Servers.end())
+void	Config::general_check() {
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
 	{
 		cfgServer	&server = *it;
 		vector<cfgRoute>	&temp_route = server.get_routes();
@@ -187,8 +171,9 @@ void	Config::general_check(Config &the_parsed) {
 			if (current.get_rootPath().empty())
 			{
 				if (server.get_rootPath().empty())
-					throw cfgServer::CheckingError(server.get_id(), current.get_path(), "root", "Root path is not set!");
-				current.set_rootPath(server.get_rootPath());
+					current.set_rootPath(".");
+				else
+					current.set_rootPath(server.get_rootPath());
 			}
 			if (current.get_indexPath().empty()) {
 				current.set_indexPath(server.get_indexPath());}
@@ -204,27 +189,43 @@ void	Config::general_check(Config &the_parsed) {
 				temp.push_back("DELETE");
 				current.set_httpMethod(temp);
 			}
-			else
-			{
-				const vector<string>& method = current.get_httpMethod();
-				if (std::find(method.begin(), method.end(), "POST") != method.end())
-				{
-					if (std::find(method.begin(), method.end(), "GET") == method.end())
-						throw CheckingError(server.get_id(), current.get_path(), "allowed_methods", "POST is allowed but GET not!");
-					// if (current.get_uploadPath().empty())
-					// 	throw CheckingError(server.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
-				}
-				//memo did not force method DELETE to have method GET
-			}
+			// else
+			// {
+			// 	const vector<string>& method = current.get_httpMethod();
+			// 	if (std::find(method.begin(), method.end(), "POST") != method.end())
+			// 	{
+			// 		if (std::find(method.begin(), method.end(), "GET") == method.end())
+			// 			Utils::print_warning(server.get_id(), current.get_path(), "allowed_methods", "GET is missing.");
+			// 	}
+			// }
+			// if (!current.get_redirectionPath().empty())
+			// 	Utils::print_warning(server.get_id(), current.get_path(), "return", "Others setup hidden by return.");
 			++it2;
 		}
 		++it;
 	}
 }
 
-void	Config::print_parse(Config &the_parsed) {
-	vector<cfgServer>::iterator	it = the_parsed._Servers.begin();
-	while (it != the_parsed._Servers.end())
+void	Config::build_SocketTable()
+{
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
+	{
+		const vector<string> address = (*it).get_hostPort();
+		
+		vector<string>::const_iterator	it2 = address.begin();
+		while (it2 != address.end())
+		{
+			this->_SocketTable[*it2].push_back((*it).get_id());
+			++it2;
+		}
+		++it;
+	}
+}
+
+void	Config::print_ServerParsed() {
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
 	{
 		(*it).display_parsedContent();
 		vector<cfgRoute> temp_route = (*it).get_routes();
@@ -239,6 +240,24 @@ void	Config::print_parse(Config &the_parsed) {
 	}
 }
 
+void	Config::print_SocketTable() {
+	map<string, vector<int> >::iterator	test = this->_SocketTable.begin();
+	std::cout << "-------Table--------\n";
+	while (test != this->_SocketTable.end())
+	{
+		std::cout << test->first << "\033[0;96m -> \033[0m";
+		vector<int>::iterator	test2 = test->second.begin();
+		while (test2 != test->second.end())
+		{
+			std::cout << *test2 << " ";
+			++test2;
+		}
+		std::cout << std::endl;
+		++test;
+	}
+	std::cout << "--------------------\n";
+}
+
 //--------------[Exception]--------------------------------------------------
 
 Config::ConfigError::ConfigError(string msg) throw() : _errMsg("Config: " + msg) {
@@ -251,15 +270,15 @@ const char*	Config::ConfigError::what() const throw() {
 Config::ConfigError::~ConfigError() throw() {
 }
 
-Config::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
-	std::ostringstream	oss;
-	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
-	this->_errMsg = oss.str();
-}
+// Config::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
+// 	std::ostringstream	oss;
+// 	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
+// 	this->_errMsg = oss.str();
+// }
 
-const char*	Config::CheckingError::what() const throw() {
-	return (this->_errMsg.c_str());
-}
+// const char*	Config::CheckingError::what() const throw() {
+// 	return (this->_errMsg.c_str());
+// }
 
-Config::CheckingError::~CheckingError() throw() {
-}
+// Config::CheckingError::~CheckingError() throw() {
+// }

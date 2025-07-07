@@ -6,6 +6,9 @@ VAL_FLAG = --show-leak-kinds=all --leak-check=full --track-origins=yes
 ASAN = -fsanitize=address -g3
 CXXFLAG= -Wall -Wextra -Werror $(ASAN) -std=c++98 -pedantic -I./includes/
 
+#set path to config file
+CONF = config/config.conf
+
 SRCS_FILE= \
 	server/main \
 	server/TcpServer \
@@ -42,13 +45,13 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)/config
 
 r: $(NAME)
-	@./$(NAME)
+	@./$(NAME) $(CONF)
 
 #run with valgrind
 v: CXXFLAG += $(VAL)
 v: re $(OBJ)
 	@c++ $(CXXFLAG) $(OBJ) -o $(NAME)
-	@valgrind $VAL_FLAG ./$(NAME)
+	@valgrind $(VAL_FLAG) ./$(NAME)
 
 clean:
 	@rm -rf $(OBJ_DIR)

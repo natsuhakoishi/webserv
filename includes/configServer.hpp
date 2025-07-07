@@ -26,7 +26,7 @@ class cfgServer {
 		string				_serverName;
 		vector<string>		_hostPort;
 		map<int,string>		_errorCodes_map;
-		int					_clientBodySize;
+		size_t				_clientBodySize;
 		string				_root_path;
 		string				_index_path;
 		bool				_autoIndexS;
@@ -43,7 +43,7 @@ class cfgServer {
 		string				get_serverName() const;
 		vector<string>		get_hostPort() const;
 		map<int,string>		get_errorCodesMap() const;
-		int					get_clientBodySize() const;
+		size_t				get_clientBodySize() const;
 		string				get_rootPath() const;
 		string				get_indexPath() const;
 		bool				get_autoIndexS() const;
@@ -86,7 +86,6 @@ class cfgServer {
 		void	handle_serverIndex(vector<string> &line);
 		void	handle_autoIndexS(vector<string> &line);
 		void	display_parsedContent(void);
-		void	general_check(cfgServer &block);
 };
 
 #endif

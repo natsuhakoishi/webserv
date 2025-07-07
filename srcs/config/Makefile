@@ -8,7 +8,7 @@ CXXFLAG= -Wall -Wextra -Werror $(ASAN) -g3 -std=c++98 -pedantic -I../../includes
 
 SRCS_FILE= \
 	Config configServer configRoute \
-	main helper
+	test helper
 SRCS = $(addsuffix .cpp, $(SRCS_FILE))
 
 OBJ_DIR = objs

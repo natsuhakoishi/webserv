@@ -1,40 +1,35 @@
 #include "../../includes/Http.hpp"
 
-string Http::GetContentType(string c)
+string Http::getContentType(string c)
 {
     if (!c.compare("./")) return "text/html";
-    // cout << "eeeeeeeee:" << c.substr(c.length() - 5) << endl;
     if (!c.substr(c.length() - 5).compare(".html")) return "text/html";
     if (!c.substr(c.length() - 4).compare(".png")) return "image/png";
     if (!c.substr(c.length() - 4).compare(".gif")) return "image/gif";
     if (!c.substr(c.length() - 5).compare(".jpeg")) return "image/jpeg";
+    if (!c.substr(c.length() - 4).compare(".jpg")) return "image/jpg";
     if (!c.substr(c.length() - 4).compare(".csv")) return "text/csv";
 
     return "text/plain";
-    // return "text/css";
 }
 
-/*
-如果GET路径
-檢查路徑 /index 是否是目錄：
-
-    -是的話，看是否尾部缺 /：
-        -缺 / → 301 Redirect 到 /index/
-
-    -然後檢查 /index/index.html 是否存在：
-        -存在就讀檔、送出 200
-
-    -如果沒有 index 檔，看是否開啟「列目錄」：
-        -有 → 回 HTML directory listing
-        -沒有 → 回 403/404
-*/
 void Http::GET(pollfd pfd, string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
-    int autoindexFlag = 1;
 
-    if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
+    if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
+    {
+        cout << RED << "GET: Method not allow" << RESETEND;
+        code403(this->pfd.fd);
+        return ;
+    }
+    else if (!this->redirectPath.empty())
+    {
+        code303(this->pfd.fd); //redirection
+        return ;
+    }
+    else if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
     {
         code404(pfd.fd);
         return ;
@@ -46,18 +41,21 @@ void Http::GET(pollfd pfd, string path)
     }
     else if (path[path.length() - 1] == '/')
     {
-        if (!fileExistis(path + "index.html") && autoindexFlag == 1) //if index.html not found, show directory (autoindex)
+        if ((this->indexFile.empty() || !fileExistis(path + this->indexFile)) && this->autoindex) //if index.html not found, show directory (autoindex)
         {
             Autoindex = true;
             cout << RED << "Auto index" << RESETEND;
         }
-        else if (!fileExistis(path + "index.html"))
+        else if (!this->indexFile.empty() && fileExistis(path + this->indexFile))
+        {
+            cout << RED << "append" << RESETEND;
+            path.append(this->indexFile);
+        }
+        else if (this->autoindex == false)
         {
             code403(pfd.fd);
             return ;
         }
-        else
-            path.append("index.html");
     }
 
     // cout << RED << "debug " << path << RESETEND;
@@ -67,13 +65,18 @@ void Http::GET(pollfd pfd, string path)
 
     if (Autoindex == true)
     {
-        content = autoindex(path);
+        content = handleAutoindex(path);
+        if (!content.compare(""))
+        {
+            code404(this->pfd.fd); //can change to server error 
+            return ;
+        }
         type = "text/html";
     }
     else
     {
         content = getContent(path);
-        type = GetContentType(path);
+        type = getContentType(path);
     }
     // cout << RED << "debug" << content << RESETEND;
 

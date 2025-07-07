@@ -3,7 +3,14 @@
 void	Http::DELETE(pollfd pfd, string path)
 {
 	struct stat	s;
+	cout << BLUE << "DELETE: client request: " << GREEN << path << RESETEND;
 
+	if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "DELETE") == this->allowMethod.end())
+    {
+        cout << RED << "DELETE: Method not allow" << RESETEND;
+        code403(this->pfd.fd);
+        return ;
+    }
 	if (stat(path.c_str(), &s) != 0) //0 means it have files or folder, 1 means no
 	{
 		code404(pfd.fd);

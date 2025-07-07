@@ -23,9 +23,9 @@ using std::endl;
 using std::vector;
 using std::map;
 
+#include "Config.hpp"
 #include "Http.hpp"
 #include "TcpServer.hpp"
-#include "Config.hpp"
 
 #define RED    "\033[0;31m"
 #define GREEN  "\033[0;32m"

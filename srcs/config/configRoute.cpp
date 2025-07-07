@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/01 00:33:13 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 02:06:04 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 //--------------[OCCF]--------------------------------------------------
 
 cfgRoute::cfgRoute() : _autoIndex(false), _autoIndex_flag(false), _clientBodySize(0) {
-	// std::cout << "\033[38;5;48m" << "Route construction trigger." << "\033[0m" << std::endl;
 }
 
 cfgRoute::cfgRoute(const cfgRoute &other)
@@ -79,7 +78,7 @@ string	cfgRoute::get_uploadPath() const {
 	return (this->_upload_path);
 }
 
-int	cfgRoute::get_clientBodySize() const {
+size_t	cfgRoute::get_clientBodySize() const {
 	return (this->_clientBodySize);
 }
 
@@ -249,7 +248,7 @@ void	cfgRoute::parseLocation(string &content) {
 	bool				firstLine = false;
 	vector<string>		tokens_holder;
 	map<string,void(cfgRoute::*)(vector<string>&)>	list;
-
+	
 	list["root"] = &cfgRoute::handle_root;
 	list["index"] = &cfgRoute::handle_index;
 	list["autoindex"] = &cfgRoute::handle_autoIndex;
@@ -258,32 +257,47 @@ void	cfgRoute::parseLocation(string &content) {
 	list["upload"] = &cfgRoute::handle_upload;
 	list["client_max_body_size"] = &cfgRoute::handle_client;
 	list["cgi"] = &cfgRoute::handle_cgi;
-
+	
 	while (std::getline(iss, line))
 	{
-		if (!firstLine)
+		vector<string>	inline_directives = Utils::splitInline(line);
+		vector<string>::iterator it2 = inline_directives.begin();
+		while (it2 != inline_directives.end())
 		{
-			firstLine = true;
-			this->_path = splitRoute(line);
-			if (this->_path.empty())
-				throw cfgRoute::RouteError();
-			continue ;
-		}
-		line = Utils::trim_inlineComment(line);
-		line = Utils::trim_whitespaces(line);
-		if (line == "}")
-			break ;
-		if (line[line.size()-1] != ';')
-			throw SemicolonMissing();
+			string	inlines = *it2;
+			inlines = Utils::trim_whitespaces(inlines);
+			inlines = Utils::trim_inlineComment(inlines);
+			if (inlines.empty())
+			{
+				++it2;
+				continue ;
+			}
+			if (!firstLine)
+			{
+				firstLine = true;
+				this->_path = splitRoute(inlines);
+				if (this->_path.empty())
+					throw cfgRoute::RouteError();
+				++it2;
+				continue ;
+			}
+			if (inlines == "}")
+			{
+				break ;
+			}
+			else if (inlines == "{"){ ++it2;
+				continue ;}
 
-		tokens_holder = Utils::tokenizer(line);
-		map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
-		if (it != list.end())
-			(this->*(it->second))(tokens_holder);
-		else
-		{
-			std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
-			throw cfgRoute::DirectiveError();
+			tokens_holder = Utils::tokenizer(line);
+			map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+			if (it != list.end())
+				(this->*(it->second))(tokens_holder);
+			else
+			{
+				std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
+				throw cfgRoute::DirectiveError();
+			}
+			++it2;
 		}
 	}
 }
@@ -295,7 +309,7 @@ string	cfgRoute::splitRoute(string &line) {
 	if (pos == std::string::npos)
 		throw cfgRoute::RouteError();
 	start = pos;
-	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t')
+	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t' && line[pos] != '{')
 		++pos;
 	return (line.substr(start, pos-start));
 }

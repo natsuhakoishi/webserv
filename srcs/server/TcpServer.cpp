@@ -1,10 +1,10 @@
 #include "../../includes/TcpServer.hpp"
 
-TcpServer::TcpServer(): canRespond(false)
+TcpServer::TcpServer(): config(NULL)
 {
 }
 
-TcpServer::TcpServer(std::vector<std::string> hostPorts): canRespond(false)
+TcpServer::TcpServer(std::vector<std::string> hostPorts, Config *_cf): config(_cf)
 {
 	for (size_t i = 0; i < hostPorts.size(); ++i)
 	{
@@ -118,57 +118,6 @@ void	TcpServer::handleClientConnection(size_t i)
 	}
 }
 
-void	TcpServer::handlePOST(string temp)
-{
-	bool flag = false;
-	if (!this->method.compare("POST"))
-	{
-			this->body = temp;
-			// cout << RED << this->body << RESETEND;
-			this->method = "POST!";
-			flag = true;
-	}
-	else if (!temp.compare("POST"))
-		this->method = "POST";
-	if (!this->body.empty() && flag == false)
-	{
-		size_t bodyLast = temp.find(this->body);
-		if (bodyLast != string::npos)
-			this->canRespond = true;
-	}
-}
-
-void	TcpServer::handleMethod(string input)
-{
-    // this->body = this->rev.substr(headersEnd + 4);
-    // cout << "headers: " << YELLOW << header << endl;
-
-    std::istringstream ss(input);
-    std::string line;
-	string temp;
-
-    std::getline(ss, line);
-    std::istringstream requestLine(line);
-    requestLine >> temp;
-
-	this->recvBuffer.append(input);
-
-	// cout << YELLOW << temp << RESETEND;
-	if (!temp.compare("GET") || !this->method.compare("GET"))
-	{
-		this->method = "GET";
-		size_t headerEnd = input.find("\r\n\r\n");
-		if (headerEnd != string::npos)
-			this->canRespond = true;
-	}
-	else if (!temp.compare("POST") || !this->method.compare("POST") || !this->method.compare("POST!"))
-	{
-		handlePOST(temp);
-	}
-	// cout << YELLOW << this->canRespond << endl;
-	// cout << GREEN << this->recvBuffer << RESETEND;
-}
-
 void	TcpServer::handleClientMessage(size_t i)
 {
 	char	buffer[1024] = { 0 };
@@ -178,27 +127,17 @@ void	TcpServer::handleClientMessage(size_t i)
 		map<int, Http *>::iterator isExisit = this->httpMap.find(this->fds[i].fd);
 		if (isExisit == this->httpMap.end())
 		{
-			cout << YELLOW << "new http object created" << RESETEND;
-			this->httpMap[this->fds[i].fd] = new Http(this->fds[i]);;
+			// cout << YELLOW << "new http object created" << RESETEND;
+			this->httpMap[this->fds[i].fd] = new Http(this->fds[i], *this->config);
 		}
 		Http *h = this->httpMap[this->fds[i].fd];
 		h->parse((string(buffer, bytes_read)));
 		if (h->getIsRespond() == true)
 		{
-			cout << RED << "http object deleted" << RESETEND;
+			// cout << RED << "http object deleted" << RESETEND;
 			delete h;
 			this->httpMap.erase(this->fds[i].fd);
 		}
-		// handleMethod((string(buffer, bytes_read)));
-		// if (this->canRespond == true)
-		// {
-		// 	Http h(this->recvBuffer, this->fds[i]);
-		// 	h.respond(this->fds[i]);
-		// 	this->recvBuffer.clear();
-		// 	this->method.clear();
-		// 	this->body.clear();
-		// 	this->canRespond = false;
-		// }
 	}
 	else if (bytes_read == 0)
 	{
