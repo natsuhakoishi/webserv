@@ -86,7 +86,6 @@ class cfgServer {
 		void	handle_serverIndex(vector<string> &line);
 		void	handle_autoIndexS(vector<string> &line);
 		void	display_parsedContent(void);
-		void	general_check(cfgServer &block);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/05 21:07:32 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 02:09:57 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,8 +152,8 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Couldn't find Server body.");
 	this->general_check();
 	this->build_SocketTable();
-	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_ServerParsed();
+	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_SocketTable();
 }
 

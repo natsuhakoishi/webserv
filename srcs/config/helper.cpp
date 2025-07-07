@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/05 21:04:25 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 02:05:19 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,8 @@ vector<string>	tokenizer(string &line) {
 	size_t	start;
 	string	temp;
 
-	line.erase(line.find(";"));
+	if (line.find(";") != std::string::npos)
+		line.erase(line.find(";"));
 	while (pos < line.size())
 	{
 		pos = line.find_first_not_of(" \t", pos);
@@ -79,8 +80,7 @@ vector<string>	tokenizer(string &line) {
 	return result;
 }
 
-void	print_warning(int server_id, string request_route, string directive, string msg)
-{
+void	print_warning(int server_id, string request_route, string directive, string msg) {
 	std::cout << "\033[0;31mWarning: \033[0m";
 	if (server_id >= 0)
 		std::cout << "Server(" << server_id << ") ";
@@ -90,6 +90,34 @@ void	print_warning(int server_id, string request_route, string directive, string
 		std::cout << "[" << directive << "]: ";
 	if (!msg.empty())
 		std::cout << msg << std::endl;
+}
+
+vector<string>	splitInline(string line) {
+	vector<string>	result;
+	size_t	pos = 0;
+	string	temp;
+
+	line = Utils::trim_whitespaces(line);
+	while (pos < line.size())
+	{
+		if (line[pos] == ';' || line[pos] == '{' || line[pos] == '}')
+		{
+			temp += line[pos];
+			if (!temp.empty())
+			{
+				result.push_back(temp);
+				temp.clear();
+			}
+			else
+				std::cout << std::endl;
+		}
+		else
+			temp += line[pos];
+		++pos;
+	}
+	if (result.empty() && temp.find_first_not_of(" \t") == std::string::npos && pos == line.size())
+		throw UtilsError("Semicolon missing");
+	return (result);
 }
 
 }

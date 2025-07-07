@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configServer.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/03 02:38:16 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/08 02:05:46 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -265,81 +265,46 @@ void	cfgServer::parseServer(string &content) {
 
 	while (std::getline(iss, line))
 	{
-		++nl;
-		line = Utils::trim_inlineComment(line);
-		line = Utils::trim_whitespaces(line);
-
-		if (!in_body)
+		vector<string>	inline_directives = Utils::splitInline(line);
+		vector<string>::iterator it2 = inline_directives.begin();
+		while (it2 != inline_directives.end())
 		{
-			if (line.find("location") != std::string::npos)
+			++nl;
+			string	inlines = *it2;
+			inlines = Utils::trim_whitespaces(inlines);
+			if (!in_body && !inlines.compare(0, 8, "location"))
 				in_body = true;
-			else if (line[line.size()-1] != ';' && !in_body)
-				throw OtherError(this->_id, nl, "Semicolon is missing!");
-		}
-		if (in_body)
-		{
-			location_body.append(line).append("\n");
-			if (line.find_last_of("}") != std::string::npos)
+			if (in_body)
 			{
-				in_body = false;
-				cfgRoute a_block_found = cfgRoute();
-				a_block_found.parseLocation(location_body);
-				// a_block_found.displayContent();
-				this->_Routes.push_back(a_block_found);
-				location_body.clear();
+				location_body.append(inlines).append("\n");
+				if (inlines.find_last_of("}") != std::string::npos)
+				{
+					in_body = false;
+					cfgRoute a_block_found = cfgRoute();
+					a_block_found.parseLocation(location_body);
+					// a_block_found.displayContent();
+					this->_Routes.push_back(a_block_found);
+					location_body.clear();
+				}
 			}
-			continue ;
-		}
-		tokens_holder = Utils::tokenizer(line);
-		map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
-		if (it != list.end())
-			(this->*(it->second))(tokens_holder);
-		else
-		{
-			std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
-			throw cfgServer::OtherError(this->_id, nl, "Invalid directive!");
-		}
-	}
-}
-
-void	cfgServer::general_check(cfgServer &block) {
-	vector<cfgRoute>::iterator	it = block._Routes.begin();
-
-	while (it != block._Routes.end())
-	{
-		cfgRoute &current = *it;
-		if (current.get_rootPath().empty())
-		{
-			if (block.get_rootPath().empty())
-				throw cfgServer::CheckingError(block.get_id(), current.get_path(), "root", "Root path is not set!");
-			current.set_rootPath(block.get_rootPath());
-		}
-		if (current.get_indexPath().empty()) {
-			current.set_indexPath(block.get_indexPath());}
-		if (current.get_autoIndex_flag() == false)
-			current.set_autoIndex(block.get_autoIndexS());
-		if (current.get_clientBodySize() == 0)
-			current.set_clientSize(block.get_clientBodySize());
-		if (current.get_httpMethod().empty())
-		{
-			vector<string> temp;
-			temp.push_back("GET");
-			temp.push_back("POST");
-			temp.push_back("DELETE");
-			current.set_httpMethod(temp);
-		}
-		else
-		{
-			const vector<string>& method = current.get_httpMethod();
-			if (std::find(method.begin(), method.end(), "POST") != method.end())
+			else
 			{
-				if (std::find(method.begin(), method.end(), "GET") == method.end())
-					throw CheckingError(block.get_id(), current.get_path(), "allowed_methods", "POST is allowed but GET not!");
-				// if (current.get_uploadPath().empty())
-				// 	throw CheckingError(block.get_id(), current.get_path(), "upload", "POST is allowed but no upload path provided!");
+				inlines = Utils::trim_inlineComment(inlines);
+				if (inlines[inlines.size()-1] != ';'){std::cout << "semicolon error" << std::endl;
+					exit(1);}
+				tokens_holder = Utils::tokenizer(inlines);
+				map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+				if (it != list.end())
+					(this->*(it->second))(tokens_holder);
+				else
+				{
+					std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
+					throw cfgServer::OtherError(this->_id, nl, "Invalid directive!");
+				}
 			}
+			++it2;
 		}
-		++it;
+		continue;
 	}
 }
 
