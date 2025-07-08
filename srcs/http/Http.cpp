@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), isRespond(false)
+: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiRoute(false), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -31,6 +31,7 @@ Http &Http::operator=(const Http &q)
     this->rootPath = q.rootPath;
     this->routes = q.routes;
     this->autoindex = q.autoindex;
+    this->cgiRoute = q.cgiRoute;
     this->indexFile = q.indexFile;
     this->bodySize = q.bodySize;
     this->errorCodeMap = q.errorCodeMap;
@@ -64,11 +65,13 @@ void Http::parse(string input)
     this->rev.append(this->buffer);
     if (this->header.empty())
         readHeaders();
-    if (!this->method.compare("POST"))
+    if (!this->url.find("/cgi/"))
+        handleCGI(this->url);
+    else if (!this->method.compare("POST"))
         readBody();
-    if (!this->method.compare("GET"))
+    else if (!this->method.compare("GET"))
         GET(this->pfd, this->filePath);
-    if (!this->method.compare("DELETE"))
+    else if (!this->method.compare("DELETE"))
         DELETE(this->pfd, this->filePath);
 
     this->buffer.clear();
@@ -86,6 +89,9 @@ void Http::readHeaders()
 
     requestLine >> this->method >> this->url >> this->HttpVersion;
 
+    this->headers["Method"] = this->method;
+    this->headers["Url"] = this->url;
+    this->headers["Http-Version"] = this->HttpVersion;
 
     cout << YELLOW << "method:" << method << ", " << "url:" << url << RESETEND;
     // cout << "headers: " << YELLOW << this->header << RESETEND;
@@ -130,6 +136,8 @@ void Http::readConfig()
         }
     }
     this->errorCodeMap = this->cs.get_errorCodesMap();
+    // printMap(this->errorCodeMap);
+    // printMap(this->headers);
 }
 
 void Http::readRouteConfig()
@@ -145,15 +153,6 @@ void Http::readRouteConfig()
             if (this->routes[i].get_path() == "/")
                 idx = i;
     initConfig(idx);
-}
-
-bool Http::IsCorrectPrefix(const string &url, const string &routePath) const
-{
-    if (!url.compare(routePath))
-        return true;
-    if (url.find(routePath) == 0 && url[routePath.length()] == '/')
-        return true;
-    return false;
 }
 
 void Http::initConfig(int idx)
@@ -181,6 +180,7 @@ void Http::initConfig(int idx)
         this->redirectPath = this->routes[idx].get_redirectionPath();
         this->filePath = this->rootPath + this->url;
         this->indexFile = this->routes[idx].get_indexPath();
+        if (!this->routes[idx].get_path().compare("/cgi")) this->cgiRoute = true;
         this->autoindex = this->routes[idx].get_autoIndex();
         this->bodySize = this->routes[idx].get_clientBodySize();
         this->allowMethod = this->routes[idx].get_httpMethod();

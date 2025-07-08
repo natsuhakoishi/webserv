@@ -17,6 +17,7 @@ SRCS_FILE= \
 	http/DELETE \
 	http/autoindex \
 	http/Http \
+	http/cgi \
 	http/status \
 	http/utils \
 	config/Config \

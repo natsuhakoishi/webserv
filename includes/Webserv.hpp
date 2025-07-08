@@ -33,3 +33,11 @@ using std::map;
 #define BLUE   "\033[34m"
 #define RESET  "\033[0m"
 #define RESETEND  "\033[0m" << std::endl
+
+template <typename m> 
+void printMap(m _map)
+{
+    for (typename m::iterator it = _map.begin();
+        it != _map.end(); it++)
+        cout << "\033[0;31m" << it->first << "=" << it->second << "\033[0m" << std::endl;
+}
