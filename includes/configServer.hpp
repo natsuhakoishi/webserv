@@ -14,6 +14,10 @@
 # include <cctype>
 # include <algorithm>
 
+# define red "\033[31m"
+# define reset "\033[0m"
+# define newline std::cout << std::endl;
+
 using std::string;
 using std::vector;
 using std::map;
@@ -31,6 +35,23 @@ class cfgServer {
 		string				_index_path;
 		bool				_autoIndexS;
 		vector<cfgRoute>	_Routes;
+
+		void	handle_serverName(vector<string> &line);
+		void	handle_hostPort(vector<string> &line);
+		void	handle_errorCodes(vector<string> &line);
+		void	handle_clientBodySize(vector<string> &line);
+		void	handle_serverRoot(vector<string> &line);
+		void	handle_serverIndex(vector<string> &line);
+		void	handle_autoIndexS(vector<string> &line);
+		
+		class ArgError : public std::exception {
+			public:
+				ArgError(int id, string dir, string msg) throw();
+				virtual const char*	what() const throw();
+				~ArgError() throw();
+			private:
+				string	_errMsg;
+		};
 
 	public:
 		cfgServer();
@@ -50,41 +71,7 @@ class cfgServer {
 		vector<cfgRoute>	get_routes() const;
 		vector<cfgRoute>&	get_routes();
 
-		class OtherError : public std::exception {
-			public:
-				OtherError(int id, int nl, string msg) throw();
-				virtual const char*	what() const throw();
-				~OtherError() throw();
-			private:
-				string	_errMsg;
-		};
-
-		class ArgError : public std::exception {
-			public:
-				ArgError(int id, string dir, string msg) throw();
-				virtual const char*	what() const throw();
-				~ArgError() throw();
-			private:
-				string	_errMsg;
-		};
-		
-		// class CheckingError : public std::exception {
-		// 	public:
-		// 		CheckingError(int id, string path, string dir, string msg) throw();
-		// 		virtual const char*	what() const throw();
-		// 		~CheckingError() throw();
-		// 	private:
-		// 		string	_errMsg;
-		// };
-
 		void	parseServer(string &content);
-		void	handle_serverName(vector<string> &line);
-		void	handle_hostPort(vector<string> &line);
-		void	handle_errorCodes(vector<string> &line);
-		void	handle_clientBodySize(vector<string> &line);
-		void	handle_serverRoot(vector<string> &line);
-		void	handle_serverIndex(vector<string> &line);
-		void	handle_autoIndexS(vector<string> &line);
 		void	display_parsedContent(void);
 };
 
