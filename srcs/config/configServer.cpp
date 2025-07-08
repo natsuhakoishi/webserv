@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/08 02:05:46 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 19:31:45 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ void	cfgServer::handle_serverName(vector<string> &line) {
 void	cfgServer::parseServer(string &content) {
 	std::istringstream	iss(content);
 	string				line;
-	int					nl = 1;
+	// int					nl = 1;
 	bool				in_body = false;
 	string				location_body;
 	vector<string>		tokens_holder;
@@ -267,12 +267,12 @@ void	cfgServer::parseServer(string &content) {
 	{
 		vector<string>	inline_directives = Utils::splitInline(line);
 		vector<string>::iterator it2 = inline_directives.begin();
+		// std::cout << "[\033[38;5;184m" << line << "\033[0m] -> " << inline_directives.size() << std::endl;
 		while (it2 != inline_directives.end())
 		{
-			++nl;
 			string	inlines = *it2;
 			inlines = Utils::trim_whitespaces(inlines);
-			if (!in_body && !inlines.compare(0, 8, "location"))
+			if (!in_body && inlines.compare(0,8,"location")==0)
 				in_body = true;
 			if (in_body)
 			{
@@ -290,21 +290,71 @@ void	cfgServer::parseServer(string &content) {
 			else
 			{
 				inlines = Utils::trim_inlineComment(inlines);
-				if (inlines[inlines.size()-1] != ';'){std::cout << "semicolon error" << std::endl;
-					exit(1);}
-				tokens_holder = Utils::tokenizer(inlines);
-				map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
-				if (it != list.end())
-					(this->*(it->second))(tokens_holder);
-				else
+				if (!inlines.empty())
 				{
-					std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
-					throw cfgServer::OtherError(this->_id, nl, "Invalid directive!");
+					if (inlines[inlines.size()-1] != ';'){
+						std::cout << inlines << std::endl;
+						throw cfgServer::OtherError(this->_id, 0, "Semicolon!");}
+
+					tokens_holder = Utils::tokenizer(inlines);
+					map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+					if (it != list.end())
+						(this->*(it->second))(tokens_holder);
+					else
+					{
+						std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
+						throw cfgServer::OtherError(this->_id, 0, "Invalid server directive!");
+					}
 				}
 			}
 			++it2;
 		}
-		continue;
+		// std::cout << "\033[38;5;97m->" << line << "\033[0m\n";
+		
+		// while (it2 != inline_directives.end())
+		// {
+		// 	++nl;
+		// 	string	inlines = *it2;
+		// 	std::cout << "\033[38;5;205m" << inlines << "\033[0m" << std::endl;
+		// 	inlines = Utils::trim_whitespaces(inlines);
+		// 	if (!in_body && inlines.compare(0, 8, "location")==0)
+		// 		in_body = true;
+		// 	if (in_body)
+		// 	{
+		// 		location_body.append(inlines).append("\n");
+		// 		if (inlines.find_last_of("}") != std::string::npos)
+		// 		{
+		// 			in_body = false;
+		// 			cfgRoute a_block_found = cfgRoute();
+		// 			a_block_found.parseLocation(location_body);
+		// 			// a_block_found.displayContent();
+		// 			this->_Routes.push_back(a_block_found);
+		// 			location_body.clear();
+		// 		}
+		// 		++it2;
+		// 		continue ;
+		// 	}
+		// 	else
+		// 	{
+		// 		std::cout << "<- " << inlines << std::endl;
+		// 		inlines = Utils::trim_inlineComment(inlines);
+		// 		std::cout << "-> " << inlines << std::endl;
+		// 		if (inlines[inlines.size()-1] != ';' && inlines[inlines.size()-1] != '{' && inlines[inlines.size()-1] != '}'){
+		// 			std::cout << inlines << std::endl;
+		// 			throw cfgServer::OtherError(this->_id, nl, "Semicolon!");}
+
+		// 		tokens_holder = Utils::tokenizer(inlines);
+		// 		map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+		// 		if (it != list.end())
+		// 			(this->*(it->second))(tokens_holder);
+		// 		else
+		// 		{
+		// 			std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
+		// 			throw cfgServer::OtherError(this->_id, nl, "Invalid server directive!");
+		// 		}
+		// 	}
+		// 	++it2;
+		// }
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/08 02:09:57 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 18:32:33 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,8 +93,8 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				}
 				continue ;
 			}
-			else //memo mostly mean detect content outside of server, but buggy as not showed up correctly based on error situation
-				throw ConfigError("Undefined configuration.");
+			else
+				throw ConfigError("Undefined.");
 		}
 		else if (in_body)
 		{
@@ -114,10 +114,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 					else
 						throw ConfigError("Other character after keyword. (Expect: Open Brace)");
 				}
-				server_body.append(line).append("\n");
 			}
-			else if (first_Obrace)
-			{
 				size_t i = 0;
 				while (i < line.size())
 				{
@@ -143,7 +140,6 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 					this->_Servers.push_back(a_server);
 					server_body.clear();
 				}
-			}
 		}
 	}
 	if (brace_count)
@@ -152,7 +148,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Couldn't find Server body.");
 	this->general_check();
 	this->build_SocketTable();
-	// this->print_ServerParsed();
+	this->print_ServerParsed();
 	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_SocketTable();
 }

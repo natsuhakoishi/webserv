@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/08 02:06:04 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/08 19:27:09 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,7 +257,8 @@ void	cfgRoute::parseLocation(string &content) {
 	list["upload"] = &cfgRoute::handle_upload;
 	list["client_max_body_size"] = &cfgRoute::handle_client;
 	list["cgi"] = &cfgRoute::handle_cgi;
-	
+
+	// std::cout << "\033[38;5;205m" << content << "\033[0m" << std::endl;
 	while (std::getline(iss, line))
 	{
 		vector<string>	inline_directives = Utils::splitInline(line);
@@ -267,11 +268,13 @@ void	cfgRoute::parseLocation(string &content) {
 			string	inlines = *it2;
 			inlines = Utils::trim_whitespaces(inlines);
 			inlines = Utils::trim_inlineComment(inlines);
-			if (inlines.empty())
+			if (inlines.empty() || inlines == "{")
 			{
 				++it2;
 				continue ;
 			}
+			else if (inlines == "}")
+				break ;
 			if (!firstLine)
 			{
 				firstLine = true;
@@ -281,14 +284,9 @@ void	cfgRoute::parseLocation(string &content) {
 				++it2;
 				continue ;
 			}
-			if (inlines == "}")
-			{
-				break ;
-			}
-			else if (inlines == "{"){ ++it2;
-				continue ;}
-
-			tokens_holder = Utils::tokenizer(line);
+			if (inlines[inlines.size()-1] != ';')
+				throw cfgRoute::ArgError(this->_path,"", "no semicolon");
+			tokens_holder = Utils::tokenizer(inlines);
 			map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
 			if (it != list.end())
 				(this->*(it->second))(tokens_holder);
