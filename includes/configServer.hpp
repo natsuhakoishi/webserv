@@ -68,14 +68,14 @@ class cfgServer {
 				string	_errMsg;
 		};
 		
-		class CheckingError : public std::exception {
-			public:
-				CheckingError(int id, string path, string dir, string msg) throw();
-				virtual const char*	what() const throw();
-				~CheckingError() throw();
-			private:
-				string	_errMsg;
-		};
+		// class CheckingError : public std::exception {
+		// 	public:
+		// 		CheckingError(int id, string path, string dir, string msg) throw();
+		// 		virtual const char*	what() const throw();
+		// 		~CheckingError() throw();
+		// 	private:
+		// 		string	_errMsg;
+		// };
 
 		void	parseServer(string &content);
 		void	handle_serverName(vector<string> &line);

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/08 19:27:09 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 07:16:08 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,11 +119,11 @@ const char*	cfgRoute::SemicolonMissing::what() const throw() {
 }
 
 const char*	cfgRoute::DirectiveError::what() const throw() {
-	return ("Route: Invalid directive detected!");
+	return ("Route: Unknown directive!");
 }
 
 cfgRoute::ArgError::ArgError(string route, string dir, string msg) throw()
-: _errMsg("Location " + route + ":  [" + dir + "]: argument invalid: " + msg) {
+: _errMsg("Location " + route + ":  [" + dir + "] directive: " + msg) {
 }
 
 const char*	cfgRoute::ArgError::what() const throw() {
@@ -136,15 +136,15 @@ cfgRoute::ArgError::~ArgError() throw() {
 //--------------[Functions]--------------------------------------------------
 
 void	cfgRoute::handle_cgi(vector<string> &line) {
+	//todo confirm how to check
 	if (line.size() < 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
 	else if (line.size() > 3)
 		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
 
-	//memo assume Python first
 	size_t	pos = line[1].find(".");
 	if (pos == std::string::npos)
-	throw cfgRoute::ArgError(this->_path, line[0], "Please provide file extension.");
+		throw cfgRoute::ArgError(this->_path, line[0], "Please provide file extension.");
 	string	temp = line[1].substr(pos, 3);
 	if (temp != ".py")
 		throw cfgRoute::ArgError(this->_path, line[0], "Server accept Python only.");
@@ -153,10 +153,12 @@ void	cfgRoute::handle_cgi(vector<string> &line) {
 }
 
 void	cfgRoute::handle_client(vector<string> &line) {
-	if (line.size() < 2)
-		return ;
-	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	// if (line.size() < 2)
+	// 	return ;
+	// else if (line.size() > 2)
+	// 	throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+	if (line.size() != 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 
 	int		byteSize;
 	string	suffix;
@@ -179,23 +181,27 @@ void	cfgRoute::handle_client(vector<string> &line) {
 	else if (suffix == "g" || suffix == "gb")
 		byteSize = byteSize * (1024 * 1024 * 1024);
 	else
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid file size.");
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid size suffix.");
 	this->_clientBodySize = byteSize;
 }
 
 void	cfgRoute::handle_upload(vector<string> &line) {
-	if (line.size() == 1) //memo assume directive mentioned, but no arg given
-		throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
-	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	// if (line.size() == 1)
+	// 	throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
+	// else if (line.size() > 2)
+	// 	throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	if (line.size() == 1 || line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	this->_upload_path = line[1];
 }
 
 void	cfgRoute::handle_redirect(vector<string> &line) {
-	if (line.size() == 1) //memo assume directive mentioned, but no arg given
-		throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
-	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	// if (line.size() == 1)
+	// 	throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
+	// else if (line.size() > 2)
+	// 	throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+	if (line.size() == 1 || line.size() > 2)
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	this->_redirection_path = line[1];
 }
 
@@ -215,14 +221,14 @@ void	cfgRoute::handle_autoIndex(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 
 	if (line[1] == "on")
 		this->_autoIndex = true;
 	else if (line[1] == "off")
 		this->_autoIndex = false;
 	else
-		throw cfgRoute::ArgError(this->_path, line[0], "Auto index only accept on / off as argument!");
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid argument, on / off only.");
 	this->_autoIndex_flag = true;
 }
 
@@ -230,7 +236,7 @@ void	cfgRoute::handle_index(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	this->_index_path = line[1];
 }
 
@@ -238,7 +244,7 @@ void	cfgRoute::handle_root(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	this->_root_path = line[1];
 }
 
@@ -258,7 +264,6 @@ void	cfgRoute::parseLocation(string &content) {
 	list["client_max_body_size"] = &cfgRoute::handle_client;
 	list["cgi"] = &cfgRoute::handle_cgi;
 
-	// std::cout << "\033[38;5;205m" << content << "\033[0m" << std::endl;
 	while (std::getline(iss, line))
 	{
 		vector<string>	inline_directives = Utils::splitInline(line);
@@ -284,8 +289,9 @@ void	cfgRoute::parseLocation(string &content) {
 				++it2;
 				continue ;
 			}
-			if (inlines[inlines.size()-1] != ';')
-				throw cfgRoute::ArgError(this->_path,"", "no semicolon");
+			if (inlines[inlines.size()-1] != ';'){
+					std::cout << inlines << std::endl;
+					throw cfgRoute::ArgError(this->_path, "", "Semicolon missing");}
 			tokens_holder = Utils::tokenizer(inlines);
 			map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
 			if (it != list.end())
@@ -309,7 +315,7 @@ string	cfgRoute::splitRoute(string &line) {
 	start = pos;
 	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t' && line[pos] != '{')
 		++pos;
-	return (line.substr(start, pos-start));
+	return (line.substr(start, pos - start));
 }
 
 void	cfgRoute::displayContent(void) {
