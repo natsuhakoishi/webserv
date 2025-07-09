@@ -16,6 +16,8 @@
 #include <fstream>
 #include <sys/stat.h> //for stat & stat()
 #include <dirent.h> //for opendir()
+#include <signal.h>
+#include <sys/wait.h>
 
 using std::string;
 using std::cout;
@@ -33,6 +35,7 @@ using std::map;
 #define BLUE   "\033[34m"
 #define RESET  "\033[0m"
 #define RESETEND  "\033[0m" << std::endl
+#define TIMEOUT 2
 
 template <typename m> 
 void printMap(m _map)

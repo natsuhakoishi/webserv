@@ -119,6 +119,28 @@ void Http::code500(int pfd)
     this->isRespond = true;
 }
 
+void Http::code504(int pfd)
+{
+    cout << RED << "504!" << RESETEND; //debug
+
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 504 Gateway Timeout\r\n\r\n";
+
+    string content = getContent(getErrorCodePath(500));
+    if (!content.compare(""))
+        ss << "<!doctype html><html lang=\"en\"><head><title>504 Gateway Timeout [DefalutPage]</title></head><body><main><h1>504 Gateway Timeout</h1></main></body></html>";
+    else
+        ss << content;
+
+    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+
+    cout << BLUE << "GET: Respond 500 successful" << endl; //debug
+    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    close(pfd);
+    this->isRespond = true;
+}
+
 void Http::code413(int pfd)
 {
     cout << RED << "413!" << RESETEND; //debug
@@ -153,6 +175,37 @@ void Http::code303(int pfd)
     send(pfd, ss.str().c_str(), ss.str().size(), 0);
 
     cout << BLUE << "GET: Respond 303 successful" << endl; //debug
+    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    close(pfd);
+    this->isRespond = true;
+}
+
+void Http::code405(int pfd)
+{
+    cout << RED << "405!" << RESETEND; //debug
+
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 403 Method Not Allowed\r\n";
+    ss << "Allow: ";
+    for (size_t i = 0; i < this->allowMethod.size(); ++i)
+    {
+        ss << this->allowMethod[i];
+        if (i + 1 != this->allowMethod[i].size())
+            ss << " ,";
+    }
+    ss << "\r\n";
+    ss << "Content-Type: text/html\r\n\r\n";
+
+    string content = getContent(getErrorCodePath(405));
+    if (!content.compare(""))
+        ss << "<!doctype html><html lang=\"en\"><head><title>405 Method Not Allowed [DefalutPage]</title></head><body><main><h1>405 Method Not Allowed</h1></main></body></html>";
+    else
+        ss << content;
+
+    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+
+    cout << BLUE << "GET: Respond 403 successful" << endl; //debug
     std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     close(pfd);
     this->isRespond = true;

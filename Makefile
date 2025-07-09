@@ -3,8 +3,8 @@ NAME= webserv
 VAL = -ggdb3
 VAL_FLAG = --show-leak-kinds=all --leak-check=full --track-origins=yes
 # comment $ASAN if dw use AddSan
-ASAN = -fsanitize=address -g3
-CXXFLAG= -Wall -Wextra -Werror $(ASAN) -std=c++98 -pedantic -I./includes/
+ASAN = #-fsanitize=address -g3
+CXXFLAG= -Wall -Wextra -Werror $(ASAN) -g3 -std=c++98 -pedantic -I./includes/
 
 #set path to config file
 CONF = config/config.conf

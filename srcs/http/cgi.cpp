@@ -101,6 +101,8 @@ void Http::handleCGI(string CGIpath)
         close(fd[0]);
 
         execve(vecArgv[0], vecArgv.data(), vecEnv.data());
+        perror("execve");
+        exit(1);
     }
     else
     {
@@ -108,13 +110,38 @@ void Http::handleCGI(string CGIpath)
         string CGIoutput;
         char buffer[1024];
         int readd = 0;
+        time_t start = time(NULL);
 
-        while ((readd = read(fd[0], buffer, sizeof(buffer))) != 0)
-            CGIoutput.append(buffer, readd);
-        close(fd[0]);
-        cout << CGIoutput << endl;
-        send(this->pfd.fd, CGIoutput.c_str(), CGIoutput.length(), 0);
-        this->isRespond = true;
+        while (1)
+        {
+            int status;
+            pid_t result = waitpid(pid, &status, WNOHANG);
+            if (!result)
+            {
+                if (time(NULL) - start > TIMEOUT)
+                {
+                    kill(pid, SIGKILL);
+                    waitpid(pid, &status, 0);
+                    close(fd[0]);
+                    code504(this->pfd.fd);
+
+                    return ;
+                }
+            }
+            else if (result > 0)
+            {
+                while ((readd = read(fd[0], buffer, sizeof(buffer))) > 0)
+                    CGIoutput.append(buffer, readd);
+                close(fd[0]);
+                cout << CGIoutput << endl;
+                send(this->pfd.fd, CGIoutput.c_str(), CGIoutput.length(), 0);
+                this->isRespond = true;
+                break ;
+            }
+            // cout << "wait" << endl;
+            sleep(1.0);
+        }
+
         // cout << GREEN << CGIoutput << RESETEND;
     }
 }

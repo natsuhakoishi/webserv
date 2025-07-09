@@ -17,7 +17,8 @@ string Http::getContent(string path)
 bool Http::isDirectory(const string &path)
 {
     struct stat s;
-    stat(path.c_str(), &s);
+    if (stat(path.c_str(), &s))
+        return false;
     if (S_ISDIR(s.st_mode))
         return true;
     return false;
@@ -45,7 +46,8 @@ bool Http::IsCorrectPrefix(const string &url, const string &routePath) const
 bool Http::isExecutale(const string &path)
 {
     struct stat s;
-    stat(path.c_str(), &s);
+    if (stat(path.c_str(), &s))
+        return false;
     if (S_ISREG(s.st_mode) && (s.st_mode & S_IEXEC))
         return true;
     return false;

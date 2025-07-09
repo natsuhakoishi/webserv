@@ -60,7 +60,8 @@ class Http
         string getContent(string);
         string getContentType(string);
         string getErrorCodePath(int code);
-        bool getServerFromServerName(const vector<cfgServer> &csVec);
+        // bool getServerFromServerName(const vector<cfgServer> &csVec);
+        void getServerBlock(const vector<cfgServer> &csVec);
         void GET(pollfd, string);
         void POST(pollfd, string);
         void DELETE(pollfd, string);
@@ -78,11 +79,13 @@ class Http
         bool IsCorrectPrefix(const string &url, const string &routePath) const;
         bool isExecutale(const string &path);
 
-        void code404(int pfd); //error not found
         void code403(int pfd); //forbidden
+        void code404(int pfd); //error not found
+        void code405(int pfd); //method not found
         void code301(int pfd, string url); //redirection
         void code409(int pfd); //conflict
         void code500(int pfd); //server error
+        void code504(int pfd); //server error
         void code413(int pfd); //post body too large
         void code303(int pfd); //see other
 
