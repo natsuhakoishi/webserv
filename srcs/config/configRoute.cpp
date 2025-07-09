@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 08:48:50 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 22:25:55 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,24 +132,19 @@ cfgRoute::ArgError::~ArgError() throw() {
 //--------------[Functions]--------------------------------------------------
 
 void	cfgRoute::handle_cgi(vector<string> &line, int id) {
-	//todo confirm how to check
-	if (line.size() < 2)
-		throw ArgError(id,this->_path, line[0], "No argument provided.");
-	else if (line.size() > 3)
-		throw ArgError(id,this->_path, line[0], "Too many arguments!");
-
+	if (line.size() != 3)
+		throw ArgError(id,this->_path, line[0], "Invalid number of arguments");
 	size_t	pos = line[1].find(".");
 	if (pos == std::string::npos)
-		throw ArgError(id,this->_path, line[0], "Please provide file extension.");
-	string	temp = line[1].substr(pos, 3);
-	if (temp != ".py")
-		throw ArgError(id,this->_path, line[0], "Server accept Python only.");
-
+		throw ArgError(id,this->_path, line[0], "First argument should provide file extension.");
+	string	temp = line[1].substr(pos);
 	this->_cgi_info[temp] = line[2];
 }
 
 void	cfgRoute::handle_client(vector<string> &line, int id) {
-	if (line.size() != 2)
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
 		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 
 	int		byteSize;

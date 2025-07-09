@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 06:49:08 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 22:21:25 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,13 @@ void	Config::general_check() {
 			if (current.get_autoIndex_flag() == false)
 				current.set_autoIndex(server.get_autoIndexS());
 			if (current.get_clientBodySize() == 0)
-				current.set_clientSize(server.get_clientBodySize());
+			{
+				//default value 2MB
+				if (server.get_clientBodySize() == 0)
+					current.set_clientSize(2097152);
+				else
+					current.set_clientSize(server.get_clientBodySize());
+			}
 			if (current.get_httpMethod().empty())
 			{
 				vector<string> temp;

@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 08:55:08 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 22:09:18 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,7 +142,9 @@ void	cfgServer::handle_serverRoot(vector<string> &line) {
 }
 
 void	cfgServer::handle_clientBodySize(vector<string> &line) {
-	if (line.size() != 2)
+	if (line.size() < 2)
+		return ;
+	else if (line.size() > 2)
 		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 
 	int		byteSize;
