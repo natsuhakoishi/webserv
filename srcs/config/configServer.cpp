@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 07:46:45 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 08:33:58 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,7 +250,7 @@ void	cfgServer::parseServer(string &content) {
 				{
 					in_body = false;
 					cfgRoute a_block_found = cfgRoute();
-					a_block_found.parseLocation(location_body);
+					a_block_found.parseLocation(location_body, this->_id);
 					// a_block_found.displayContent();
 					this->_Routes.push_back(a_block_found);
 					location_body.clear();

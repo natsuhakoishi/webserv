@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 08:29:14 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 08:48:50 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,14 +110,16 @@ void	cfgRoute::set_httpMethod(const vector<string> &methods) {
 
 //--------------[Exception]--------------------------------------------------
 
-cfgRoute::ArgError::ArgError(string route, string dir, string msg) throw() {
-	//todo server id
+cfgRoute::ArgError::ArgError(int id, string route, string dir, string msg) throw() {
+	std::ostringstream	oss;
+	oss << "Server(" << id << "): ";
 	if (!route.empty())
-		this->_errMsg.append("Location ").append(route).append(": ");
+		oss << "Location " << route << ": ";
 	if (!dir.empty())
-		this->_errMsg.append(" [").append(dir).append("]: ");
+		oss << " [" << dir << "]: ";
 	if (!msg.empty())
-		this->_errMsg.append(msg);
+		oss << msg;
+	this->_errMsg = oss.str();
 }
 
 const char*	cfgRoute::ArgError::what() const throw() {
@@ -129,26 +131,26 @@ cfgRoute::ArgError::~ArgError() throw() {
 
 //--------------[Functions]--------------------------------------------------
 
-void	cfgRoute::handle_cgi(vector<string> &line) {
+void	cfgRoute::handle_cgi(vector<string> &line, int id) {
 	//todo confirm how to check
 	if (line.size() < 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "No argument provided.");
+		throw ArgError(id,this->_path, line[0], "No argument provided.");
 	else if (line.size() > 3)
-		throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
+		throw ArgError(id,this->_path, line[0], "Too many arguments!");
 
 	size_t	pos = line[1].find(".");
 	if (pos == std::string::npos)
-		throw cfgRoute::ArgError(this->_path, line[0], "Please provide file extension.");
+		throw ArgError(id,this->_path, line[0], "Please provide file extension.");
 	string	temp = line[1].substr(pos, 3);
 	if (temp != ".py")
-		throw cfgRoute::ArgError(this->_path, line[0], "Server accept Python only.");
+		throw ArgError(id,this->_path, line[0], "Server accept Python only.");
 
 	this->_cgi_info[temp] = line[2];
 }
 
-void	cfgRoute::handle_client(vector<string> &line) {
+void	cfgRoute::handle_client(vector<string> &line, int id) {
 	if (line.size() != 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 
 	int		byteSize;
 	string	suffix;
@@ -171,23 +173,24 @@ void	cfgRoute::handle_client(vector<string> &line) {
 	else if (suffix == "g" || suffix == "gb")
 		byteSize = byteSize * (1024 * 1024 * 1024);
 	else
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid size suffix.");
+		throw ArgError(id, this->_path, line[0], "Invalid size suffix.");
 	this->_clientBodySize = byteSize;
 }
 
-void	cfgRoute::handle_upload(vector<string> &line) {
+void	cfgRoute::handle_upload(vector<string> &line, int id) {
 	if (line.size() == 1 || line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 	this->_upload_path = line[1];
 }
 
-void	cfgRoute::handle_redirect(vector<string> &line) {
+void	cfgRoute::handle_redirect(vector<string> &line, int id) {
 	if (line.size() == 1 || line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 	this->_redirection_path = line[1];
 }
 
-void	cfgRoute::handle_methods(vector<string> &line) {
+void	cfgRoute::handle_methods(vector<string> &line, int id) {
+	(void)id;
 	if (line.size() < 2)
 		return ;
 	vector<string>::iterator	it = line.begin();
@@ -199,43 +202,43 @@ void	cfgRoute::handle_methods(vector<string> &line) {
 	}
 }
 
-void	cfgRoute::handle_autoIndex(vector<string> &line) {
+void	cfgRoute::handle_autoIndex(vector<string> &line, int id) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 
 	if (line[1] == "on")
 		this->_autoIndex = true;
 	else if (line[1] == "off")
 		this->_autoIndex = false;
 	else
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid argument, on / off only.");
+		throw ArgError(id, this->_path, line[0], "Invalid argument, on / off only.");
 	this->_autoIndex_flag = true;
 }
 
-void	cfgRoute::handle_index(vector<string> &line) {
+void	cfgRoute::handle_index(vector<string> &line, int id) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 	this->_index_path = line[1];
 }
 
-void	cfgRoute::handle_root(vector<string> &line) {
+void	cfgRoute::handle_root(vector<string> &line, int id) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
+		throw ArgError(id, this->_path, line[0], "Invalid number of arguments");
 	this->_root_path = line[1];
 }
 
-void	cfgRoute::parseLocation(string &content) {
+void	cfgRoute::parseLocation(string &content, int server_id) {
 	std::istringstream	iss(content);
 	string				line;
 	bool				firstLine = false;
 	vector<string>		tokens_holder;
-	map<string,void(cfgRoute::*)(vector<string>&)>	list;
+	map<string,void(cfgRoute::*)(vector<string>&,int)>	list;
 	
 	list["root"] = &cfgRoute::handle_root;
 	list["index"] = &cfgRoute::handle_index;
@@ -265,37 +268,37 @@ void	cfgRoute::parseLocation(string &content) {
 			if (!firstLine)
 			{
 				firstLine = true;
-				this->_path = splitRoute(inlines);
+				this->_path = splitRoute(inlines, server_id);
 				if (this->_path.empty())
-					throw ArgError("", "", "Error! Can't split out route.");
+					throw ArgError(server_id, "", "", "Error! Can't split out route.");
 				++it2;
 				continue ;
 			}
 			if (inlines[inlines.size() - 1] != ';')
 			{
 				std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
-				throw ArgError(this->_path, "", "not terminated by \";\"");
+				throw ArgError(server_id, this->_path, "", "not terminated by \";\"");
 			}
 			tokens_holder = Utils::tokenizer(inlines);
-			map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+			map<string,void(cfgRoute::*)(vector<string>&,int)>::iterator it = list.find(tokens_holder[0]);
 			if (it != list.end())
-				(this->*(it->second))(tokens_holder);
+				(this->*(it->second))(tokens_holder,server_id);
 			else
 			{
 				std::cout << red << "Error -> \"" << tokens_holder[0] << "\"" << reset << std::endl;
-				throw ArgError(this->_path, "", "unknown directive");
+				throw ArgError(server_id, this->_path, "", "unknown directive");
 			}
 			++it2;
 		}
 	}
 }
 
-string	cfgRoute::splitRoute(string &line) {
+string	cfgRoute::splitRoute(string &line, int id) {
 	size_t	start;
 	size_t	pos = line.find("/", 7);
 
 	if (pos == std::string::npos)
-		throw ArgError("", "Location", "No route given!");
+		throw ArgError(id, "", "Location", "No route given!");
 	start = pos;
 	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t' && line[pos] != '{')
 		++pos;

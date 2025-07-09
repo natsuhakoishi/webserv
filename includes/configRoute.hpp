@@ -31,19 +31,19 @@ class cfgRoute {
 		size_t				_clientBodySize;
 		map<string,string>	_cgi_info;
 
-		string	splitRoute(string &line);
-		void	handle_root(vector<string> &line);
-		void	handle_index(vector<string> &line);
-		void	handle_autoIndex(vector<string> &line);
-		void	handle_methods(vector<string> &line);
-		void	handle_redirect(vector<string> &line);
-		void	handle_upload(vector<string> &line);
-		void	handle_client(vector<string> &line);
-		void	handle_cgi(vector<string> &line);
+		string	splitRoute(string &line, int id);
+		void	handle_root(vector<string> &line, int id);
+		void	handle_index(vector<string> &line, int id);
+		void	handle_autoIndex(vector<string> &line, int id);
+		void	handle_methods(vector<string> &line, int id);
+		void	handle_redirect(vector<string> &line, int id);
+		void	handle_upload(vector<string> &line, int id);
+		void	handle_client(vector<string> &line, int id);
+		void	handle_cgi(vector<string> &line, int id);
 
 		class ArgError : public std::exception {
 			public:
-				ArgError(string route, string dir, string msg) throw();
+				ArgError(int id, string route, string dir, string msg) throw();
 				virtual const char*	what() const throw();
 				~ArgError() throw();
 			private:
@@ -73,7 +73,7 @@ class cfgRoute {
 		void	set_clientSize(int	size);
 		void	set_httpMethod(const vector<string> &methods);
 
-		void	parseLocation(string &content);
+		void	parseLocation(string &content, int server_id);
 		void	displayContent(void);
 };
 
