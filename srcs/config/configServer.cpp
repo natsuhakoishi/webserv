@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 08:33:58 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 08:55:08 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,7 +296,7 @@ void	cfgServer::display_parsedContent(void) {
 			std::cout << "\033[38;5;68mlisten on: \033[0m" << *it << std::endl;
 			++it;
 		}
-		if (!this->_hostPort.empty())
+		if (this->_hostPort.empty())
 			std::cout << "\033[38;5;68mlisten on: \033[0m" << "-" << std::endl;
 	}
 	{
