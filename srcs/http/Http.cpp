@@ -60,7 +60,7 @@ Http &Http::operator=(const Http &q)
 
 void Http::parse(string input)
 {
-    // cout << GREEN << "Client: " << input << RESETEND;
+    cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
@@ -115,30 +115,59 @@ void Http::readHeaders()
 
 }
 
+
+/*
+check all server block's server name
+    -macth -> bind
+    -not macth -> 在所有server找host 并且绑定第一个对到的server host。
+*/
 void Http::readConfig()
 {
     vector<cfgServer> csVec = this->cf.get_Servers();
-    vector<cfgServer>::iterator iter = csVec.begin();
-    string requestHost = this->headers["Host"].substr(this->headers["Host"].find(':') + 1);
 
-    for (; iter != csVec.end(); ++iter) //search which server Iphost is macth
+    if (!getServerFromServerName(csVec))
     {
-        vector<string> hosts = iter->get_hostPort();
-        vector<string>::iterator hostsIter = hosts.begin();
-        for (; hostsIter != hosts.end(); ++hostsIter)
+        vector<cfgServer>::iterator iter = csVec.begin();
+        string requestHost = this->headers["Host"].substr(this->headers["Host"].find(':') + 1);
+        bool found = false;
+
+        for (; iter != csVec.end() && !found; ++iter) //search which server Iphost is macth
         {
-            // cout << YELLOW << "debug:" << *hostsIter << " " << this->headers["Host"] << RESETEND; 
-            if (hostsIter->substr(hostsIter->find(':') + 1) == requestHost)
+            vector<string> hosts = iter->get_hostPort();
+            vector<string>::iterator hostsIter = hosts.begin();
+            for (; hostsIter != hosts.end(); ++hostsIter)
             {
-                this->cs = *iter;
-                break ;
+                // cout << hostsIter->substr(hostsIter->find(':') + 1) << " " << requestHost << endl;
+                // cout << YELLOW << "debug:" << *hostsIter << " " << this->headers["Host"] << RESETEND; 
+                if (hostsIter->substr(hostsIter->find(':') + 1) == requestHost)
+                {
+                    this->cs = *iter;
+                    found = true;
+                    break ;
+                }
             }
         }
     }
+
     this->errorCodeMap = this->cs.get_errorCodesMap();
     // printMap(this->errorCodeMap);
     // printMap(this->headers);
 }
+
+bool Http::getServerFromServerName(const vector<cfgServer> &csVec)
+{
+    string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
+
+    for (size_t i = 0; i < csVec.size(); ++i)
+    {
+        if (!csVec[i].get_serverName().compare(hostName))
+        {
+            this->cs = csVec[i];
+            return true;
+        }
+    }
+    return false;
+} 
 
 void Http::readRouteConfig()
 {

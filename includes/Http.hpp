@@ -60,6 +60,7 @@ class Http
         string getContent(string);
         string getContentType(string);
         string getErrorCodePath(int code);
+        bool getServerFromServerName(const vector<cfgServer> &csVec);
         void GET(pollfd, string);
         void POST(pollfd, string);
         void DELETE(pollfd, string);
