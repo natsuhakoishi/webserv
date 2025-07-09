@@ -11,7 +11,7 @@ class TcpServer
 {
 	public:
 		TcpServer();
-		TcpServer(std::vector<std::string> hostPorts, Config *_cf);
+		TcpServer(Config *_cf);
 		~TcpServer();
 
 		void	runServer();
@@ -25,6 +25,7 @@ class TcpServer
 		void	initServer();
 		void	handleClientConnection(size_t i);
 		void	handleClientMessage(size_t i);
+		bool	checkIpPortStatus(string ip, int port);
 
 		TcpServer(const TcpServer &copy);
 		TcpServer	&operator = (const TcpServer &copy);

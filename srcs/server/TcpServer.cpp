@@ -4,47 +4,52 @@ TcpServer::TcpServer(): config(NULL)
 {
 }
 
-TcpServer::TcpServer(std::vector<std::string> hostPorts, Config *_cf): config(_cf)
+TcpServer::TcpServer(Config *_cf): config(_cf)
 {
-	for (size_t i = 0; i < hostPorts.size(); ++i)
+	vector<cfgServer> server = _cf->get_Servers();
+	for (vector<cfgServer>::iterator it = server.begin(); it != server.end(); ++it)
 	{
-		size_t	separate_pos = hostPorts[i].find(":");
-		if (separate_pos == string::npos)
+		vector<string> hostPorts = it->get_hostPort();
+		vector<int> used_ports;
+		for (size_t i = 0; i < hostPorts.size(); ++i)
 		{
-			cout << "Error: Invalid HostPort" << endl;
-			exit(1);
+			size_t	separate_pos = hostPorts[i].find(":");
+			if (separate_pos == string::npos)
+			{
+				cout << "Error: Invalid HostPort" << endl;
+				exit(1);
+			}
+			string host = hostPorts[i].substr(0, separate_pos);
+			string port_str = hostPorts[i].substr(separate_pos + 1);
+
+			if (port_str.empty())
+			{
+				cout << "Invalid Port" << endl;
+				exit(1);
+			}
+
+			int port = atoi(port_str.c_str());
+
+			if (std::find(used_ports.begin(), used_ports.end(), port) != used_ports.end())
+			{
+				std::cerr << RED << "Failure: Port " << port << " is in used." << RESETEND << std::endl;
+			}
+			else
+			{
+				cout << GREEN << "Host " << host << " Port " << port << RESETEND << endl;
+				this->ips.push_back(host);
+				this->ports.push_back(port);
+				used_ports.push_back(port);
+			}
 		}
-		string host = hostPorts[i].substr(0, separate_pos);
-		string port_str = hostPorts[i].substr(separate_pos + 1);
-
-		if (port_str.empty())
-		{
-			cout << "Invalid Port" << endl;
-			exit(1);
-		}
-
-		int port = atoi(port_str.c_str());
-
-		cout << GREEN << "Host " << host << " Port " << port << RESETEND << endl;
-
-		this->ips.push_back(host);
-		this->ports.push_back(port);
 	}
 	initServer();
 }
 
 void	TcpServer::initServer()
 {
-	std::vector<int> used_ports;
-
 	for(size_t i = 0; i < this->ports.size(); i++)
 	{
-		if (std::find(used_ports.begin(), used_ports.end(), this->ports[i]) != used_ports.end())
-		{
-			std::cerr << "Failure: Port " << this->ports[i] << " is in used." << std::endl;
-			exit(1);
-		}
-
 		int	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
 		if (server_fd < 0)
@@ -71,7 +76,6 @@ void	TcpServer::initServer()
 			std::cerr << "Failure: Bind on port " << this->ports[i] << std::endl;
 			exit(1);
 		}
-		used_ports.push_back(this->ports[i]);
 
 		if (listen(server_fd, 3) < 0)
 		{

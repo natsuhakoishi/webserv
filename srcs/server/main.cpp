@@ -8,12 +8,7 @@ int main(int argc, char** argv)
 		{
 			std::string	filepath = argv[1];
 			Config  *config = new Config(filepath);
-			vector<cfgServer> servers = config->get_Servers();
-
-			vector<cfgServer>::iterator it = servers.begin();
-			std::vector<std::string> hostPorts = it->get_hostPort();
-
-			TcpServer *server = new TcpServer(hostPorts, config);
+			TcpServer *server = new TcpServer(config);
 			server->runServer();
 
 			delete config;
