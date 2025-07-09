@@ -25,7 +25,7 @@ class TcpServer
 		void	initServer();
 		void	handleClientConnection(size_t i);
 		void	handleClientMessage(size_t i);
-		bool	checkIpPortStatus(string ip, int port);
+		void	handleIpp(vector<std::pair<string, int> > ipp);
 
 		TcpServer(const TcpServer &copy);
 		TcpServer	&operator = (const TcpServer &copy);

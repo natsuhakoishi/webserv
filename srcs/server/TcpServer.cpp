@@ -4,13 +4,45 @@ TcpServer::TcpServer(): config(NULL)
 {
 }
 
+void	TcpServer::handleIpp(vector<std::pair<string, int> > ipp)
+{
+	vector<std::pair<string, int> > checked_ipp;
+
+	for (size_t i = 0; i < ipp.size(); ++i)
+	{
+		string ip = ipp[i].first;
+		int port = ipp[i].second;
+		bool conflict = false;
+
+		for (size_t j = 0; j < checked_ipp.size(); ++j)
+		{
+			string exist_ip = checked_ipp[j].first;
+			int exist_port = checked_ipp[j].second;
+
+			if (exist_port == port && (exist_ip == "0.0.0.0" || ip == "0.0.0.0" || exist_ip == ip))
+			{
+				conflict = true;
+				break;
+			}
+		}
+		if (!conflict)
+		{
+			this->ips.push_back(ip);
+			this->ports.push_back(port);
+			checked_ipp.push_back(ipp[i]);
+		}
+	}
+}
+
 TcpServer::TcpServer(Config *_cf): config(_cf)
 {
 	vector<cfgServer> server = _cf->get_Servers();
+	vector<std::pair<string, int> > ipp;
 	for (vector<cfgServer>::iterator it = server.begin(); it != server.end(); ++it)
 	{
 		vector<string> hostPorts = it->get_hostPort();
 		vector<int> used_ports;
+
 		for (size_t i = 0; i < hostPorts.size(); ++i)
 		{
 			size_t	separate_pos = hostPorts[i].find(":");
@@ -37,12 +69,12 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 			else
 			{
 				cout << GREEN << "Host " << host << " Port " << port << RESETEND << endl;
-				this->ips.push_back(host);
-				this->ports.push_back(port);
+				ipp.push_back(std::make_pair(host, port));
 				used_ports.push_back(port);
 			}
 		}
 	}
+	handleIpp(ipp);
 	initServer();
 }
 
