@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 07:16:08 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/09 08:29:14 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,20 +110,14 @@ void	cfgRoute::set_httpMethod(const vector<string> &methods) {
 
 //--------------[Exception]--------------------------------------------------
 
-const char*	cfgRoute::RouteError::what() const throw() {
-	return ("Route: No route specified in the location block!");
-}
-
-const char*	cfgRoute::SemicolonMissing::what() const throw() {
-	return ("Route: Semicolon is missing!");
-}
-
-const char*	cfgRoute::DirectiveError::what() const throw() {
-	return ("Route: Unknown directive!");
-}
-
-cfgRoute::ArgError::ArgError(string route, string dir, string msg) throw()
-: _errMsg("Location " + route + ":  [" + dir + "] directive: " + msg) {
+cfgRoute::ArgError::ArgError(string route, string dir, string msg) throw() {
+	//todo server id
+	if (!route.empty())
+		this->_errMsg.append("Location ").append(route).append(": ");
+	if (!dir.empty())
+		this->_errMsg.append(" [").append(dir).append("]: ");
+	if (!msg.empty())
+		this->_errMsg.append(msg);
 }
 
 const char*	cfgRoute::ArgError::what() const throw() {
@@ -153,10 +147,6 @@ void	cfgRoute::handle_cgi(vector<string> &line) {
 }
 
 void	cfgRoute::handle_client(vector<string> &line) {
-	// if (line.size() < 2)
-	// 	return ;
-	// else if (line.size() > 2)
-	// 	throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	if (line.size() != 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 
@@ -186,20 +176,12 @@ void	cfgRoute::handle_client(vector<string> &line) {
 }
 
 void	cfgRoute::handle_upload(vector<string> &line) {
-	// if (line.size() == 1)
-	// 	throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
-	// else if (line.size() > 2)
-	// 	throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
 	if (line.size() == 1 || line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	this->_upload_path = line[1];
 }
 
 void	cfgRoute::handle_redirect(vector<string> &line) {
-	// if (line.size() == 1)
-	// 	throw cfgRoute::ArgError(this->_path, line[0], "Argument missing!");
-	// else if (line.size() > 2)
-	// 	throw cfgRoute::ArgError(this->_path, line[0], "Too many arguments!");
 	if (line.size() == 1 || line.size() > 2)
 		throw cfgRoute::ArgError(this->_path, line[0], "Invalid number of arguments");
 	this->_redirection_path = line[1];
@@ -285,21 +267,23 @@ void	cfgRoute::parseLocation(string &content) {
 				firstLine = true;
 				this->_path = splitRoute(inlines);
 				if (this->_path.empty())
-					throw cfgRoute::RouteError();
+					throw ArgError("", "", "Error! Can't split out route.");
 				++it2;
 				continue ;
 			}
-			if (inlines[inlines.size()-1] != ';'){
-					std::cout << inlines << std::endl;
-					throw cfgRoute::ArgError(this->_path, "", "Semicolon missing");}
+			if (inlines[inlines.size() - 1] != ';')
+			{
+				std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
+				throw ArgError(this->_path, "", "not terminated by \";\"");
+			}
 			tokens_holder = Utils::tokenizer(inlines);
 			map<string,void(cfgRoute::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
 			if (it != list.end())
 				(this->*(it->second))(tokens_holder);
 			else
 			{
-				std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
-				throw cfgRoute::DirectiveError();
+				std::cout << red << "Error -> \"" << tokens_holder[0] << "\"" << reset << std::endl;
+				throw ArgError(this->_path, "", "unknown directive");
 			}
 			++it2;
 		}
@@ -311,7 +295,7 @@ string	cfgRoute::splitRoute(string &line) {
 	size_t	pos = line.find("/", 7);
 
 	if (pos == std::string::npos)
-		throw cfgRoute::RouteError();
+		throw ArgError("", "Location", "No route given!");
 	start = pos;
 	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t' && line[pos] != '{')
 		++pos;

@@ -10,6 +10,10 @@
 # include "configServer.hpp"
 # include "helper.hpp"
 
+# define red "\033[31m"
+# define reset "\033[0m"
+# define newline std::cout << std::endl;
+ 
 using std::string;
 using std::vector;
 using std::map;
@@ -26,6 +30,26 @@ class cfgRoute {
 		string				_upload_path;
 		size_t				_clientBodySize;
 		map<string,string>	_cgi_info;
+
+		string	splitRoute(string &line);
+		void	handle_root(vector<string> &line);
+		void	handle_index(vector<string> &line);
+		void	handle_autoIndex(vector<string> &line);
+		void	handle_methods(vector<string> &line);
+		void	handle_redirect(vector<string> &line);
+		void	handle_upload(vector<string> &line);
+		void	handle_client(vector<string> &line);
+		void	handle_cgi(vector<string> &line);
+
+		class ArgError : public std::exception {
+			public:
+				ArgError(string route, string dir, string msg) throw();
+				virtual const char*	what() const throw();
+				~ArgError() throw();
+			private:
+				string	_errMsg;
+		};
+
 	public:
 		cfgRoute();
 		cfgRoute(const cfgRoute &other);
@@ -49,37 +73,7 @@ class cfgRoute {
 		void	set_clientSize(int	size);
 		void	set_httpMethod(const vector<string> &methods);
 
-		class RouteError : public std::exception {
-			public:
-				virtual const char*	what() const throw();
-		};
-		class SemicolonMissing : public std::exception {
-			public:
-				virtual const char*	what() const throw();
-		};
-		class DirectiveError : public std::exception {
-			public:
-				virtual const char*	what() const throw();
-		};
-		class ArgError : public std::exception {
-			public:
-				ArgError(string route, string dir, string msg) throw();
-				virtual const char*	what() const throw();
-				~ArgError() throw();
-			private:
-				string	_errMsg;
-		};
-
 		void	parseLocation(string &content);
-		string	splitRoute(string &line);
-		void	handle_root(vector<string> &line);
-		void	handle_index(vector<string> &line);
-		void	handle_autoIndex(vector<string> &line);
-		void	handle_methods(vector<string> &line);
-		void	handle_redirect(vector<string> &line);
-		void	handle_upload(vector<string> &line);
-		void	handle_client(vector<string> &line);
-		void	handle_cgi(vector<string> &line);
 		void	displayContent(void);
 };
 
