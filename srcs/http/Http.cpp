@@ -128,51 +128,12 @@ void Http::readConfig()
     vector<cfgServer> csVec = this->cf.get_Servers();
 
     getServerBlock(csVec);
-    // if (!getServerFromIpPortFullyMacth(csVec))
-    // {
-    //     vector<cfgServer>::iterator iter = csVec.begin();
-    //     string requestHost = this->headers["Host"].substr(this->headers["Host"].find(':') + 1);
-    //     string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
-    //     bool found = false;
-
-    //     for (; iter != csVec.end() && !found; ++iter) //search which server Iphost is macth
-    //     {
-    //         vector<string> hosts = iter->get_hostPort();
-    //         vector<string>::iterator hostsIter = hosts.begin();
-    //         for (; hostsIter != hosts.end(); ++hostsIter)
-    //         {
-    //             // cout << hostsIter->substr(hostsIter->find(':') + 1) << " " << requestHost << endl;
-    //             // cout << YELLOW << "debug:" << *hostsIter << " " << this->headers["Host"] << RESETEND; 
-    //             if (hostsIter->substr(hostsIter->find(':') + 1) == requestHost)
-    //             {
-    //                 this->cs = *iter;
-    //                 found = true;
-    //                 break ;
-    //             }
-    //         }
-    //     }
-    // }
     cout << RED << "Server name: " << this->cs.get_serverName() << RESETEND;
 
     this->errorCodeMap = this->cs.get_errorCodesMap();
     // printMap(this->errorCodeMap);
     // printMap(this->headers);
 }
-
-// bool Http::getServerFromServerName(const vector<cfgServer> &csVec)
-// {
-//     string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
-
-//     for (size_t i = 0; i < csVec.size(); ++i)
-//     {
-//         if (!csVec[i].get_serverName().compare(hostName))
-//         {
-//             this->cs = csVec[i];
-//             return true;
-//         }
-//     }
-//     return false;
-// } 
 
 void Http::getServerBlock(const vector<cfgServer> &csVec)
 {
@@ -186,14 +147,12 @@ void Http::getServerBlock(const vector<cfgServer> &csVec)
                 csMap[hp[j]] = csVec[i];
     }
 
-    cout << RED << csMap.size() << RESETEND;
     if (csMap.size() == 0)
     {
         string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
         vector<cfgServer>::const_iterator csIter = csVec.begin();
         for (; csIter != csVec.end(); ++csIter)
         {
-
             if (!csIter->get_serverName().compare(hostName))
             {
                 this->cs = *csIter;
@@ -208,42 +167,6 @@ void Http::getServerBlock(const vector<cfgServer> &csVec)
         map<string, cfgServer>::iterator csMapIter = csMap.begin();
         this->cs = csMapIter->second;
     }
-    // if (csMap.size() == 1)
-    // {
-    //     map<string, cfgServer>::iterator csMapIter = csMap.begin();
-    //     this->cs = csMapIter->second;
-    //     cout << RED << "1" << RESETEND;
-    //     return true;
-    // }
-    // else if (csMap.size() > 1) //ipPort more then 1, try to match server name
-    // {
-    //     // cout << RED << csMap.size() << RESETEND;
-    //     // string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
-    //     map<string, cfgServer>::iterator csMapIter = csMap.begin();
-    //     // for (; csMapIter != csMap.end(); ++csMapIter)
-    //     // {
-    //     //     if (!csMapIter->second.get_serverName().compare(hostName))
-    //     //     {
-    //     //         this->cs = csMapIter->second;
-    //     //         return true;
-    //     //     }
-    //     // }
-    //     csMapIter = csMap.begin(); //server name not found, take first
-    //     this->cs = csMapIter->second;
-    // }
-    // else
-    // {
-    //     string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
-    //     map<string, cfgServer>::iterator csMapIter = csMap.begin();
-    //     for (; csMapIter != csMap.end(); ++csMapIter)
-    //     {
-    //         if (!csMapIter->second.get_serverName().compare(hostName))
-    //         {
-    //             this->cs = csMapIter->second;
-    //             return true;
-    //         }
-    //     }
-    // }
 }
 
 void Http::readRouteConfig()

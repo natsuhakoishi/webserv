@@ -89,7 +89,6 @@ void Http::handleCGI(string CGIpath)
     vecArgv.push_back(const_cast<char *>(clearURL.c_str()));
     vecArgv.push_back(NULL);
 
-    // cout << vecArgv[0] << " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << endl;
     int fd[2];
     pipe(fd);
 
@@ -116,7 +115,14 @@ void Http::handleCGI(string CGIpath)
         {
             int status;
             pid_t result = waitpid(pid, &status, WNOHANG);
-            if (!result)
+            if (result == -1)
+            {
+                perror("waitpid error");
+                close(fd[0]);
+                code500(this->pfd.fd);
+                return;
+            }
+            else if (!result)
             {
                 if (time(NULL) - start > TIMEOUT)
                 {
@@ -124,7 +130,6 @@ void Http::handleCGI(string CGIpath)
                     waitpid(pid, &status, 0);
                     close(fd[0]);
                     code504(this->pfd.fd);
-
                     return ;
                 }
             }
@@ -133,13 +138,18 @@ void Http::handleCGI(string CGIpath)
                 while ((readd = read(fd[0], buffer, sizeof(buffer))) > 0)
                     CGIoutput.append(buffer, readd);
                 close(fd[0]);
+                if (CGIoutput.empty())
+                {
+                    code504(this->pfd.fd);
+                    return ;
+                }
                 cout << CGIoutput << endl;
                 send(this->pfd.fd, CGIoutput.c_str(), CGIoutput.length(), 0);
                 this->isRespond = true;
                 break ;
             }
             // cout << "wait" << endl;
-            sleep(1.0);
+            sleep(0.1);
         }
 
         // cout << GREEN << CGIoutput << RESETEND;
