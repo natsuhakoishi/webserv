@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), isRespond(false)
+: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiRoute(false), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -31,6 +31,7 @@ Http &Http::operator=(const Http &q)
     this->rootPath = q.rootPath;
     this->routes = q.routes;
     this->autoindex = q.autoindex;
+    this->cgiRoute = q.cgiRoute;
     this->indexFile = q.indexFile;
     this->bodySize = q.bodySize;
     this->errorCodeMap = q.errorCodeMap;
@@ -59,17 +60,21 @@ Http &Http::operator=(const Http &q)
 
 void Http::parse(string input)
 {
-    // cout << GREEN << "Client: " << input << RESETEND;
+    cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
         readHeaders();
-    if (!this->method.compare("POST"))
+    if (!this->url.find("/cgi/"))
+        handleCGI(this->url);
+    else if (!this->method.compare("POST"))
         readBody();
-    if (!this->method.compare("GET"))
+    else if (!this->method.compare("GET"))
         GET(this->pfd, this->filePath);
-    if (!this->method.compare("DELETE"))
+    else if (!this->method.compare("DELETE"))
         DELETE(this->pfd, this->filePath);
+    else //unknown method
+        code405(this->pfd.fd);
 
     this->buffer.clear();
 }
@@ -86,6 +91,9 @@ void Http::readHeaders()
 
     requestLine >> this->method >> this->url >> this->HttpVersion;
 
+    this->headers["Method"] = this->method;
+    this->headers["Url"] = this->url;
+    this->headers["Http-Version"] = this->HttpVersion;
 
     cout << YELLOW << "method:" << method << ", " << "url:" << url << RESETEND;
     // cout << "headers: " << YELLOW << this->header << RESETEND;
@@ -109,27 +117,56 @@ void Http::readHeaders()
 
 }
 
+
+/*
+check all server block's server name
+    -macth -> bind
+    -not macth -> 在所有server找host 并且绑定第一个对到的server host。
+*/
 void Http::readConfig()
 {
     vector<cfgServer> csVec = this->cf.get_Servers();
-    vector<cfgServer>::iterator iter = csVec.begin();
-    string requestHost = this->headers["Host"].substr(this->headers["Host"].find(':') + 1);
 
-    for (; iter != csVec.end(); ++iter) //search which server Iphost is macth
+    getServerBlock(csVec);
+    cout << RED << "Server name: " << this->cs.get_serverName() << RESETEND;
+
+    this->errorCodeMap = this->cs.get_errorCodesMap();
+    // printMap(this->errorCodeMap);
+    // printMap(this->headers);
+}
+
+void Http::getServerBlock(const vector<cfgServer> &csVec)
+{
+    map<string, cfgServer> csMap; //ipPort | cfgServer
+
+    for (size_t i = 0; i < csVec.size(); ++i)
     {
-        vector<string> hosts = iter->get_hostPort();
-        vector<string>::iterator hostsIter = hosts.begin();
-        for (; hostsIter != hosts.end(); ++hostsIter)
+        const vector<string> &hp = csVec[i].get_hostPort();
+        for (size_t j = 0; j < hp.size(); ++j)
+            if (!hp[j].compare(this->headers["Host"]))
+                csMap[hp[j]] = csVec[i];
+    }
+
+    if (csMap.size() == 0)
+    {
+        string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
+        vector<cfgServer>::const_iterator csIter = csVec.begin();
+        for (; csIter != csVec.end(); ++csIter)
         {
-            // cout << YELLOW << "debug:" << *hostsIter << " " << this->headers["Host"] << RESETEND; 
-            if (hostsIter->substr(hostsIter->find(':') + 1) == requestHost)
+            if (!csIter->get_serverName().compare(hostName))
             {
-                this->cs = *iter;
-                break ;
+                this->cs = *csIter;
+                return ;
             }
         }
+        csIter = csVec.begin();
+        this->cs = *csIter;
     }
-    this->errorCodeMap = this->cs.get_errorCodesMap();
+    else
+    {
+        map<string, cfgServer>::iterator csMapIter = csMap.begin();
+        this->cs = csMapIter->second;
+    }
 }
 
 void Http::readRouteConfig()
@@ -145,15 +182,6 @@ void Http::readRouteConfig()
             if (this->routes[i].get_path() == "/")
                 idx = i;
     initConfig(idx);
-}
-
-bool Http::IsCorrectPrefix(const string &url, const string &routePath) const
-{
-    if (!url.compare(routePath))
-        return true;
-    if (url.find(routePath) == 0 && url[routePath.length()] == '/')
-        return true;
-    return false;
 }
 
 void Http::initConfig(int idx)
@@ -181,6 +209,7 @@ void Http::initConfig(int idx)
         this->redirectPath = this->routes[idx].get_redirectionPath();
         this->filePath = this->rootPath + this->url;
         this->indexFile = this->routes[idx].get_indexPath();
+        if (!this->routes[idx].get_path().compare("/cgi")) this->cgiRoute = true;
         this->autoindex = this->routes[idx].get_autoIndex();
         this->bodySize = this->routes[idx].get_clientBodySize();
         this->allowMethod = this->routes[idx].get_httpMethod();

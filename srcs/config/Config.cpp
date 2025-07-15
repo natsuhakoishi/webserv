@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
+/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
 /*   Updated: 2025/07/15 20:16:20 by zgoh             ###   ########.fr       */
@@ -220,6 +220,22 @@ void	Config::build_SocketTable()
 		}
 		++it;
 	}
+	// vector<string>	used_port;
+	// map<string, vector<int> >::iterator	table = this->_SocketTable.begin();
+	// while (table != this->_SocketTable.end())
+	// {
+	// 	string port;
+	// 	port = (*table).first.substr((*table).first.find(":") + 1);
+	// 	vector<string>::iterator it3 = used_port.begin();
+	// 	while (it3 != used_port.end())
+	// 	{
+	// 		if ((*it3).compare(port) == 0)
+	// 			throw ConfigError("Detect bind to used port");
+	// 		++it3;
+	// 	}
+	// 	used_port.push_back(port);
+	// 	++table;
+	// }
 }
 
 void	Config::print_ServerParsed() {

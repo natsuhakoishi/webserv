@@ -17,11 +17,13 @@ class Http
         string rootPath;
         vector<cfgRoute> routes;
         bool autoindex;
+        bool cgiRoute;
         string indexFile;
         size_t  bodySize;
 		map<int,string>		errorCodeMap;
         string redirectPath;
         string uplaodPath;
+
 
         map<string, string> headers;
         vector<string> allowMethod;
@@ -52,34 +54,44 @@ class Http
         void readBody();
         void readConfig();
         void readRouteConfig();
-        // void readAllowMethod(vector<string> allow);
         void initConfig(int idx);
-        bool IsCorrectPrefix(const string &url, const string &routePath) const;
 
         //method
         string getContent(string);
         string getContentType(string);
         string getErrorCodePath(int code);
+        // bool getServerFromServerName(const vector<cfgServer> &csVec);
+        void getServerBlock(const vector<cfgServer> &csVec);
         void GET(pollfd, string);
         void POST(pollfd, string);
         void DELETE(pollfd, string);
 
+        void handleCGI(string CGIpath);
+        vector<string> getQueryParameters(string &url);
+
+        vector<string> createEnv(map<string, string> &m);
         string handleAutoindex(string path);
         string createElement(string file);
 
         //utils
-        bool isDirectory(string path);
-        bool fileExistis(string path);
+        bool isDirectory(const string &path);
+        bool fileExistis(const string &path);
+        bool IsCorrectPrefix(const string &url, const string &routePath) const;
+        bool isExecutale(const string &path);
 
-        void code404(int pfd); //error not found
         void code403(int pfd); //forbidden
+        void code404(int pfd); //error not found
+        void code405(int pfd); //method not found
         void code301(int pfd, string url); //redirection
         void code409(int pfd); //conflict
         void code500(int pfd); //server error
+        void code504(int pfd); //server error
         void code413(int pfd); //post body too large
         void code303(int pfd); //see other
 
         //getter
         bool getIsRespond() const;
+
+
 };
 
