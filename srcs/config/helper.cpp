@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/08 19:18:52 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/15 19:49:13 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,9 @@ vector<string>	splitInline(string line) {
 	vector<string>	result;
 	size_t	pos = 0;
 	string	temp;
-	// size_t	sp = 0;
 
 	line = Utils::trim_whitespaces(line);
-	// std::cout << "Utils -> " << line << std::endl;
+	// std::cout << "Splitting -> " << line << std::endl;
 	while (pos < line.size())
 	{
 		if (line[pos] == ';' || line[pos] == '{' || line[pos] == '}')
@@ -108,19 +107,13 @@ vector<string>	splitInline(string line) {
 			if (!temp.empty())
 			{
 				result.push_back(temp);
-				// sp = pos;
 				temp.clear();
 			}
-			else
-				std::cout << std::endl;
 		}
 		else
 			temp += line[pos];
 		++pos;
 	}
-	// if (!temp.empty() && temp != "{" && temp != "}" && temp.compare(0,8,"location") != 0){
-	// 	std::cout << temp << std::endl;
-	// 	throw UtilsError("urghhh");}
 	if (!temp.empty())
 		result.push_back(temp);
 	return (result);

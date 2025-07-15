@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/15 17:21:55 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/15 20:16:20 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,72 +81,71 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		else if (!in_body)
 		{
 			pos = line.find_first_not_of(" \n\t\r\v\f");
-			if (pos != std::string::npos && line[pos] == 's')
-			{
-				string temp_buf;
-				temp_buf = Utils::trim_whitespaces(line);
-				if (temp_buf == "server" || temp_buf == "server {" || temp_buf == "server	{")
-				{
-					in_body = true;
-					if (temp_buf != "server")
-						brace_count++;
-				}
-				continue ;
-			}
+			if (pos != std::string::npos && !line.compare(pos, 6, "server"))
+				in_body = true;
 			else
 				throw ConfigError("Error: Couldn't find server directive / Brace not enclosed properly");
 		}
-		else if (in_body)
+		//found server directive
+		//checking if it's in body; which mean exact follow by an open brace, ex: server {
+		if (!first_Obrace && in_body)
 		{
-			if (!first_Obrace)
-			{
-				if (brace_count)
-					first_Obrace = true;
-				else
-				{
-					size_t Obrace = line.find_first_not_of(" \n\t\r\v\f");
-					if (Obrace != std::string::npos && line[Obrace] == '{')
-					{
-						first_Obrace = true;
-						brace_count++;
-						continue ;
-					}
-					else
-						throw ConfigError("Other character after keyword. (Expect: Open Brace)");
-				}
-			}
-				size_t i = 0;
-				while (i < line.size())
-				{
-					if (line[i] == '{')
-						brace_count++;
-					else if (line[i] == '}')
-						brace_count--;
-					++i;
-				}
-				if (brace_count)
-				{
-					server_body.append(line).append("\n");
-					continue ;
-				}
-				else
-				{
-					in_body = false;
-					first_Obrace = false;
-					this->_blockCount++;
-					cfgServer a_server = cfgServer(this->_blockCount - 1);
-					a_server.parseServer(server_body);
-					// a_server.display_parsedContent();
-					this->_Servers.push_back(a_server);
-					server_body.clear();
-				}
+			size_t Obrace = line.find_first_not_of(" \n\t\r\v\f");
+			size_t pos2 = line.find_first_not_of(" \n\t\r\v\f", pos+6);
+			if (line == "server")
+				continue ;
+			else if (Obrace != std::string::npos && line[Obrace] == '{')
+				first_Obrace = true; // brace on single line
+			else if (pos2 != std::string::npos && (line.find("{", pos2) != std::string::npos || line.find(" {", pos2) != std::string::npos || line.find("	{", pos2)  != std::string::npos ))
+				first_Obrace = true; // brace mixed inline w/ other content
+			else
+				throw ConfigError("Other character after keyword. (Expect: Open Brace)");
+		}
+		//continue parsing,current stage rely on brace counter
+		//to validate all blocks enclosed properly / when a full server block is found
+		size_t i = 0;
+		while (i < line.size())
+		{
+			if (line[i] == '{')
+				brace_count++;
+			else if (line[i] == '}')
+				brace_count--;
+			++i;
+		}
+		if (brace_count)
+		{
+			server_body.append(line).append("\n");
+			continue ;
+		}
+		else if (!brace_count && line.find("server", line.find_first_not_of(" \n\t\r\v\f")) != std::string::npos)
+		{
+			//urgh edge case, inline server block
+			in_body = false;
+			first_Obrace = false;
+			this->_blockCount++;
+			cfgServer a_server = cfgServer(this->_blockCount - 1);
+			server_body.append(line).append("\n");
+			a_server.parseServer(server_body);
+			this->_Servers.push_back(a_server);
+			server_body.clear();
+		}
+		else
+		{
+			in_body = false;
+			first_Obrace = false;
+			this->_blockCount++;
+			cfgServer a_server = cfgServer(this->_blockCount - 1);
+			a_server.parseServer(server_body);
+			// a_server.display_parsedContent();
+			this->_Servers.push_back(a_server);
+			server_body.clear();
 		}
 	}
 	if (brace_count)
 		throw ConfigError("Brace: Not enclosed properly.");
 	this->general_check();
 	this->build_SocketTable();
-	this->print_ServerParsed();
+	// this->print_ServerParsed();
 	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_SocketTable();
 }

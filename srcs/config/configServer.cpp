@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 22:09:18 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/15 20:19:19 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,13 @@ void	cfgServer::parseServer(string &content) {
 		{
 			string	inlines = *it2;
 			inlines = Utils::trim_whitespaces(inlines);
-			if (!in_body && inlines.compare(0,8,"location")==0)
+			//don't move it to upper-level parser, will not working w/ inline config
+			if (!in_body && (!inlines.compare(0, 7, "server{") || !inlines.compare(0, 8, "server {") || !inlines.compare(0, 8, "server	{")))
+			{
+				++it2;
+				continue ;
+			}
+			if (!in_body && !inlines.compare(0,8,"location"))
 				in_body = true;
 			if (in_body)
 			{
@@ -263,7 +269,12 @@ void	cfgServer::parseServer(string &content) {
 				inlines = Utils::trim_inlineComment(inlines);
 				if (!inlines.empty())
 				{
-					if (inlines[inlines.size() - 1] != ';')
+					if (inlines == "}" || inlines == "{")
+					{
+						++it2;
+						continue ;
+					}
+					else if (inlines[inlines.size() - 1] != ';')
 					{
 						std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
 						throw ArgError(this->_id, "", "not terminated by \";\"");
