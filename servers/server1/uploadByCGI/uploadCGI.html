@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Upload Page</title>
+</head>
+<body>
+    <main>
+        <div>
+            <h1>Upload Page</h1>
+        </div>
+        <div>
+            <img src="/img/pls.png" />
+            <form action="/cgi/upload.py" method="post" enctype="multipart/form-data">
+                <label for="file">Choose file to upload:</label>
+                <input type="file" name="upload_file" id="file" />
+                <br />
+                <input type="submit" value="Upload" />
+            </form>
+        </div>
+    </main>
+</body>
+</html>

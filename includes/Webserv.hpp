@@ -18,6 +18,7 @@
 #include <dirent.h> //for opendir()
 #include <signal.h>
 #include <sys/wait.h>
+#include <iomanip>
 
 using std::string;
 using std::cout;
@@ -35,7 +36,7 @@ using std::map;
 #define BLUE   "\033[34m"
 #define RESET  "\033[0m"
 #define RESETEND  "\033[0m" << std::endl
-#define TIMEOUT 2
+#define TIMEOUT 100
 
 template <typename m> 
 void printMap(m _map)

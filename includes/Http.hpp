@@ -67,6 +67,8 @@ class Http
         void DELETE(pollfd, string);
 
         void handleCGI(string CGIpath);
+        void CGIGet(vector<char *> &argv, string CGIpath);
+        void CGIPost(vector<char *> &argv, string CGIpath);
         vector<string> getQueryParameters(string &url);
 
         vector<string> createEnv(map<string, string> &m);

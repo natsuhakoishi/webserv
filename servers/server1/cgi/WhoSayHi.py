@@ -15,8 +15,8 @@ content = f"""<html lang="en">
 </body>
 </html>"""
 
-print("HTTP/1.1 200 ok\r")
-print("Content-Type: text/html\r")
-print("Content-Length: ", len(content), "\r")
-print("\r")
+print("HTTP/1.1 200 ok")
+print("Content-Type: text/html")
+print("Content-Length:", len(content))
+print()
 print(content)

@@ -60,15 +60,15 @@ Http &Http::operator=(const Http &q)
 
 void Http::parse(string input)
 {
-    cout << GREEN << "Client: " << input << RESETEND;
+    // cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
         readHeaders();
-    if (!this->url.find("/cgi/"))
-        handleCGI(this->url);
-    else if (!this->method.compare("POST"))
+    if (!this->method.compare("POST"))
         readBody();
+    else if (!this->url.find("/cgi/"))
+        handleCGI(this->url);
     else if (!this->method.compare("GET"))
         GET(this->pfd, this->filePath);
     else if (!this->method.compare("DELETE"))
@@ -238,7 +238,12 @@ void Http::readBody()
     this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
 
     if (this->body.length() == ContentLenght)
-        POST(this->pfd, this->filePath);
+    {
+        if (!this->url.find("/cgi/"))
+            handleCGI(this->url);
+        else
+            POST(this->pfd, this->filePath);
+    }
 }
 
 bool Http::getIsRespond() const

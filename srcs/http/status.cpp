@@ -155,6 +155,7 @@ void Http::code413(int pfd)
     else
         ss << content;
 
+    cout << ss.str() << endl;
     send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
     cout << BLUE << "GET: Respond 413 successful" << endl; //debug
