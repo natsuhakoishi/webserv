@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 22:21:25 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/15 17:21:55 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				continue ;
 			}
 			else
-				throw ConfigError("Undefined.");
+				throw ConfigError("Error: Couldn't find server directive / Brace not enclosed properly");
 		}
 		else if (in_body)
 		{
@@ -143,12 +143,10 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		}
 	}
 	if (brace_count)
-		throw ConfigError("Braces' issue");
-	else if (!this->_blockCount)
-		throw ConfigError("Couldn't find Server body.");
+		throw ConfigError("Brace: Not enclosed properly.");
 	this->general_check();
 	this->build_SocketTable();
-	// this->print_ServerParsed();
+	this->print_ServerParsed();
 	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_SocketTable();
 }
