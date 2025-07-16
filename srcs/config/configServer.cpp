@@ -6,7 +6,7 @@
 /*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/15 20:14:56 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/16 22:37:51 by yyan-bin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,35 +89,13 @@ vector<cfgRoute>&	cfgServer::get_routes() {
 
 //--------------[Exception]--------------------------------------------------
 
-cfgServer::OtherError::OtherError(int id, int nl, string msg) throw() {
-	std::ostringstream	oss;
-	oss << "Server(" << id << "): " << msg << " <-- Ln " << nl;
-	this->_errMsg = oss.str();
-}
-
-const char*	cfgServer::OtherError::what() const throw() {
-	return (this->_errMsg.c_str());
-}
-
-cfgServer::OtherError::~OtherError() throw() {
-}
-
-cfgServer::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
-	std::ostringstream	oss;
-	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
-	this->_errMsg = oss.str();
-}
-
-const char*	cfgServer::CheckingError::what() const throw() {
-	return (this->_errMsg.c_str());
-}
-
-cfgServer::CheckingError::~CheckingError() throw() {
-}
-
 cfgServer::ArgError::ArgError(int id, string dir, string msg) throw() {
 	std::ostringstream	oss;
-	oss << "Server(" << id << "):  [" << dir << "]: argument invalid: " << msg;
+	oss << "Server(" << id << "): ";
+	if (!dir.empty())
+		oss << " [" << dir << "]: ";
+	if (!msg.empty())
+		oss << msg;
 	this->_errMsg = oss.str();
 }
 
@@ -133,26 +111,25 @@ cfgServer::ArgError::~ArgError() throw() {
 void	cfgServer::handle_autoIndexS(vector<string> &line) {
 	if (line.size() < 2)
 	{
-		// std::cout << "\033[31mWarning: auto index argument not given. It will set as off.\033[0m\n";
 		this->_autoIndexS = false;
 		return ;
 	}
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 	
 	if (line[1] == "on")
 		this->_autoIndexS = true;
 	else if (line[1] == "off")
 		this->_autoIndexS = false;
 	else
-		throw cfgServer::ArgError(this->_id, line[0], "Auto index only accept on / off as argument!");
+		throw ArgError(this->_id, line[0], "Invalid argument, on / off only.");
 }
 
 void	cfgServer::handle_serverIndex(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 	this->_index_path = line[1];
 }
 
@@ -160,7 +137,7 @@ void	cfgServer::handle_serverRoot(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 	this->_root_path = line[1];
 }
 
@@ -168,7 +145,7 @@ void	cfgServer::handle_clientBodySize(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 
 	int		byteSize;
 	string	suffix;
@@ -191,38 +168,34 @@ void	cfgServer::handle_clientBodySize(vector<string> &line) {
 	else if (suffix == "g" || suffix == "gb")
 		byteSize = byteSize * (1024 * 1024 * 1024);
 	else
-		throw cfgServer::ArgError(this->_id, line[0], "Invalid file size.");
+		throw ArgError(this->_id, line[0], "Invalid size suffix.");
 	this->_clientBodySize = byteSize;
 }
 
 void	cfgServer::handle_errorCodes(vector<string> &line) {
-	if (line.size() < 3)
-		throw cfgServer::ArgError(this->_id, line[0], "Not enough argument. Format: <error_code> <HTML_filepath>");
-	else if (line.size() > 3)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments! Format: <error_code> <HTML_filepath>");
+	if (line.size() != 3)
+		throw ArgError(this->_id, line[0], "Invalid number of arguments. Format: error_page <status_code> <HTML_filepath>");
 	else if (line[1].find_first_not_of("0123456789") != std::string::npos)
-		throw cfgServer::ArgError(this->_id, line[0], "Given error status code mixed with non-numeric value.");
+		throw ArgError(this->_id, line[0], "Status code mixed with non-numeric value.");
 
 	int	temp;
 	temp = std::atoi(line[1].c_str());
-	if (temp < 400 || temp > 600)
-		throw cfgServer::ArgError(this->_id,line[0], "Given error status code is out of range!");
 	this->_errorCodes_map[temp] = line[2];
 }
 
 void	cfgServer::handle_hostPort(vector<string> &line) {
 	if (line.size() < 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Not enough argument.");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments! Please seperate to different line.");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments (Seperate to next line)");
 	else if (line[1].find_first_not_of("0123456789:.") != std::string::npos)
-		throw cfgServer::ArgError(this->_id, line[0], "Non-numeric value found?");
+		throw ArgError(this->_id, line[0], "Invalid argument, accept digits only.");
 
 	size_t pos = line[1].find(":");
 	if (pos != std::string::npos)
 	{
-		if (line[1].find_first_not_of(":") == std::string::npos)
-			throw cfgServer::ArgError(this->_id, line[0], "Don't pass weird argument!");
+		if (line[1].at(0) == ':')
+			throw ArgError(this->_id, line[0], "No host");
 		this->_hostPort.push_back(line[1]);
 	}
 	else
@@ -234,7 +207,7 @@ void	cfgServer::handle_hostPort(vector<string> &line) {
 			this->_hostPort.push_back(temp);
 		}
 		else
-			throw cfgServer::ArgError(this->_id, line[0], "No port given!");
+			throw ArgError(this->_id, line[0], "No port!");
 	}
 }
 
@@ -242,14 +215,13 @@ void	cfgServer::handle_serverName(vector<string> &line) {
 	if (line.size() < 2)
 		return ;
 	else if (line.size() > 2)
-		throw cfgServer::ArgError(this->_id, line[0], "Too many arguments!");
+		throw ArgError(this->_id, line[0], "Invalid number of arguments");
 	this->_serverName = line[1];
 }
 
 void	cfgServer::parseServer(string &content) {
 	std::istringstream	iss(content);
 	string				line;
-	int					nl = 1;
 	bool				in_body = false;
 	string				location_body;
 	vector<string>		tokens_holder;
@@ -269,10 +241,15 @@ void	cfgServer::parseServer(string &content) {
 		vector<string>::iterator it2 = inline_directives.begin();
 		while (it2 != inline_directives.end())
 		{
-			++nl;
 			string	inlines = *it2;
 			inlines = Utils::trim_whitespaces(inlines);
-			if (!in_body && !inlines.compare(0, 8, "location"))
+			//don't move it to upper-level parser, will not working w/ inline config
+			if (!in_body && (!inlines.compare(0, 7, "server{") || !inlines.compare(0, 8, "server {") || !inlines.compare(0, 8, "server	{")))
+			{
+				++it2;
+				continue ;
+			}
+			if (!in_body && !inlines.compare(0,8,"location"))
 				in_body = true;
 			if (in_body)
 			{
@@ -281,7 +258,7 @@ void	cfgServer::parseServer(string &content) {
 				{
 					in_body = false;
 					cfgRoute a_block_found = cfgRoute();
-					a_block_found.parseLocation(location_body);
+					a_block_found.parseLocation(location_body, this->_id);
 					// a_block_found.displayContent();
 					this->_Routes.push_back(a_block_found);
 					location_body.clear();
@@ -290,21 +267,31 @@ void	cfgServer::parseServer(string &content) {
 			else
 			{
 				inlines = Utils::trim_inlineComment(inlines);
-				if (inlines[inlines.size()-1] != ';'){std::cout << "semicolon error" << std::endl;
-					exit(1);}
-				tokens_holder = Utils::tokenizer(inlines);
-				map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
-				if (it != list.end())
-					(this->*(it->second))(tokens_holder);
-				else
+				if (!inlines.empty())
 				{
-					std::cout << "\033[31mError -> \"" << tokens_holder[0] << "\"\033[0m" << std::endl;
-					throw cfgServer::OtherError(this->_id, nl, "Invalid directive!");
+					if (inlines == "}" || inlines == "{")
+					{
+						++it2;
+						continue ;
+					}
+					else if (inlines[inlines.size() - 1] != ';')
+					{
+						std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
+						throw ArgError(this->_id, "", "not terminated by \";\"");
+					}
+					tokens_holder = Utils::tokenizer(inlines);
+					map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+					if (it != list.end())
+						(this->*(it->second))(tokens_holder);
+					else
+					{
+						std::cout << red << "Error -> \"" << tokens_holder[0] << "\"" << reset << std::endl;
+						throw ArgError(this->_id, "", "unknown directive");
+					}
 				}
 			}
 			++it2;
 		}
-		continue;
 	}
 }
 
@@ -322,6 +309,8 @@ void	cfgServer::display_parsedContent(void) {
 			std::cout << "\033[38;5;68mlisten on: \033[0m" << *it << std::endl;
 			++it;
 		}
+		if (this->_hostPort.empty())
+			std::cout << "\033[38;5;68mlisten on: \033[0m" << "-" << std::endl;
 	}
 	{
 		map<int,string>::iterator it = this->_errorCodes_map.begin();

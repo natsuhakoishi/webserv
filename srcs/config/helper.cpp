@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/08 02:05:19 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/15 19:49:13 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 namespace Utils {
 
 UtilsError::UtilsError(string msg) throw()
-: _errMsg("Utils"+msg) {
+: _errMsg("Utils: "+msg) {
 }
 
 const char*	UtilsError::what() const throw() {
@@ -98,6 +98,7 @@ vector<string>	splitInline(string line) {
 	string	temp;
 
 	line = Utils::trim_whitespaces(line);
+	// std::cout << "Splitting -> " << line << std::endl;
 	while (pos < line.size())
 	{
 		if (line[pos] == ';' || line[pos] == '{' || line[pos] == '}')
@@ -108,15 +109,13 @@ vector<string>	splitInline(string line) {
 				result.push_back(temp);
 				temp.clear();
 			}
-			else
-				std::cout << std::endl;
 		}
 		else
 			temp += line[pos];
 		++pos;
 	}
-	if (result.empty() && temp.find_first_not_of(" \t") == std::string::npos && pos == line.size())
-		throw UtilsError("Semicolon missing");
+	if (!temp.empty())
+		result.push_back(temp);
 	return (result);
 }
 
