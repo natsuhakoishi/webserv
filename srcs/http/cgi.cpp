@@ -7,6 +7,10 @@ vector<string> Http::createEnv(map<string, string> &m)
 
     for (; it != m.end(); ++it)
         vec.push_back(it->first + "=" + it->second);
+    vec.push_back("REQUEST_METHOD=" + this->method);
+    vec.push_back("CONTENT_LENGTH=" + this->headers["Content-Length"]);
+    vec.push_back("CONTENT_TYPE=" + this->headers["Content-Type"]);
+    vec.push_back("HTTP_USER_AGENT=" + this->headers["User-Agent"]);
     return vec;
 }
 
@@ -139,15 +143,12 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
     {
         vector<string> vecTmp = createEnv(this->headers);
         vector<char *> vecEnv;
-        string contentLength("CONTENT_LENGTH=" + this->headers["Content-Length"]);
-        string contentType("CONTENT_TYPE=" + this->headers["Content-Type"]);
-
-        vecEnv.push_back(const_cast<char *>(contentLength.c_str()));
-        vecEnv.push_back(const_cast<char *>(contentType.c_str()));
 
         for (size_t i = 0; i < vecTmp.size(); ++i)
             vecEnv.push_back(const_cast<char *>(vecTmp[i].c_str()));
 
+        // string boundary("Boundary=" + this->headers["Content-Type"].substr(this->headers["Content-Type"].find("----") + 4));
+        // vecEnv.push_back(const_cast<char *>(boundary.c_str()));
         if (std::count(CGIpath.begin(), CGIpath.end(), '?') != 0) //if have Query Parameters, save all to env's vector
         {
             CGIpath = CGIpath.substr(CGIpath.find("?") + 1);
@@ -178,8 +179,11 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
         close(cgiIn[0]);
         close(cgiOut[1]);
         ssize_t total = 0;
-        sleep(1);
-        
+        // sleep(1);
+
+        // this->body = this->header + "\r\n\r\n" + this->body;
+
+        // cout << this->body << endl;
         while (static_cast<size_t>(total) < this->body.size())
         {
             ssize_t n = write(cgiIn[1], this->body.c_str() + total, this->body.size() - total);
@@ -194,7 +198,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
             usleep(10000);
         }
         close(cgiIn[1]);
-        std::cerr << "total2: " << total << endl;
+        std::cerr << "total2: " << total << " Bodysize: " << this->body.size() << endl;
 
         string CGIoutput;
         char buffer[1024];
@@ -225,7 +229,6 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
             }
             else if (result > 0)
             {
-
                 while ((readd = read(cgiOut[0], buffer, sizeof(buffer))) > 0)
                     CGIoutput.append(buffer, readd);
                 close(cgiOut[0]);
@@ -236,10 +239,29 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                 }
                 cout << BLUE << "Out:\n" << CGIoutput << RESETEND;
 
-                send(this->pfd.fd, CGIoutput.c_str(), CGIoutput.length(), 0);
-                this->isRespond = true;
-                cout << BLUE << "CGI Respond ok" << RESETEND;
-                close(pfd.fd);
+                if (!CGIoutput.compare("403\n"))
+                    code403(this->pfd.fd);
+                else if (!CGIoutput.compare("ok\n") && !this->redirectPath.empty())
+                    code303(this->pfd.fd);
+                else if (!CGIoutput.compare("ok\n"))
+                {
+                    string content = (getContent(this->rootPath + "/index/yeah.html").compare("") ? getContent(this->rootPath + "/index/yeah.html") : "<!doctype html><html lang=\"en\"><head><title>Upload Page [DefalutPage]</title></head><body><main><h1>Upload sucessful!</h1></main></body></html>");
+                    std::ostringstream oss;
+
+                    oss << "HTTP/1.1 200 OK\r\n";
+                    oss << "Content-Type: " << "text/html" << "\r\n";
+                    oss << "Content-Length: " << content.length() << "\r\n";
+                    oss << "\r\n";
+                    oss << content;
+                    send(this->pfd.fd, oss.str().c_str(), oss.str().length(), 0);
+                    this->isRespond = true;
+                    // cout << BLUE << "CGI Respond ok" << RESETEND;
+                    close(pfd.fd);
+                }
+                // else if (!CGIoutput.compare("500\n"))
+                else
+                    code500(this->pfd.fd);
+
                 return ;
             }
             // cout << "wait" << endl;

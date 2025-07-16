@@ -224,6 +224,12 @@ void Http::initConfig(int idx)
             cout << "Allow method: " << this->allowMethod[i] << endl;
         cout << RESETEND;
     }
+    this->headers["ROOT_PATH"] = this->rootPath;
+    this->headers["UPLOAD_PATH"] = this->uplaodPath;
+    this->headers["POST_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") != this->allowMethod.end() ? "Y" : "N");
+    this->headers["GET_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") != this->allowMethod.end() ? "Y" : "N");
+    this->headers["DEL_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "DELETE") != this->allowMethod.end() ? "Y" : "N");
+    // cout << "GET: " << this->headers["GET_METHOD"] << " POST: " << this->headers["POST_METHOD"] << endl;
 }
 
 void Http::readBody()
