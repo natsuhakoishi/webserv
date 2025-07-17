@@ -47,6 +47,7 @@ class Config {
 		void	print_SocketTable();
 		void	general_check();
 		void	build_SocketTable();
+		void	checkRoute();
 };
 
 #endif

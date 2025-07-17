@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/17 19:09:19 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/17 22:59:22 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,7 +234,7 @@ void	cfgRoute::parseLocation(string &content, int server_id) {
 	bool				firstLine = false;
 	vector<string>		tokens_holder;
 	map<string,void(cfgRoute::*)(vector<string>&,int)>	list;
-	
+
 	list["root"] = &cfgRoute::handle_root;
 	list["index"] = &cfgRoute::handle_index;
 	list["autoindex"] = &cfgRoute::handle_autoIndex;

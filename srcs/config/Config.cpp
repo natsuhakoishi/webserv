@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/17 19:06:18 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/18 03:05:40 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
 			a_server.parseServer(server_body);
 			this->_Servers.push_back(a_server);
+			this->checkRoute();
 			server_body.clear();
 		}
 		else
@@ -134,6 +135,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
 			a_server.parseServer(server_body);
 			this->_Servers.push_back(a_server);
+			this->checkRoute();
 			server_body.clear();
 		}
 	}
@@ -190,17 +192,41 @@ void	Config::general_check() {
 	}
 }
 
-void	Config::build_SocketTable()
-{
+void	Config::build_SocketTable() {
 	vector<cfgServer>::iterator	it = this->_Servers.begin();
 	while (it != this->_Servers.end())
 	{
 		const vector<string> address = (*it).get_hostPort();
-		
 		vector<string>::const_iterator	it2 = address.begin();
 		while (it2 != address.end())
 		{
 			this->_SocketTable[*it2].push_back((*it).get_id());
+			++it2;
+		}
+		++it;
+	}
+}
+
+void	Config::checkRoute() {
+	vector<string>	temp_buffer;
+	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	while (it != this->_Servers.end())
+	{
+		vector<cfgRoute>	&temp_route = (*it).get_routes();
+		vector<cfgRoute>::iterator	it2 = temp_route.begin();
+		while (it2 != temp_route.end())
+		{
+			temp_buffer.push_back((*it2).get_path());
+			if (temp_buffer.size() > 2)
+			{
+				vector<string>::iterator	it3 = temp_buffer.begin();
+				while (it3 != temp_buffer.end())
+				{
+					if ((*it3).compare((*it2).get_path()) == 0)
+						throw ConfigError("Found duplicate route!");
+					++it3;
+				}
+			}
 			++it2;
 		}
 		++it;
