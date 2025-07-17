@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/18 03:05:40 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/18 03:18:18 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,19 +216,23 @@ void	Config::checkRoute() {
 		vector<cfgRoute>::iterator	it2 = temp_route.begin();
 		while (it2 != temp_route.end())
 		{
-			temp_buffer.push_back((*it2).get_path());
 			if (temp_buffer.size() > 2)
 			{
 				vector<string>::iterator	it3 = temp_buffer.begin();
 				while (it3 != temp_buffer.end())
 				{
 					if ((*it3).compare((*it2).get_path()) == 0)
+					{
+						std::cout << red << "Error -> \"" << (*it2).get_path() << "\"" << reset << std::endl;
 						throw ConfigError("Found duplicate route!");
+					}
 					++it3;
 				}
 			}
+			temp_buffer.push_back((*it2).get_path());
 			++it2;
 		}
+		temp_buffer.clear();
 		++it;
 	}
 }

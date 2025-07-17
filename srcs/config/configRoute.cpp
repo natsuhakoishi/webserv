@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/17 22:59:22 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/18 03:24:49 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,8 +264,6 @@ void	cfgRoute::parseLocation(string &content, int server_id) {
 			{
 				firstLine = true;
 				this->_path = splitRoute(inlines, server_id);
-				if (this->_path.empty())
-					throw ArgError(server_id, "", "", "Error! Can't split out route.");
 				++it2;
 				continue ;
 			}
@@ -289,15 +287,23 @@ void	cfgRoute::parseLocation(string &content, int server_id) {
 }
 
 string	cfgRoute::splitRoute(string &line, int id) {
-	size_t	start;
-	size_t	pos = line.find("/", 7);
-
-	if (pos == std::string::npos)
-		throw ArgError(id, "", "Location", "No route given!");
-	start = pos;
-	while (pos < line.size() && line[pos] != ' ' && line[pos] != '\t' && line[pos] != '{')
-		++pos;
-	return (line.substr(start, pos - start));
+	vector<string>	temp = Utils::tokenizer(line);
+	if (temp.empty())
+	{
+		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
+		throw ArgError(id, "", "", "\"location\" directive: not delimited by empty spaces!");
+	}
+	else if (temp.size() < 2 || temp.size() > 3)
+	{
+		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
+		throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
+	}
+	else if (temp.size() == 3 && temp[2] != "{")
+	{
+			std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
+			throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
+	}
+	return (temp[1]);
 }
 
 void	cfgRoute::displayContent(void) {
