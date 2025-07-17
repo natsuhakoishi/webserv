@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Config.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/15 20:16:20 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/17 19:06:18 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,11 +112,9 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 				brace_count--;
 			++i;
 		}
+		server_body.append(line).append("\n");
 		if (brace_count)
-		{
-			server_body.append(line).append("\n");
 			continue ;
-		}
 		else if (!brace_count && line.find("server", line.find_first_not_of(" \n\t\r\v\f")) != std::string::npos)
 		{
 			//urgh edge case, inline server block
@@ -124,7 +122,6 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			first_Obrace = false;
 			this->_blockCount++;
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
-			server_body.append(line).append("\n");
 			a_server.parseServer(server_body);
 			this->_Servers.push_back(a_server);
 			server_body.clear();
@@ -136,7 +133,6 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			this->_blockCount++;
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
 			a_server.parseServer(server_body);
-			// a_server.display_parsedContent();
 			this->_Servers.push_back(a_server);
 			server_body.clear();
 		}
@@ -188,17 +184,6 @@ void	Config::general_check() {
 				temp.push_back("DELETE");
 				current.set_httpMethod(temp);
 			}
-			// else
-			// {
-			// 	const vector<string>& method = current.get_httpMethod();
-			// 	if (std::find(method.begin(), method.end(), "POST") != method.end())
-			// 	{
-			// 		if (std::find(method.begin(), method.end(), "GET") == method.end())
-			// 			Utils::print_warning(server.get_id(), current.get_path(), "allowed_methods", "GET is missing.");
-			// 	}
-			// }
-			// if (!current.get_redirectionPath().empty())
-			// 	Utils::print_warning(server.get_id(), current.get_path(), "return", "Others setup hidden by return.");
 			++it2;
 		}
 		++it;
@@ -220,22 +205,6 @@ void	Config::build_SocketTable()
 		}
 		++it;
 	}
-	// vector<string>	used_port;
-	// map<string, vector<int> >::iterator	table = this->_SocketTable.begin();
-	// while (table != this->_SocketTable.end())
-	// {
-	// 	string port;
-	// 	port = (*table).first.substr((*table).first.find(":") + 1);
-	// 	vector<string>::iterator it3 = used_port.begin();
-	// 	while (it3 != used_port.end())
-	// 	{
-	// 		if ((*it3).compare(port) == 0)
-	// 			throw ConfigError("Detect bind to used port");
-	// 		++it3;
-	// 	}
-	// 	used_port.push_back(port);
-	// 	++table;
-	// }
 }
 
 void	Config::print_ServerParsed() {
@@ -284,16 +253,3 @@ const char*	Config::ConfigError::what() const throw() {
 
 Config::ConfigError::~ConfigError() throw() {
 }
-
-// Config::CheckingError::CheckingError(int id, string path, string dir, string msg) throw() {
-// 	std::ostringstream	oss;
-// 	oss << "Server(" << id << ") Location <" << path << ">:  [" << dir << "]: argument invalid: " << msg;
-// 	this->_errMsg = oss.str();
-// }
-
-// const char*	Config::CheckingError::what() const throw() {
-// 	return (this->_errMsg.c_str());
-// }
-
-// Config::CheckingError::~CheckingError() throw() {
-// }

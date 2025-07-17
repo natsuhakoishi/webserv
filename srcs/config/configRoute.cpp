@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/09 22:25:55 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/17 19:09:19 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -303,7 +303,11 @@ string	cfgRoute::splitRoute(string &line, int id) {
 void	cfgRoute::displayContent(void) {
 	std::cout << "\033[38;5;69m----- Route: \033[0m" << this->_path << " -----" << std::endl;
 	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
+	if (this->_root_path.empty())
+		std::cout << "\033[38;5;68mroot: -\033[0m" << std::endl;
 	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
+	if (this->_index_path.empty())
+		std::cout << "\033[38;5;68mindex: -\033[0m" << std::endl;
 	std::cout << "\033[38;5;68mauto index: \033[0m" << (this->_autoIndex==true ? "on" : "off") << std::endl;
 	{
 		vector<string>::iterator	it = this->_http_method.begin();

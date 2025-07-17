@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configServer.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yyan-bin <yyan-bin@student.42kl.edu.my>    +#+  +:+       +#+        */
+/*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/16 22:37:51 by yyan-bin         ###   ########.fr       */
+/*   Updated: 2025/07/17 19:10:51 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ void	cfgServer::parseServer(string &content) {
 		{
 			string	inlines = *it2;
 			inlines = Utils::trim_whitespaces(inlines);
-			//don't move it to upper-level parser, will not working w/ inline config
+			//don't move it to Config parsing logic, will not working w/ inline config
 			if (!in_body && (!inlines.compare(0, 7, "server{") || !inlines.compare(0, 8, "server {") || !inlines.compare(0, 8, "server	{")))
 			{
 				++it2;
@@ -254,7 +254,7 @@ void	cfgServer::parseServer(string &content) {
 			if (in_body)
 			{
 				location_body.append(inlines).append("\n");
-				if (inlines.find_last_of("}") != std::string::npos)
+				if (inlines.find("}") != std::string::npos)
 				{
 					in_body = false;
 					cfgRoute a_block_found = cfgRoute();
@@ -322,6 +322,10 @@ void	cfgServer::display_parsedContent(void) {
 	}
 	std::cout << "\033[38;5;68mclient_max_body_size: \033[0m" << this->_clientBodySize << std::endl;
 	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
+	if (this->_root_path.empty())
+		std::cout << "\033[38;5;68mroot: -\033[0m" << std::endl;
 	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
+		if (this->_index_path.empty())
+			std::cout << "\033[38;5;68mindex: -\033[0m" << std::endl;
 	std::cout << "\033[38;5;68mauto index: \033[0m" << (this->_autoIndexS==true ? "on" : "off") << std::endl << std::endl;
 }
