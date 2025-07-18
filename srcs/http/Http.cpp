@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiRoute(false), isRespond(false)
+: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), isRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -31,7 +31,6 @@ Http &Http::operator=(const Http &q)
     this->rootPath = q.rootPath;
     this->routes = q.routes;
     this->autoindex = q.autoindex;
-    this->cgiRoute = q.cgiRoute;
     this->indexFile = q.indexFile;
     this->bodySize = q.bodySize;
     this->errorCodeMap = q.errorCodeMap;
@@ -67,7 +66,7 @@ void Http::parse(string input)
         readHeaders();
     if (!this->method.compare("POST"))
         readBody();
-    else if (!this->url.find("/cgi/"))
+    else if (cgiTypePath.first.compare("Empty"))
         handleCGI(this->url);
     else if (!this->method.compare("GET"))
         GET(this->pfd, this->filePath);
@@ -209,11 +208,28 @@ void Http::initConfig(int idx)
         this->redirectPath = this->routes[idx].get_redirectionPath();
         this->filePath = this->rootPath + this->url;
         this->indexFile = this->routes[idx].get_indexPath();
-        if (!this->routes[idx].get_path().compare("/cgi")) this->cgiRoute = true;
         this->autoindex = this->routes[idx].get_autoIndex();
         this->bodySize = this->routes[idx].get_clientBodySize();
         this->allowMethod = this->routes[idx].get_httpMethod();
         this->uplaodPath = this->routes[idx].get_uploadPath();
+
+        map<string, string> cgi = this->routes[idx].get_cgiInfo();
+        cout << "cgi info: " << cgi.size() << endl;
+        if (cgi.size() != 0)
+        {
+            map<string, string>::iterator it = cgi.begin();
+            cout << it->first << " : " << it->second << endl;
+            for (; it != cgi.end(); ++it)
+            {
+                if (url.find(it->first) != string::npos)
+                {
+                    this->cgiTypePath = *it;
+                    break ;
+                }
+            }
+            this->cgiTypePath.first = "C?";
+        }
+
         cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
@@ -224,6 +240,7 @@ void Http::initConfig(int idx)
             cout << "Allow method: " << this->allowMethod[i] << endl;
         cout << RESETEND;
     }
+
     this->headers["ROOT_PATH"] = this->rootPath;
     this->headers["UPLOAD_PATH"] = this->uplaodPath;
     this->headers["POST_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") != this->allowMethod.end() ? "Y" : "N");
@@ -245,7 +262,7 @@ void Http::readBody()
 
     if (this->body.length() == ContentLenght)
     {
-        if (!this->url.find("/cgi/"))
+        if (this->cgiTypePath.first.compare("Empty"))
             handleCGI(this->url);
         else
             POST(this->pfd, this->filePath);

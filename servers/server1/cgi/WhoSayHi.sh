@@ -1,12 +1,12 @@
 #!/bin/bash
 
-if [ -z "$NAME"]; then
+if [ -z "$NAME" ]; then
     name="Who"
 else
     name=$NAME
 fi
 
-if [ -z "$SAY"]; then
+if [ -z "$SAY" ]; then
     said="Hi"
 else
     said=$SAY

@@ -17,7 +17,7 @@ class Http
         string rootPath;
         vector<cfgRoute> routes;
         bool autoindex;
-        bool cgiRoute;
+        std::pair<string, string> cgiTypePath; //type:executePath
         string indexFile;
         size_t  bodySize;
 		map<int,string>		errorCodeMap;

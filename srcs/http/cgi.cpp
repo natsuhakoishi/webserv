@@ -33,7 +33,7 @@ vector<string> Http::getQueryParameters(string &url)
 void Http::CGIGet(vector<char *> &argv, string CGIpath)
 {
     // for (size_t i = 0; i < argv.size(); i++)
-    //     cout << GREEN << "ARGV:" << argv[i] << RESETEND;
+    //     cout << GREEN << argv.size() << " ARGV:" << argv[i] << RESETEND;
     int fd[2];
     pipe(fd);
 
@@ -41,7 +41,6 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
     if (pid == 0)
     {
         // cout << RED << vecArgv[0] << RESETEND;
-
         vector<string> vecTmp = createEnv(this->headers);
         vector<char *> vecEnv;
 
@@ -79,6 +78,7 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
         {
             int status;
             pid_t result = waitpid(pid, &status, WNOHANG);
+            // std::cerr << result << " aaaaa" << endl;
             if (result == -1)
             {
                 perror("waitpid error");
@@ -273,11 +273,11 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
 
 void Http::handleCGI(string CGIpath)
 {
-    if (!cgiRoute) //config file did'nt set /cgi/
-    {
-        code403(this->pfd.fd);
-        return ;
-    }
+    // if (!cgiRoute) //config file did'nt set /cgi/
+    // {
+    //     code403(this->pfd.fd);
+    //     return ;
+    // }
     string clearURL(this->rootPath + CGIpath); //removed $...
     if (std::count(CGIpath.begin(), CGIpath.end(), '?') != 0)
         clearURL = this->rootPath + CGIpath.substr(0, CGIpath.find("?"));  //removed $...
@@ -293,6 +293,7 @@ void Http::handleCGI(string CGIpath)
     }
     if (!isExecutale(clearURL))
     {
+        // GET(this->pfd, clearURL);
         code403(this->pfd.fd);
         return ;
     }
@@ -301,19 +302,21 @@ void Http::handleCGI(string CGIpath)
         // cout << BLUE << vecEnv[i] << RESETEND;
     vector<char *> vecArgv;
 
-    if (clearURL.find('.', 1) == string::npos || !clearURL.substr(clearURL.find('.', 1), 4).compare(".out"))
-        ;
-    else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".sh"))
-        vecArgv.push_back(const_cast<char *>("/usr/bin/bash"));
-    else if (!clearURL.substr(clearURL.find('.', 1), 5).compare(".zsh"))
-        vecArgv.push_back(const_cast<char *>("/usr/bin/zsh"));
-    else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".py"))
-        vecArgv.push_back(const_cast<char *>("/usr/bin/python3"));
-    else
-    {
-        code500(this->pfd.fd);
-        return ;
-    }
+    if (this->cgiTypePath.first.compare("C?"))
+        vecArgv.push_back(const_cast<char *>(this->cgiTypePath.second.c_str()));
+    // if (clearURL.find('.', 1) == string::npos || !clearURL.substr(clearURL.find('.', 1), 4).compare(".out"))
+    //     ;
+    // else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".sh"))
+    //     vecArgv.push_back(const_cast<char *>("/usr/bin/bash"));
+    // else if (!clearURL.substr(clearURL.find('.', 1), 5).compare(".zsh"))
+    //     vecArgv.push_back(const_cast<char *>("/usr/bin/zsh"));
+    // else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".py"))
+    //     vecArgv.push_back(const_cast<char *>("/usr/bin/python3"));
+    // else
+    // {
+    //     code500(this->pfd.fd);
+    //     return ;
+    // }
 
     vecArgv.push_back(const_cast<char *>(clearURL.c_str()));
     vecArgv.push_back(NULL);
