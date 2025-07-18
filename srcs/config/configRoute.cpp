@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/18 03:24:49 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/18 16:31:04 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,29 +291,42 @@ string	cfgRoute::splitRoute(string &line, int id) {
 	if (temp.empty())
 	{
 		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
-		throw ArgError(id, "", "", "\"location\" directive: not delimited by empty spaces!");
+		throw ArgError(id, "", "", "\"location\" directive: not delimited by whitespaces!");
 	}
 	else if (temp.size() < 2 || temp.size() > 3)
 	{
 		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
 		throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
 	}
+	else if (temp[0] != "location")
+	{
+		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
+		throw ArgError(id, "", "", "\"location\" directive: unknown directive.");
+	}
 	else if (temp.size() == 3 && temp[2] != "{")
 	{
-			std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
-			throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
+		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
+		throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
+	}
+	if (temp.size() == 2)
+	{
+		size_t pos = temp[1].find_last_of("{");
+		if (pos != std::string::npos)
+			temp[1] = temp[1].substr(0, pos);
 	}
 	return (temp[1]);
 }
 
 void	cfgRoute::displayContent(void) {
 	std::cout << "\033[38;5;69m----- Route: \033[0m" << this->_path << " -----" << std::endl;
-	std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
 	if (this->_root_path.empty())
 		std::cout << "\033[38;5;68mroot: -\033[0m" << std::endl;
-	std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
+	else
+		std::cout << "\033[38;5;68mroot: \033[0m" << this->_root_path << std::endl;
 	if (this->_index_path.empty())
 		std::cout << "\033[38;5;68mindex: -\033[0m" << std::endl;
+	else
+		std::cout << "\033[38;5;68mindex: \033[0m" << this->_index_path << std::endl;
 	std::cout << "\033[38;5;68mauto index: \033[0m" << (this->_autoIndex==true ? "on" : "off") << std::endl;
 	{
 		vector<string>::iterator	it = this->_http_method.begin();
