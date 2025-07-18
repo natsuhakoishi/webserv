@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/18 16:31:04 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/18 18:54:54 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,7 +250,7 @@ void	cfgRoute::parseLocation(string &content, int server_id) {
 		vector<string>::iterator it2 = inline_directives.begin();
 		while (it2 != inline_directives.end())
 		{
-			string	inlines = *it2;
+			string	inlines = *it2; 
 			inlines = Utils::trim_whitespaces(inlines);
 			inlines = Utils::trim_inlineComment(inlines);
 			if (inlines.empty() || inlines == "{")
@@ -267,7 +267,12 @@ void	cfgRoute::parseLocation(string &content, int server_id) {
 				++it2;
 				continue ;
 			}
-			if (inlines[inlines.size() - 1] != ';')
+			if (!inlines.compare(0, 8, "location"))
+			{
+				std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
+				throw ArgError(server_id, this->_path, "", "nested location blocks is invalid.");
+			}
+			else if (inlines[inlines.size() - 1] != ';')
 			{
 				std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
 				throw ArgError(server_id, this->_path, "", "not terminated by \";\"");
