@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/18 03:18:18 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/20 22:03:27 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,9 @@ void	Config::general_check() {
 		cfgServer	&server = *it;
 		vector<cfgRoute>	&temp_route = server.get_routes();
 		vector<cfgRoute>::iterator	it2 = temp_route.begin();
-		
+
+		if (server.get_hostPort().empty())
+			throw CheckingError(server.get_id(), "listen", "No valid socket address / port found!");
 		while (it2 != temp_route.end())
 		{
 			cfgRoute &current = *it2;
@@ -282,4 +284,21 @@ const char*	Config::ConfigError::what() const throw() {
 }
 
 Config::ConfigError::~ConfigError() throw() {
+}
+
+Config::CheckingError::CheckingError(int id, string dir, string msg) throw() {
+	std::ostringstream	oss;
+	oss << "Server(" << id << "): ";
+	if (!dir.empty())
+		oss << " [" << dir << "]: ";
+	if (!msg.empty())
+		oss << msg;
+	this->_errMsg = oss.str();
+}
+
+const char*	Config::CheckingError::what() const throw() {
+	return (this->_errMsg.c_str());
+}
+
+Config::CheckingError::~CheckingError() throw() {
 }
