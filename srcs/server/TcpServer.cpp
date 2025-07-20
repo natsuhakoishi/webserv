@@ -171,8 +171,9 @@ void	TcpServer::handleClientMessage(size_t i)
 		if (h->getIsRespond() == true)
 		{
 			// cout << RED << "http object deleted" << RESETEND;
-			delete h;
-			this->httpMap.erase(this->fds[i].fd);
+			// delete h;
+			// this->httpMap.erase(this->fds[i].fd);
+			this->fds[i].revents = POLLOUT;
 		}
 	}
 	else if (bytes_read == 0)
@@ -181,6 +182,26 @@ void	TcpServer::handleClientMessage(size_t i)
 		close(this->fds[i].fd);
 		this->fds.erase(fds.begin() + i);
 	}
+}
+
+void	TcpServer::handleClientSend(size_t i)
+{
+	Http *h = this->httpMap[this->fds[i].fd];
+
+	string response = h->getResponse();
+
+	cout << response << endl;
+	ssize_t bytes_send = send(this->fds[i].fd, response.c_str(), response.length(), 0);
+
+	if (bytes_send < 0)
+	{
+		std::cerr << "Error: Send: fd " << this->fds[i].fd << std::endl;
+	}
+	close(this->fds[i].fd);
+	this->fds.erase(this->fds.begin() + i);
+
+	delete h;
+	this->httpMap.erase(this->fds[i].fd);
 }
 
 void	TcpServer::runServer()
@@ -203,6 +224,8 @@ void	TcpServer::runServer()
 				else
 					handleClientMessage(i);
 			}
+			else if (this->fds[i].revents & POLLOUT)
+				handleClientSend(i);
 		}
 	}
 }

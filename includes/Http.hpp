@@ -39,6 +39,8 @@ class Http
         string filePath;
         string HttpVersion;
 
+        string response;
+
         bool isRespond;
         Http();
 
@@ -60,6 +62,7 @@ class Http
         string getContent(string);
         string getContentType(string);
         string getErrorCodePath(int code);
+        string getResponse();
         // bool getServerFromServerName(const vector<cfgServer> &csVec);
         void getServerBlock(const vector<cfgServer> &csVec);
         void GET(pollfd, string);

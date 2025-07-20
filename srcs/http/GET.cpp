@@ -68,7 +68,7 @@ void Http::GET(pollfd pfd, string path)
         content = handleAutoindex(path);
         if (!content.compare(""))
         {
-            code404(this->pfd.fd); //can change to server error 
+            code404(this->pfd.fd); //can change to server error
             return ;
         }
         type = "text/html";
@@ -88,10 +88,11 @@ void Http::GET(pollfd pfd, string path)
     ss << "\r\n";
     ss << content;
 
-    send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
+    // send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
+    this->response = ss.str();
 
     cout << BLUE << "GET: Respond successful" << RESETEND;
-    std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
-    close(pfd.fd);
+    // std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
+    // close(pfd.fd);
     this->isRespond = true;
 }

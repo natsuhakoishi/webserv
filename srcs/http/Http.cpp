@@ -51,7 +51,7 @@ Http &Http::operator=(const Http &q)
     this->filePath = q.filePath;
     this->headers = q.headers;
     this->HttpVersion = q.HttpVersion;
-    
+
     this->isRespond = q.isRespond;
 
     return *this;
