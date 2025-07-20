@@ -13,7 +13,7 @@ string Http::getContentType(string c)
     return "text/plain";
 }
 
-void Http::GET(pollfd pfd, string path)
+void Http::GET(string path)
 {
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
@@ -21,22 +21,22 @@ void Http::GET(pollfd pfd, string path)
     if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
     {
         cout << RED << "GET: Method not allow" << RESETEND;
-        code403(this->pfd.fd);
+        code403();
         return ;
     }
     else if (!this->redirectPath.empty())
     {
-        code303(this->pfd.fd); //redirection
+        code303(); //redirection
         return ;
     }
     else if (!isDirectory(path) && !fileExistis(path)) //not a directory & file not exists
     {
-        code404(pfd.fd);
+        code404();
         return ;
     }
     else if (isDirectory(this->filePath) && this->filePath[this->filePath.length() - 1] != '/')
     {
-        code301(pfd.fd, path); //redirect ./example to ./example/
+        code301(path); //redirect ./example to ./example/
         return ;
     }
     else if (path[path.length() - 1] == '/')
@@ -53,7 +53,7 @@ void Http::GET(pollfd pfd, string path)
         }
         else if (this->autoindex == false)
         {
-            code403(pfd.fd);
+            code403();
             return ;
         }
     }
@@ -68,7 +68,7 @@ void Http::GET(pollfd pfd, string path)
         content = handleAutoindex(path);
         if (!content.compare(""))
         {
-            code404(this->pfd.fd); //can change to server error
+            code404(); //can change to server error
             return ;
         }
         type = "text/html";
@@ -88,11 +88,11 @@ void Http::GET(pollfd pfd, string path)
     ss << "\r\n";
     ss << content;
 
+    this->respond = ss.str();
     // send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
-    this->response = ss.str();
 
-    cout << BLUE << "GET: Respond successful" << RESETEND;
+    // cout << BLUE << "GET: Respond successful" << RESETEND;
     // std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
     // close(pfd.fd);
-    this->isRespond = true;
+    // this->isRespond = true;
 }

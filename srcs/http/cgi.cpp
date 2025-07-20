@@ -83,7 +83,7 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
             {
                 perror("waitpid error");
                 close(fd[0]);
-                code500(this->pfd.fd);
+                code500();
                 return;
             }
             else if (!result)
@@ -93,7 +93,7 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
                     kill(pid, SIGKILL);
                     waitpid(pid, &status, 0);
                     close(fd[0]);
-                    code504(this->pfd.fd);
+                    code504();
                     return ;
                 }
             }
@@ -104,14 +104,15 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
                 close(fd[0]);
                 if (CGIoutput.empty())
                 {
-                    code504(this->pfd.fd);
+                    code504();
                     return ;
                 }
                 cout << CGIoutput << endl;
 
-                send(this->pfd.fd, CGIoutput.c_str(), CGIoutput.length(), 0);
-                this->isRespond = true;
-                cout << BLUE << "CGI Respond ok" << RESETEND;
+                this->respond = CGIoutput;
+                // send(this->pfd.fd, CGIoutput.c_str(), CGIoutput.length(), 0);
+                // this->isRespond = true;
+                // cout << BLUE << "CGI Respond ok" << RESETEND;
                 break ;
             }
             // cout << "wait" << endl;
@@ -136,7 +137,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
     int pid = fork();
     if (pid == -1)
     {
-        code500(this->pfd.fd);
+        code500();
         return ;
     }
     else if (pid == 0)
@@ -191,7 +192,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
             {
                 close(cgiIn[1]);
                 close(cgiOut[0]);
-                code500(this->pfd.fd);
+                code500();
                 return ;
             }
             total += n;
@@ -213,7 +214,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
             {
                 perror("waitpid error");
                 close(cgiOut[0]);
-                code500(this->pfd.fd);
+                code500();
                 return;
             }
             else if (!result)
@@ -223,7 +224,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     kill(pid, SIGKILL);
                     waitpid(pid, &status, 0);
                     close(cgiOut[0]);
-                    code504(this->pfd.fd);
+                    code504();
                     return ;
                 }
             }
@@ -234,15 +235,15 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                 close(cgiOut[0]);
                 if (CGIoutput.empty())
                 {
-                    code504(this->pfd.fd);
+                    code504();
                     return ;
                 }
                 cout << BLUE << "Out:\n" << CGIoutput << RESETEND;
 
                 if (!CGIoutput.compare("403\n"))
-                    code403(this->pfd.fd);
+                    code403();
                 else if (!CGIoutput.compare("ok\n") && !this->redirectPath.empty())
-                    code303(this->pfd.fd);
+                    code303();
                 else if (!CGIoutput.compare("ok\n"))
                 {
                     string content = (getContent(this->rootPath + "/index/yeah.html").compare("") ? getContent(this->rootPath + "/index/yeah.html") : "<!doctype html><html lang=\"en\"><head><title>Upload Page [DefalutPage]</title></head><body><main><h1>Upload sucessful!</h1></main></body></html>");
@@ -253,14 +254,16 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     oss << "Content-Length: " << content.length() << "\r\n";
                     oss << "\r\n";
                     oss << content;
-                    send(this->pfd.fd, oss.str().c_str(), oss.str().length(), 0);
-                    this->isRespond = true;
-                    // cout << BLUE << "CGI Respond ok" << RESETEND;
-                    close(pfd.fd);
+
+                    this->respond = oss.str();
+                    // send(this->pfd.fd, oss.str().c_str(), oss.str().length(), 0);
+                    // this->isRespond = true;
+                    // // cout << BLUE << "CGI Respond ok" << RESETEND;
+                    // close(pfd.fd);
                 }
                 // else if (!CGIoutput.compare("500\n"))
                 else
-                    code500(this->pfd.fd);
+                    code500();
 
                 return ;
             }
@@ -283,18 +286,18 @@ void Http::handleCGI(string CGIpath)
         clearURL = this->rootPath + CGIpath.substr(0, CGIpath.find("?"));  //removed $...
     if (!fileExistis(clearURL))
     {
-        code404(this->pfd.fd);
+        code404();
         return ;
     }
     if (isDirectory(clearURL)) //pass to GET method handle autoindex
     {
-        GET(this->pfd, clearURL);
+        GET(clearURL);
         return ;
     }
     if (!isExecutale(clearURL))
     {
         // GET(this->pfd, clearURL);
-        code403(this->pfd.fd);
+        code403();
         return ;
     }
 
@@ -326,5 +329,5 @@ void Http::handleCGI(string CGIpath)
     else if (!this->method.compare("POST"))
         CGIPost(vecArgv, CGIpath);
     else
-        code405(this->pfd.fd);
+        code405();
 }

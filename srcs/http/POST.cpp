@@ -12,7 +12,7 @@ Content-Disposition: form-data; name="file"; filename="&#27927;&#34915;&#29483;&
 Content-Type: video/mp4
 */
 
-void Http::POST(pollfd pfd, string path)
+void Http::POST(string path)
 {
     std::istringstream ss(this->body);
     string boundary;
@@ -23,7 +23,7 @@ void Http::POST(pollfd pfd, string path)
             std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") == this->allowMethod.end())
     {
         cout << RED << "POST: Method not allow" << RESETEND;
-        code403(this->pfd.fd);
+        code403();
         return ;
     }
     // if (static_cast<int>(this->body.length()) > this->bodySize)
@@ -57,7 +57,7 @@ void Http::POST(pollfd pfd, string path)
 
     if (!this->redirectPath.empty())
     {
-        code303(this->pfd.fd);
+        code303();
         return ;
     }
     //respond sucessful page
@@ -71,10 +71,12 @@ void Http::POST(pollfd pfd, string path)
     oss << "Content-Length: " << content.length() << "\r\n";
     oss << "\r\n";
     oss << content;
-    send(pfd.fd, oss.str().c_str(), oss.str().length(), 0);
-    this->isRespond = true;
 
-    cout << BLUE << "POST: Respond sucessful" << RESETEND;
-    std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
-    close(pfd.fd);
+    this->respond = oss.str();
+    // send(pfd.fd, oss.str().c_str(), oss.str().length(), 0);
+    // this->isRespond = true;
+
+    // cout << BLUE << "POST: Respond sucessful" << RESETEND;
+    // std::cout << "Client (fd: " << pfd.fd << ") Disconnected" << RESETEND; //debug
+    // close(pfd.fd);
 }

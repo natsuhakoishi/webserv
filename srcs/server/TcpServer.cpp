@@ -168,6 +168,18 @@ void	TcpServer::handleClientMessage(size_t i)
 		}
 		Http *h = this->httpMap[this->fds[i].fd];
 		h->parse((string(buffer, bytes_read)));
+
+		/*
+		if (h->getCanRespond() == true)
+		{
+			h->handleRequest();
+			string respond = h->getRespond();
+			send(this->fds[i].fd, respond.c_str(), respond.length(), 0);
+			// cout << RED << "http object deleted" << RESETEND;
+			delete h;
+			this->httpMap.erase(this->fds[i].fd);
+			close(this->fds[i].fd);
+		*/          //comment below 6 row
 		if (h->getIsRespond() == true)
 		{
 			// cout << RED << "http object deleted" << RESETEND;
