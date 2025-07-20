@@ -209,11 +209,11 @@ void	TcpServer::handleClientSend(size_t i)
 	{
 		std::cerr << "Error: Send: fd " << this->fds[i].fd << std::endl;
 	}
-	close(this->fds[i].fd);
-	this->fds.erase(this->fds.begin() + i);
-
 	delete h;
 	this->httpMap.erase(this->fds[i].fd);
+
+	close(this->fds[i].fd);
+	this->fds.erase(this->fds.begin() + i);
 }
 
 void	TcpServer::runServer()
