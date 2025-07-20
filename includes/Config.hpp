@@ -30,12 +30,21 @@ class Config {
 		void	checkRoute();
 
 		class ConfigError : public std::exception {
-			private:
-				string	_errMsg;
 			public:
 				ConfigError(string msg) throw();
 				virtual const char*	what() const throw();
 				~ConfigError() throw();
+			private:
+				string	_errMsg;
+		};
+
+		class CheckingError : public std::exception {
+			public:
+				CheckingError(int id, string dir, string msg) throw();
+				virtual const char*	what() const throw();
+				~CheckingError() throw();
+			private:
+				string	_errMsg;
 		};
 
 	public:
