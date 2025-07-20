@@ -52,8 +52,3 @@ bool Http::isExecutale(const string &path)
         return true;
     return false;
 }
-
-string Http::getResponse()
-{
-    return this->response;
-}
