@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), isRespond(false)
+: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), canRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -52,7 +52,7 @@ Http &Http::operator=(const Http &q)
     this->headers = q.headers;
     this->HttpVersion = q.HttpVersion;
     
-    this->isRespond = q.isRespond;
+    this->canRespond = q.canRespond;
 
     return *this;
 }
@@ -66,16 +66,32 @@ void Http::parse(string input)
         readHeaders();
     if (!this->method.compare("POST"))
         readBody();
-    else if (cgiTypePath.first.compare("Empty"))
-        handleCGI(this->url);
-    else if (!this->method.compare("GET"))
-        GET(this->pfd, this->filePath);
-    else if (!this->method.compare("DELETE"))
-        DELETE(this->pfd, this->filePath);
-    else //unknown method
-        code405(this->pfd.fd);
+    else
+        this->canRespond = true;
+    // else if (cgiTypePath.first.compare("Empty"))
+    //     handleCGI(this->url);
+    // else if (!this->method.compare("GET"))
+    //     GET(this->pfd, this->filePath);
+    // else if (!this->method.compare("DELETE"))
+    //     DELETE(this->pfd, this->filePath);
+    // else //unknown method
+    //     code405(this->pfd.fd);
 
     this->buffer.clear();
+}
+
+void Http::handleRequest()
+{
+    if (cgiTypePath.first.compare("Empty"))
+        handleCGI(this->url);
+    else if (!this->method.compare("POST"))
+        POST(this->filePath);
+    else if (!this->method.compare("GET"))
+        GET(this->filePath);
+    else if (!this->method.compare("DELETE"))
+        DELETE(this->filePath);
+    else //unknown method
+        code405();
 }
 
 void Http::readHeaders()
@@ -255,21 +271,38 @@ void Http::readBody()
     if (ContentLenght > this->bodySize)
     {
         cout << RED << "POST: Size too large" << RESETEND;
-        code413(this->pfd.fd);
+        code413();
         return ;
     }
     this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
 
     if (this->body.length() == ContentLenght)
-    {
-        if (this->cgiTypePath.first.compare("Empty"))
-            handleCGI(this->url);
-        else
-            POST(this->pfd, this->filePath);
-    }
+        this->canRespond = true;
+    // {
+        // if (this->cgiTypePath.first.compare("Empty"))
+        //     handleCGI(this->url);
+        // else
+        //     POST(this->pfd, this->filePath);
+    // }
 }
 
-bool Http::getIsRespond() const
+bool Http::getCanRespond() const
 {
-    return this->isRespond;
+    return this->canRespond;
+}
+
+const string Http::getConnection() const
+{
+    map<string, string>::const_iterator iter = this->headers.find("Connection");
+    if (iter == this->headers.end())
+        return "";
+    return iter->second;
+}
+
+const string &Http::getRespond()
+{
+    if (this->respond.empty())
+        code500();
+    // cout << GREEN << "respond:\n" << this->respond << RESETEND;
+    return this->respond;
 }
