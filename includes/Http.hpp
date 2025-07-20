@@ -39,7 +39,8 @@ class Http
         string filePath;
         string HttpVersion;
 
-        bool isRespond;
+        bool canRespond;
+        string respond;
         Http();
 
     public:
@@ -60,11 +61,13 @@ class Http
         string getContent(string);
         string getContentType(string);
         string getErrorCodePath(int code);
+        string getResponse();
         // bool getServerFromServerName(const vector<cfgServer> &csVec);
         void getServerBlock(const vector<cfgServer> &csVec);
-        void GET(pollfd, string);
-        void POST(pollfd, string);
-        void DELETE(pollfd, string);
+        void handleRequest();
+        void GET(string);
+        void POST(string);
+        void DELETE(string);
 
         void handleCGI(string CGIpath);
         void CGIGet(vector<char *> &argv, string CGIpath);
@@ -81,19 +84,20 @@ class Http
         bool IsCorrectPrefix(const string &url, const string &routePath) const;
         bool isExecutale(const string &path);
 
-        void code403(int pfd); //forbidden
-        void code404(int pfd); //error not found
-        void code405(int pfd); //method not found
-        void code301(int pfd, string url); //redirection
-        void code409(int pfd); //conflict
-        void code500(int pfd); //server error
-        void code504(int pfd); //server error
-        void code413(int pfd); //post body too large
-        void code303(int pfd); //see other
+        void code403(); //forbidden
+        void code404(); //error not found
+        void code405(); //method not found
+        void code301(string url); //redirection
+        void code409(); //conflict
+        void code500(); //server error
+        void code504(); //server error
+        void code413(); //post body too large
+        void code303(); //see other
 
         //getter
-        bool getIsRespond() const;
-
+        bool getCanRespond() const;
+        const string getConnection() const;
+        const string &getRespond();
 
 };
 

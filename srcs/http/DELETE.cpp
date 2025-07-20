@@ -1,6 +1,6 @@
 #include "../../includes/Http.hpp"
 
-void	Http::DELETE(pollfd pfd, string path)
+void	Http::DELETE(string path)
 {
 	struct stat	s;
 	cout << BLUE << "DELETE: client request: " << GREEN << path << RESETEND;
@@ -8,17 +8,17 @@ void	Http::DELETE(pollfd pfd, string path)
 	if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "DELETE") == this->allowMethod.end())
     {
         cout << RED << "DELETE: Method not allow" << RESETEND;
-        code403(this->pfd.fd);
+        code403();
         return ;
     }
 	if (stat(path.c_str(), &s) != 0) //0 means it have files or folder, 1 means no
 	{
-		code404(pfd.fd);
+		code404();
 		return ;
 	}
 	if (access(path.c_str(), W_OK) != 0) //check is it writeable, cuz want delete must can write access
 	{
-		code403(pfd.fd);
+		code403();
 		return ;
 	}
 
@@ -30,7 +30,7 @@ void	Http::DELETE(pollfd pfd, string path)
 		DIR* dir = opendir(path.c_str());
 		if (dir == NULL)
 		{
-			code500(pfd.fd);
+			code500();
 			return ;
 		}
 		struct dirent *enterdir;
@@ -46,20 +46,23 @@ void	Http::DELETE(pollfd pfd, string path)
 		closedir(dir);
 		if (isEmpty == false) //if folder got stuff cant delete, send 409 conflict
 		{
-			code409(pfd.fd);
+			code409();
 			return ;
 		}
 		flag = rmdir(path.c_str()); //success 0, else 1
 	}
 	if (flag != 0)
 	{
-		code500(pfd.fd);
+		code500();
 		return ;
 	}
 
 	std::ostringstream	ss;
 	ss << "HTTP/1.1 204 No Content\r\n\r\n";
-	send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
-	this->isRespond = true;
-	close(pfd.fd);
+
+	this->respond = ss.str();
+
+	// send(pfd.fd, ss.str().c_str(), ss.str().length(), 0);
+	// this->isRespond = true;
+	// close(pfd.fd);
 }

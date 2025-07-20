@@ -7,7 +7,7 @@ string Http::getErrorCodePath(int code)
     return "";
 }
 
-void Http::code404(int pfd)
+void Http::code404()
 {
     cout << RED << "404!" << RESETEND; //debug
 
@@ -21,15 +21,16 @@ void Http::code404(int pfd)
     else
         ss << content;
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 404 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 404 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code403(int pfd)
+void Http::code403()
 {
     cout << RED << "403!" << RESETEND; //debug
 
@@ -43,15 +44,16 @@ void Http::code403(int pfd)
     else
         ss << content;
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 403 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 403 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code301(int pfd, string url)
+void Http::code301(string url)
 {
     cout << RED << "301!" << RESETEND; //debug
     std::ostringstream ss;
@@ -66,16 +68,17 @@ void Http::code301(int pfd, string url)
     ss << "Location: " << newPath + "/\r\n";
     ss << "Content-Length: 0\r\n\r\n";
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 301 successful" << endl; //debug
-    cout << BLUE << "Respond:" << RED << ss.str() << RESETEND; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 301 successful" << endl; //debug
+    // cout << BLUE << "Respond:" << RED << ss.str() << RESETEND; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code409(int pfd)
+void Http::code409()
 {
     cout << RED << "409!" << RESETEND; //debug
 
@@ -89,15 +92,16 @@ void Http::code409(int pfd)
     else
         ss << content;
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 409 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 409 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code500(int pfd)
+void Http::code500()
 {
     cout << RED << "500!" << RESETEND; //debug
 
@@ -111,15 +115,16 @@ void Http::code500(int pfd)
     else
         ss << content;
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 500 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 500 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code504(int pfd)
+void Http::code504()
 {
     cout << RED << "504!" << RESETEND; //debug
 
@@ -133,15 +138,16 @@ void Http::code504(int pfd)
     else
         ss << content;
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 500 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 500 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code413(int pfd)
+void Http::code413()
 {
     cout << RED << "413!" << RESETEND; //debug
 
@@ -156,15 +162,16 @@ void Http::code413(int pfd)
         ss << content;
 
     cout << ss.str() << endl;
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 413 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 413 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code303(int pfd)
+void Http::code303()
 {
     cout << RED << "303!" << RESETEND; //debug
     std::ostringstream ss;
@@ -173,15 +180,16 @@ void Http::code303(int pfd)
     ss << "Location: " << this->redirectPath << "\r\n";
     ss << "\r\n";
 
-    send(pfd, ss.str().c_str(), ss.str().size(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().size(), 0);
 
-    cout << BLUE << "GET: Respond 303 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 303 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }
 
-void Http::code405(int pfd)
+void Http::code405()
 {
     cout << RED << "405!" << RESETEND; //debug
 
@@ -204,10 +212,11 @@ void Http::code405(int pfd)
     else
         ss << content;
 
-    send(pfd, ss.str().c_str(), ss.str().length(), 0);
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
-    cout << BLUE << "GET: Respond 403 successful" << endl; //debug
-    std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
-    close(pfd);
-    this->isRespond = true;
+    // cout << BLUE << "GET: Respond 403 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
 }

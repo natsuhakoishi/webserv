@@ -25,6 +25,7 @@ class TcpServer
 		void	initServer();
 		void	handleClientConnection(size_t i);
 		void	handleClientMessage(size_t i);
+		void	handleClientSend(size_t i);
 		void	handleIpp(vector<std::pair<string, int> > ipp);
 
 		TcpServer(const TcpServer &copy);
