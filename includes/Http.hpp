@@ -23,7 +23,7 @@ class Http
 		map<int,string>		errorCodeMap;
         string redirectPath;
         string uplaodPath;
-
+        bool sizeTooLarge;
 
         map<string, string> headers;
         vector<string> allowMethod;

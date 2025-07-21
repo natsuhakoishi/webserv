@@ -32,11 +32,18 @@ void Http::POST(string path)
     //     code413(this->pfd.fd);
     //     return ;
     // }
-
+    // {
+    //     cout << "Hi " << this->body << endl;
+    // }
     std::getline(ss, boundary);
     std::getline(ss, line);
     std::getline(ss, thrLine);
 
+    if (boundary.empty() || line.empty() || thrLine.empty())
+    {
+        code500();
+        return ;
+    }
     size_t pos = line.find("filename=\"");
     string filename = line.substr(pos + 10);
     filename.erase(filename.find_last_not_of("\"\r\n") + 1);
@@ -44,7 +51,7 @@ void Http::POST(string path)
     int start = boundary.length() + line.length() + thrLine.length() + 5;
 
     string pureBody = this->body.substr(start, this->body.rfind("\r\n------") - start);
- 
+
     // cout << pureBody << endl;
     if (!this->uplaodPath.empty())
         path = this->rootPath + this->uplaodPath;

@@ -7,7 +7,7 @@
 // }
 
 Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), canRespond(false)
+: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), sizeTooLarge(false), canRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -82,7 +82,10 @@ void Http::parse(string input)
 
 void Http::handleRequest()
 {
-    if (cgiTypePath.first.compare("Empty"))
+
+    if (this->sizeTooLarge)
+        code413();
+    else if (cgiTypePath.first.compare("Empty"))
         handleCGI(this->url);
     else if (!this->method.compare("POST"))
         POST(this->filePath);
@@ -271,7 +274,9 @@ void Http::readBody()
     if (ContentLenght > this->bodySize)
     {
         cout << RED << "POST: Size too large" << RESETEND;
-        code413();
+        // code413();
+        this->canRespond = true;
+        this->sizeTooLarge = true;
         return ;
     }
     this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
