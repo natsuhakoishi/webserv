@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/20 22:03:27 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/21 16:34:46 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,6 +288,7 @@ Config::ConfigError::~ConfigError() throw() {
 
 Config::CheckingError::CheckingError(int id, string dir, string msg) throw() {
 	std::ostringstream	oss;
+	oss << "CHECKING -> ";
 	oss << "Server(" << id << "): ";
 	if (!dir.empty())
 		oss << " [" << dir << "]: ";
