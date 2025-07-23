@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 19:03:32 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/18 18:54:54 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/24 04:13:12 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -296,22 +296,22 @@ string	cfgRoute::splitRoute(string &line, int id) {
 	if (temp.empty())
 	{
 		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
-		throw ArgError(id, "", "", "\"location\" directive: not delimited by whitespaces!");
+		throw ArgError(id, "", "", "\"Location\" directive: not delimited by whitespaces!");
 	}
 	else if (temp.size() < 2 || temp.size() > 3)
 	{
 		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
-		throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
+		throw ArgError(id, "", "", "\"Location\" directive: number of arguments invalid!");
 	}
 	else if (temp[0] != "location")
 	{
 		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
-		throw ArgError(id, "", "", "\"location\" directive: unknown directive.");
+		throw ArgError(id, "", "", "\"Location\" directive: unknown directive.");
 	}
 	else if (temp.size() == 3 && temp[2] != "{")
 	{
 		std::cout << red << "Error -> \"" << line << "\"" << reset << std::endl;
-		throw ArgError(id, "", "", "\"location\" directive: number of arguments invalid!");
+		throw ArgError(id, "", "", "\"Location\" directive: number of arguments invalid!");
 	}
 	if (temp.size() == 2)
 	{

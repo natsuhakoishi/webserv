@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/14 01:43:14 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/15 19:49:13 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/24 03:42:50 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 namespace Utils {
 
 UtilsError::UtilsError(string msg) throw()
-: _errMsg("Utils: "+msg) {
+: _errMsg(msg) {
 }
 
 const char*	UtilsError::what() const throw() {
@@ -74,7 +74,10 @@ vector<string>	tokenizer(string &line) {
 			++pos;
 		temp = line.substr(start, pos-start);
 		if (temp.empty())
-			throw Utils::UtilsError("Fail to create token");
+		{
+			std::cout << "\033[31mError detect -> \"" << line << "\"\033[0m" << std::endl;
+			throw UtilsError("Fail to create token");
+		}
 		result.push_back(temp);
 	}
 	return result;
@@ -106,6 +109,11 @@ vector<string>	splitInline(string line) {
 			temp += line[pos];
 			if (!temp.empty())
 			{
+				if (temp == ";")
+				{
+					std::cout << "\033[31mError detect -> \"" << line << "\"\033[0m" << std::endl;
+					throw UtilsError("Unexpected ; found!");
+				}
 				result.push_back(temp);
 				temp.clear();
 			}
