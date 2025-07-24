@@ -8,6 +8,12 @@ vector<string> Http::createEnv(map<string, string> &m)
     for (; it != m.end(); ++it)
         vec.push_back(it->first + "=" + it->second);
     vec.push_back("REQUEST_METHOD=" + this->method);
+    if (!this->headers["Transfer-Encoding"].compare("chunked"))
+    {
+        std::stringstream len;
+        len << this->body.length();
+        len >> this->headers["Content-Length"];
+    }
     vec.push_back("CONTENT_LENGTH=" + this->headers["Content-Length"]);
     vec.push_back("CONTENT_TYPE=" + this->headers["Content-Type"]);
     vec.push_back("HTTP_USER_AGENT=" + this->headers["User-Agent"]);
@@ -168,8 +174,11 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
 
         vecEnv.push_back(const_cast<char *>(qs.c_str()));
         vecEnv.push_back(NULL);
-        for (size_t i = 0; i < vecEnv.size(); ++i)
-            cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
+        for (size_t i = 0; i < vecEnv.size() - 1; ++i)
+        cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
+
+        for (size_t i = 0; i < argv.size() - 1; ++i)
+            cout << RED << "argv: " << argv[i] << RESETEND;
 
         dup2(cgiIn[0], 0); 
         dup2(cgiOut[1], 1); 
@@ -248,6 +257,8 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                 }
                 cout << BLUE << "Out:\n" << CGIoutput << RESETEND;
 
+                this->respond = CGIoutput;
+                return ;
                 if (!CGIoutput.compare("403\n"))
                     code403();
                 else if (!CGIoutput.compare("ok\n") && !this->redirectPath.empty())
@@ -314,7 +325,9 @@ void Http::handleCGI(string CGIpath)
     vector<char *> vecArgv;
 
     if (this->cgiTypePath.first.compare("C?"))
+    {
         vecArgv.push_back(const_cast<char *>(this->cgiTypePath.second.c_str()));
+    }
     // if (clearURL.find('.', 1) == string::npos || !clearURL.substr(clearURL.find('.', 1), 4).compare(".out"))
     //     ;
     // else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".sh"))

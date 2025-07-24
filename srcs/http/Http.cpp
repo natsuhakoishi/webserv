@@ -6,8 +6,8 @@
 //         cout << GREEN << "Default constructor called" << endl;
 // }
 
-Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), sizeTooLarge(false), canRespond(false)
+Http::Http(const Config &_cf)
+: cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), sizeTooLarge(false), canRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -67,21 +67,12 @@ void Http::parse(string input)
         readBody();
     else
         this->canRespond = true;
-    // else if (cgiTypePath.first.compare("Empty"))
-    //     handleCGI(this->url);
-    // else if (!this->method.compare("GET"))
-    //     GET(this->pfd, this->filePath);
-    // else if (!this->method.compare("DELETE"))
-    //     DELETE(this->pfd, this->filePath);
-    // else //unknown method
-    //     code405(this->pfd.fd);
 
     this->buffer.clear();
 }
 
 void Http::handleRequest()
 {
-
     if (this->sizeTooLarge)
         code413();
     else if (cgiTypePath.first.compare("Empty"))
@@ -138,7 +129,7 @@ void Http::readHeaders()
 /*
 check all server block's server name
     -macth -> bind
-    -not macth -> 在所有server找host 并且绑定第一个对到的server host。
+    -not macth -> find host in all server, bind first macth server host
 */
 void Http::readConfig()
 {
@@ -236,16 +227,16 @@ void Http::initConfig(int idx)
         if (cgi.size() != 0)
         {
             map<string, string>::iterator it = cgi.begin();
-            cout << it->first << " : " << it->second << endl;
+            this->cgiTypePath.first = "C?";
             for (; it != cgi.end(); ++it)
             {
+                cout << it->first << " : " << it->second << endl;
                 if (url.find(it->first) != string::npos)
                 {
                     this->cgiTypePath = *it;
                     break ;
                 }
             }
-            this->cgiTypePath.first = "C?";
         }
 
         cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
@@ -279,10 +270,10 @@ void Http::readBody()
         std::stringstream ss(buf);
 
         string tmpBody;
-        size_t pos;
+        size_t pos = 0;
         while (1)
         {
-            size_t end = buf.find("\r\n");
+            size_t end = buf.find("\r\n", pos);
             if (end == string::npos)
                 break ;
 
@@ -292,21 +283,30 @@ void Http::readBody()
             ss_size << std::hex << sizeString;
             ss_size >> chunkSize;
 
+            cout << "size: " << chunkSize << endl;
             if (chunkSize == 0)
             {
+                cout << "0" << endl;
                 this->canRespond = true;
                 break ;
             }
-            pos += end + 2;
+            pos = end + 2;
 
             if (pos + chunkSize > buf.length())
+            {
+                cout << pos << "+" << chunkSize << '>' << buf.length() << endl;
                 break ;
+            }
             tmpBody.append(buf.substr(pos, chunkSize));
 
+            cout << "buf: " << buf.substr(pos, chunkSize) << endl;
             pos += chunkSize;
 
             if (buf.substr(pos, 2).compare("\r\n"))
+            {
+                cout << "breaked" << endl;
                 break ;
+            }
             pos += 2;
         }
         this->body.append(tmpBody);
@@ -318,6 +318,8 @@ void Http::readBody()
         {
             cout << RED << "POST: Size too large" << RESETEND;
             code413();
+            this->canRespond = true;
+            this->sizeTooLarge = true;
             return ;
         }
         this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
@@ -325,7 +327,7 @@ void Http::readBody()
         if (this->body.length() == ContentLenght)
             this->canRespond = true;
     }
-    cout << body << endl;
+    cout << "body:\n" << body << endl;
 }
 
 bool Http::getCanRespond() const

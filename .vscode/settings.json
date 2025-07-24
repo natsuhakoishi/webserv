@@ -50,6 +50,7 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "strstream": "cpp",
-        "iomanip": "cpp"
+        "iomanip": "cpp",
+        "debug": "cpp"
     }
 }
