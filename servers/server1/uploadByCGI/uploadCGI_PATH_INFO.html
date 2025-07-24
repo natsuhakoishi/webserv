@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h1>Upload File</h1>
+  <form action="/cgi/pathInfo.py" method="post" enctype="application/octet-stream">
+    <input type="file" id="file" />
+    <button type="submit">Upload</button>
+  </form>
+<div id="result"></div>
+
+  <script>
+    document.querySelector("form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.querySelector("#file").files[0];
+      if (!file) return alert("No file chosen");
+
+      const response = await fetch("/cgi/pathInfo.py/uploadByCGI/uploadPATH/" + file.name, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/octet-stream"
+        },
+        body: file
+      });
+
+        const html = await response.text();
+        document.getElementById("result").innerHTML = html;
+    });
+  </script>
+</body>
+</html>

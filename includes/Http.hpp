@@ -97,7 +97,7 @@ class Http
         void code409(); //conflict
         void code413(); //post body too large
         void code500(); //server error
-        void code504(); //server error
+        void code504(); //time out
 
         //getter
         bool getCanRespond() const;

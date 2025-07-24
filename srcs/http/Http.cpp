@@ -232,7 +232,7 @@ void Http::initConfig(int idx)
         this->uplaodPath = this->routes[idx].get_uploadPath();
 
         map<string, string> cgi = this->routes[idx].get_cgiInfo();
-        cout << "cgi info: " << cgi.size() << endl;
+        // cout << "cgi info: " << cgi.size() << endl;
         if (cgi.size() != 0)
         {
             map<string, string>::iterator it = cgi.begin();
@@ -247,7 +247,7 @@ void Http::initConfig(int idx)
                 }
             }
         }
-
+        cout << "CgiType: " << this->cgiTypePath.first << " : " << this->cgiTypePath.second << endl;
         cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
