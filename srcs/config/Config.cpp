@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/20 22:03:27 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/24 04:11:55 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,15 +218,15 @@ void	Config::checkRoute() {
 		vector<cfgRoute>::iterator	it2 = temp_route.begin();
 		while (it2 != temp_route.end())
 		{
-			if (temp_buffer.size() > 2)
+			if (temp_buffer.size() >= 2)
 			{
 				vector<string>::iterator	it3 = temp_buffer.begin();
 				while (it3 != temp_buffer.end())
 				{
-					if ((*it3).compare((*it2).get_path()) == 0)
+					if (*it3 == (*it2).get_path())
 					{
 						std::cout << red << "Error -> \"" << (*it2).get_path() << "\"" << reset << std::endl;
-						throw ConfigError("Found duplicate route!");
+						throw CheckingError((*it).get_id(), "Location", "Found duplicate route!");
 					}
 					++it3;
 				}
@@ -288,6 +288,7 @@ Config::ConfigError::~ConfigError() throw() {
 
 Config::CheckingError::CheckingError(int id, string dir, string msg) throw() {
 	std::ostringstream	oss;
+	oss << "CHECKING -> ";
 	oss << "Server(" << id << "): ";
 	if (!dir.empty())
 		oss << " [" << dir << "]: ";
