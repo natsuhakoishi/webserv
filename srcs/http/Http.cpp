@@ -6,9 +6,16 @@
 //         cout << GREEN << "Default constructor called" << endl;
 // }
 
-Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), sizeTooLarge(false), canRespond(false)
+Http::Http(const Config &_cf): cf(_cf)
 {
+    this->rootPath = ".";
+    this->autoindex = false;
+    this->cgiTypePath = std::make_pair("Empty", "Empty");
+    this->sizeTooLarge = false;
+    this->canRespond = false;
+    this->tmpChunkSize = 0;
+    this->chunkError = false;
+
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
 }
@@ -26,7 +33,6 @@ Http &Http::operator=(const Http &q)
 {
     if (this == &q)
         return *this;
-    this->pfd = q.pfd;
     this->cs = q.cs;
     this->rootPath = q.rootPath;
     this->routes = q.routes;
@@ -59,7 +65,7 @@ Http &Http::operator=(const Http &q)
 
 void Http::parse(string input)
 {
-    // cout << GREEN << "Client: " << input << RESETEND;
+    cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
@@ -68,22 +74,15 @@ void Http::parse(string input)
         readBody();
     else
         this->canRespond = true;
-    // else if (cgiTypePath.first.compare("Empty"))
-    //     handleCGI(this->url);
-    // else if (!this->method.compare("GET"))
-    //     GET(this->pfd, this->filePath);
-    // else if (!this->method.compare("DELETE"))
-    //     DELETE(this->pfd, this->filePath);
-    // else //unknown method
-    //     code405(this->pfd.fd);
 
     this->buffer.clear();
 }
 
 void Http::handleRequest()
 {
-
-    if (this->sizeTooLarge)
+    if (this->chunkError)
+        code400();
+    else if (this->sizeTooLarge)
         code413();
     else if (cgiTypePath.first.compare("Empty"))
         handleCGI(this->url);
@@ -139,7 +138,7 @@ void Http::readHeaders()
 /*
 check all server block's server name
     -macth -> bind
-    -not macth -> 在所有server找host 并且绑定第一个对到的server host。
+    -not macth -> find host in all server, bind first macth server host
 */
 void Http::readConfig()
 {
@@ -233,22 +232,22 @@ void Http::initConfig(int idx)
         this->uplaodPath = this->routes[idx].get_uploadPath();
 
         map<string, string> cgi = this->routes[idx].get_cgiInfo();
-        cout << "cgi info: " << cgi.size() << endl;
+        // cout << "cgi info: " << cgi.size() << endl;
         if (cgi.size() != 0)
         {
             map<string, string>::iterator it = cgi.begin();
-            cout << it->first << " : " << it->second << endl;
+            this->cgiTypePath.first = "C?";
             for (; it != cgi.end(); ++it)
             {
+                cout << it->first << " : " << it->second << endl;
                 if (url.find(it->first) != string::npos)
                 {
                     this->cgiTypePath = *it;
                     break ;
                 }
             }
-            this->cgiTypePath.first = "C?";
         }
-
+        cout << "CgiType: " << this->cgiTypePath.first << " : " << this->cgiTypePath.second << endl;
         cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
         cout << "Index file: " << this->indexFile << endl;
         cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
@@ -265,43 +264,109 @@ void Http::initConfig(int idx)
     this->headers["POST_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") != this->allowMethod.end() ? "Y" : "N");
     this->headers["GET_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") != this->allowMethod.end() ? "Y" : "N");
     this->headers["DEL_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "DELETE") != this->allowMethod.end() ? "Y" : "N");
+    // for (map<string, string>::iterator it = this->headers.begin(); it != this->headers.end(); ++it)
+    //     cout << "HEADER: " << it->first << " : " << it->second << endl;
     // cout << "GET: " << this->headers["GET_METHOD"] << " POST: " << this->headers["POST_METHOD"] << endl;
 }
 
 void Http::readBody()
 {
-    size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
-    if (ContentLenght > this->bodySize)
+    if (!this->headers["Transfer-Encoding"].compare("chunked"))
     {
-        cout << RED << "POST: Size too large" << RESETEND;
-        // code413();
-        this->canRespond = true;
-        this->sizeTooLarge = true;
-        return ;
-    }
-    this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+        string buf;
+        if (this->body.empty())
+            buf = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+        else
+            buf = this->buffer;
 
-    if (this->body.length() == ContentLenght)
-        this->canRespond = true;
-    // {
-        // if (this->cgiTypePath.first.compare("Empty"))
-        //     handleCGI(this->url);
-        // else
-        //     POST(this->pfd, this->filePath);
-    // }
+        if (this->chunkError && buf.find("0\r\n\r\n") != string::npos)
+        {
+            this->canRespond = true;
+            return ;
+        }
+
+        size_t pos = 0;
+        while (1)
+        {
+            size_t end = 0;
+            size_t chunkSize = 0;
+            std::stringstream ss_size;
+
+            if (this->tmpChunkSize != 0)
+            {
+                this->tmpBodyChunk.append(buf.substr(0, this->tmpChunkSize));
+                pos += this->tmpChunkSize + 2;
+
+                this->tmpChunkSize = 0;
+            }
+
+            end = buf.find("\r\n", pos);
+            if (end == string::npos)
+            {
+                cout << RED << "posssssssssssssssss" << RESETEND;
+                if (buf.find("0\r\n\r\n") != string::npos)
+                    this->canRespond = true;
+                this->chunkError = true;
+                break ;
+            }
+
+            string sizeString = buf.substr(pos, end - pos);
+            ss_size << std::hex << sizeString;
+            ss_size >> chunkSize;
+
+            cout << "size: " << chunkSize << endl;
+            if (chunkSize == 0)
+            {
+                cout << RED << "0000000000000" << RESETEND;
+                this->canRespond = true;
+                break ;
+            }
+            pos = end + 2;
+
+            if (pos + chunkSize > buf.length())
+            {
+                cout << pos << "+" << chunkSize << '>' << buf.length() << endl;
+                this->tmpChunkSize = pos + chunkSize - buf.length();
+                break ;
+            }
+            this->tmpBodyChunk.append(buf.substr(pos, chunkSize));
+            cout << "pos: " << pos << endl;
+            cout << "buf: " << buf.substr(pos, chunkSize) << endl;
+            pos += chunkSize;
+
+            if (buf.substr(pos, 2).compare("\r\n"))
+            {
+                cout << RED << "breakedddddddddddddd" << RESETEND;
+                if (buf.find("0\r\n\r\n") != string::npos)
+                    this->canRespond = true;
+                this->chunkError = true;
+                break ;
+            }
+            pos += 2;
+        }
+        this->body.append(this->tmpBodyChunk);
+    }
+    else
+    {
+        size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
+        if (ContentLenght > this->bodySize)
+        {
+            cout << RED << "POST: Size too large" << RESETEND;
+            this->canRespond = true;
+            this->sizeTooLarge = true;
+            return ;
+        }
+        this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+
+        if (this->body.length() == ContentLenght)
+            this->canRespond = true;
+    }
+    cout << "body:\n" << body << endl;
 }
 
 bool Http::getCanRespond() const
 {
     return this->canRespond;
-}
-
-const string Http::getConnection() const
-{
-    map<string, string>::const_iterator iter = this->headers.find("Connection");
-    if (iter == this->headers.end())
-        return "";
-    return iter->second;
 }
 
 const string &Http::getRespond()

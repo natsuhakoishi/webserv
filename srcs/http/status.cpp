@@ -17,7 +17,7 @@ void Http::code404()
 
     string content = getContent(getErrorCodePath(404));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>404 not found [DefalutPage]</title></head><body><main><h1>404 Not found</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>404 not found [DefaultPage]</title></head><body><main><h1>404 Not found</h1></main></body></html>";
     else
         ss << content;
 
@@ -40,7 +40,7 @@ void Http::code403()
 
     string content = getContent(getErrorCodePath(403));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>403 Forbidden [DefalutPage]</title></head><body><main><h1>403 Forbidden</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>403 Forbidden [DefaultPage]</title></head><body><main><h1>403 Forbidden</h1></main></body></html>";
     else
         ss << content;
 
@@ -88,7 +88,7 @@ void Http::code409()
 
     string content = getContent(getErrorCodePath(409));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>409 Conflict [DefalutPage]</title></head><body><main><h1>404 Conflict</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>409 Conflict [DefaultPage]</title></head><body><main><h1>404 Conflict</h1></main></body></html>";
     else
         ss << content;
 
@@ -111,7 +111,7 @@ void Http::code500()
 
     string content = getContent(getErrorCodePath(500));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>500 Internal Server Error [DefalutPage]</title></head><body><main><h1>500 Internal Server Error</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>500 Internal Server Error [DefaultPage]</title></head><body><main><h1>500 Internal Server Error</h1></main></body></html>";
     else
         ss << content;
 
@@ -134,7 +134,7 @@ void Http::code504()
 
     string content = getContent(getErrorCodePath(500));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>504 Gateway Timeout [DefalutPage]</title></head><body><main><h1>504 Gateway Timeout</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>504 Gateway Timeout [DefaultPage]</title></head><body><main><h1>504 Gateway Timeout</h1></main></body></html>";
     else
         ss << content;
 
@@ -157,7 +157,7 @@ void Http::code413()
 
     string content = getContent(getErrorCodePath(413));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>413 SizeTooLarge [DefalutPage]</title></head><body><main><h1>413 SizeTooLarge</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>413 SizeTooLarge [DefaultPage]</title></head><body><main><h1>413 SizeTooLarge</h1></main></body></html>";
     else
         ss << content;
 
@@ -208,7 +208,7 @@ void Http::code405()
 
     string content = getContent(getErrorCodePath(405));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>405 Method Not Allowed [DefalutPage]</title></head><body><main><h1>405 Method Not Allowed</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>405 Method Not Allowed [DefaultPage]</title></head><body><main><h1>405 Method Not Allowed</h1></main></body></html>";
     else
         ss << content;
 
@@ -216,6 +216,29 @@ void Http::code405()
     // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
     // cout << BLUE << "GET: Respond 403 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
+}
+
+void Http::code400()
+{
+    cout << RED << "400!" << RESETEND; //debug
+
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 400 Bad request\r\n\r\n";
+
+    string content = getContent(getErrorCodePath(400));
+    if (!content.compare(""))
+        ss << "<!doctype html><html lang=\"en\"><head><title>400 Bad request [DefaultPage]</title></head><body><main><h1>400 Bad request</h1></main></body></html>";
+    else
+        ss << content;
+
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
+
+    // cout << BLUE << "GET: Respond 500 successful" << endl; //debug
     // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
     // close(pfd);
     // this->isRespond = true;

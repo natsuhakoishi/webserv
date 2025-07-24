@@ -8,6 +8,12 @@ vector<string> Http::createEnv(map<string, string> &m)
     for (; it != m.end(); ++it)
         vec.push_back(it->first + "=" + it->second);
     vec.push_back("REQUEST_METHOD=" + this->method);
+    if (!this->headers["Transfer-Encoding"].compare("chunked"))
+    {
+        std::stringstream len;
+        len << this->body.length();
+        len >> this->headers["Content-Length"];
+    }
     vec.push_back("CONTENT_LENGTH=" + this->headers["Content-Length"]);
     vec.push_back("CONTENT_TYPE=" + this->headers["Content-Type"]);
     vec.push_back("HTTP_USER_AGENT=" + this->headers["User-Agent"]);
@@ -141,7 +147,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
     int pid = fork();
     if (pid == -1)
     {
-        code500();
+        code500(); //server error
         return ;
     }
     else if (pid == 0)
@@ -163,13 +169,16 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
             qs.append(CGIpath);            
             qp = getQueryParameters(CGIpath);
             for (size_t i = 0; i < qp.size(); ++i)
-            vecEnv.push_back(const_cast<char *>(qp[i].c_str()));
+                vecEnv.push_back(const_cast<char *>(qp[i].c_str()));
         }
 
         vecEnv.push_back(const_cast<char *>(qs.c_str()));
         vecEnv.push_back(NULL);
-        for (size_t i = 0; i < vecEnv.size(); ++i)
-            cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
+        for (size_t i = 0; i < vecEnv.size() - 1; ++i)
+        cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
+
+        for (size_t i = 0; i < argv.size() - 1; ++i)
+            cout << RED << "argv: " << argv[i] << RESETEND;
 
         dup2(cgiIn[0], 0); 
         dup2(cgiOut[1], 1); 
@@ -200,7 +209,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
             {
                 close(cgiIn[1]);
                 close(cgiOut[0]);
-                code500();
+                code500(); //server error
                 return ;
             }
             total += n;
@@ -232,7 +241,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     kill(pid, SIGKILL);
                     waitpid(pid, &status, 0);
                     close(cgiOut[0]);
-                    code504();
+                    code504(); //time out
                     return ;
                 }
             }
@@ -243,11 +252,12 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                 close(cgiOut[0]);
                 if (CGIoutput.empty())
                 {
-                    code504();
+                    code504(); //time out
                     return ;
                 }
                 cout << BLUE << "Out:\n" << CGIoutput << RESETEND;
 
+                this->respond = CGIoutput;
                 if (!CGIoutput.compare("403\n"))
                     code403();
                 else if (!CGIoutput.compare("ok\n") && !this->redirectPath.empty())
@@ -266,12 +276,12 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     this->respond = oss.str();
                     // send(this->pfd.fd, oss.str().c_str(), oss.str().length(), 0);
                     // this->isRespond = true;
-                    // // cout << BLUE << "CGI Respond ok" << RESETEND;
+                    // cout << BLUE << "CGI Respond ok" << RESETEND;
                     // close(pfd.fd);
                 }
                 // else if (!CGIoutput.compare("500\n"))
                 else
-                    code500();
+                    code500(); //server error
 
                 return ;
             }
@@ -284,17 +294,27 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
 
 void Http::handleCGI(string CGIpath)
 {
-    // if (!cgiRoute) //config file did'nt set /cgi/
-    // {
-    //     code403(this->pfd.fd);
-    //     return ;
-    // }
-    string clearURL(this->rootPath + CGIpath); //removed $...
+    size_t pos;
+    string clearURL(this->rootPath + CGIpath); //remove ?...
     if (std::count(CGIpath.begin(), CGIpath.end(), '?') != 0)
-        clearURL = this->rootPath + CGIpath.substr(0, CGIpath.find("?"));  //removed $...
+        clearURL = this->rootPath + CGIpath.substr(0, CGIpath.find("?"));  //remove ?...
+    else if ((pos = CGIpath.find(this->cgiTypePath.first)) != string::npos)
+    {
+        string check(CGIpath.substr(pos + this->cgiTypePath.first.length())); 
+        // cout << "check: " << check << endl;
+        if (!check.empty())
+        {
+            if (check[0] != '/') //example cgi.pyaaa
+                clearURL.clear();
+            else
+                clearURL = this->rootPath + CGIpath.substr(0, pos + this->cgiTypePath.first.length()); //remove /xxx/xxx
+            this->headers["PATH_INFO"] = check;
+            // cout << "ClearUrl: " << clearURL << endl;
+        }
+    }
     if (!fileExistis(clearURL))
     {
-        code404();
+        code404(); //not found
         return ;
     }
     if (isDirectory(clearURL)) //pass to GET method handle autoindex
@@ -304,8 +324,7 @@ void Http::handleCGI(string CGIpath)
     }
     if (!isExecutale(clearURL))
     {
-        // GET(this->pfd, clearURL);
-        code403();
+        code403(); //forbidden
         return ;
     }
 
@@ -315,19 +334,11 @@ void Http::handleCGI(string CGIpath)
 
     if (this->cgiTypePath.first.compare("C?"))
         vecArgv.push_back(const_cast<char *>(this->cgiTypePath.second.c_str()));
-    // if (clearURL.find('.', 1) == string::npos || !clearURL.substr(clearURL.find('.', 1), 4).compare(".out"))
-    //     ;
-    // else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".sh"))
-    //     vecArgv.push_back(const_cast<char *>("/usr/bin/bash"));
-    // else if (!clearURL.substr(clearURL.find('.', 1), 5).compare(".zsh"))
-    //     vecArgv.push_back(const_cast<char *>("/usr/bin/zsh"));
-    // else if (!clearURL.substr(clearURL.find('.', 1), 4).compare(".py"))
-    //     vecArgv.push_back(const_cast<char *>("/usr/bin/python3"));
-    // else
-    // {
-    //     code500(this->pfd.fd);
-    //     return ;
-    // }
+    else
+    {
+        code400(); //bad request
+        return ;
+    }
 
     vecArgv.push_back(const_cast<char *>(clearURL.c_str()));
     vecArgv.push_back(NULL);
@@ -337,5 +348,5 @@ void Http::handleCGI(string CGIpath)
     else if (!this->method.compare("POST"))
         CGIPost(vecArgv, CGIpath);
     else
-        code405();
+        code405(); //method not allow
 }

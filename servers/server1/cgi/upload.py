@@ -25,7 +25,6 @@ if 'Y' not in os.environ.get("GET_METHOD") or 'Y' not in os.environ.get("POST_ME
 
 # print("HTTP/1.1 200 ok")
 
-
 if "upload_file" in form:
     fileitem = form["upload_file"]
     

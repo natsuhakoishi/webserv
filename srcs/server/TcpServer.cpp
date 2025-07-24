@@ -164,7 +164,7 @@ void	TcpServer::handleClientMessage(size_t i)
 		if (isExisit == this->httpMap.end())
 		{
 			// cout << YELLOW << "new http object created" << RESETEND;
-			this->httpMap[this->fds[i].fd] = new Http(this->fds[i], *this->config);
+			this->httpMap[this->fds[i].fd] = new Http(*this->config);
 		}
 		Http *h = this->httpMap[this->fds[i].fd];
 		h->parse((string(buffer, bytes_read)));

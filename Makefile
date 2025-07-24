@@ -62,6 +62,9 @@ fclean: clean
 
 re: fclean all
 
+sc:
+	python3 sendChunked.py
+
 .PHONY: all r v clean fclean re
 
 #                                                                 *=::.::=+#
