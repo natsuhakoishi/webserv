@@ -41,6 +41,9 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
     if (pid == 0)
     {
         // cout << RED << vecArgv[0] << RESETEND;
+        // vector<string> qs;
+        string qs("QUERY_STRING=");
+        vector<string> qp;
         vector<string> vecTmp = createEnv(this->headers);
         vector<char *> vecEnv;
 
@@ -51,11 +54,12 @@ void Http::CGIGet(vector<char *> &argv, string CGIpath)
         {
             CGIpath = CGIpath.substr(CGIpath.find("?") + 1);
 
-            vector<string> qp = getQueryParameters(CGIpath);
+            qs.append(CGIpath);
+            qp = getQueryParameters(CGIpath);
             for (size_t i = 0; i < qp.size(); ++i)
                 vecEnv.push_back(const_cast<char *>(qp[i].c_str()));
         }
-
+        vecEnv.push_back(const_cast<char *>(qs.c_str()));
         vecEnv.push_back(NULL);
         for (size_t i = 0; i < vecEnv.size(); ++i)
             cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
@@ -142,6 +146,8 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
     }
     else if (pid == 0)
     {
+        string qs("QUERY_STRING=");
+        vector<string> qp;
         vector<string> vecTmp = createEnv(this->headers);
         vector<char *> vecEnv;
 
@@ -154,11 +160,13 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
         {
             CGIpath = CGIpath.substr(CGIpath.find("?") + 1);
 
-            vector<string> qp = getQueryParameters(CGIpath);
+            qs.append(CGIpath);            
+            qp = getQueryParameters(CGIpath);
             for (size_t i = 0; i < qp.size(); ++i)
-                vecEnv.push_back(const_cast<char *>(qp[i].c_str()));
+            vecEnv.push_back(const_cast<char *>(qp[i].c_str()));
         }
 
+        vecEnv.push_back(const_cast<char *>(qs.c_str()));
         vecEnv.push_back(NULL);
         for (size_t i = 0; i < vecEnv.size(); ++i)
             cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
