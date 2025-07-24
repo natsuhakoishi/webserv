@@ -30,6 +30,11 @@ class Http
         string rev;
         string buffer;
 
+        //for chunk
+        string tmpBodyChunk;
+        size_t tmpChunkSize;
+        bool chunkError;
+
         string header;
         string body;
 
@@ -83,15 +88,16 @@ class Http
         bool IsCorrectPrefix(const string &url, const string &routePath) const;
         bool isExecutale(const string &path);
 
+        void code301(string url); //redirection
+        void code303(); //see other
+        void code400(); //bad request
         void code403(); //forbidden
         void code404(); //error not found
         void code405(); //method not found
-        void code301(string url); //redirection
         void code409(); //conflict
+        void code413(); //post body too large
         void code500(); //server error
         void code504(); //server error
-        void code413(); //post body too large
-        void code303(); //see other
 
         //getter
         bool getCanRespond() const;

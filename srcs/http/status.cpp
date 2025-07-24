@@ -220,3 +220,26 @@ void Http::code405()
     // close(pfd);
     // this->isRespond = true;
 }
+
+void Http::code400()
+{
+    cout << RED << "400!" << RESETEND; //debug
+
+    std::ostringstream ss;
+
+    ss << "HTTP/1.1 400 Bad request\r\n\r\n";
+
+    string content = getContent(getErrorCodePath(400));
+    if (!content.compare(""))
+        ss << "<!doctype html><html lang=\"en\"><head><title>400 Bad request [DefaultPage]</title></head><body><main><h1>400 Bad request</h1></main></body></html>";
+    else
+        ss << content;
+
+    this->respond = ss.str();
+    // send(pfd, ss.str().c_str(), ss.str().length(), 0);
+
+    // cout << BLUE << "GET: Respond 500 successful" << endl; //debug
+    // std::cout << "Client (fd: " << pfd << ") Disconnected" << RESETEND; //debug
+    // close(pfd);
+    // this->isRespond = true;
+}

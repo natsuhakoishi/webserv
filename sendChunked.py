@@ -4,7 +4,7 @@ host = '127.0.0.1'
 port = 4242
 
 request = (
-    "POST /cgi/readChunk.py HTTP/1.1\r\n"
+    "POST /cgi/plain.py?FILEN=Test HTTP/1.1\r\n"
     "Host: 127.0.0.1\r\n"
     "Transfer-Encoding: chunked\r\n"
     "Content-Type: application/x-www-form-urlencoded\r\n"
@@ -12,6 +12,8 @@ request = (
 )
 
 body = (
+    "5\r\n"
+    "start\r\n"
     "A\r\n"
     "name=Yabi&\r\n"
     "6\r\n"
@@ -184,6 +186,8 @@ body = (
     "name=Yabi&\r\n"
     "6\r\n"
     "age=20\r\n"
+    "3\r\n"
+    "mid\r\n"
     "A\r\n"
     "name=Yabi&\r\n"
     "6\r\n"
@@ -280,6 +284,8 @@ body = (
     "name=Yabi&\r\n"
     "6\r\n"
     "age=20\r\n"
+    "3\r\n"
+    "end\r\n"
     "0\r\n"
     "\r\n"
 )

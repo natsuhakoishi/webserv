@@ -6,9 +6,16 @@
 //         cout << GREEN << "Default constructor called" << endl;
 // }
 
-Http::Http(const Config &_cf)
-: cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), sizeTooLarge(false), canRespond(false)
+Http::Http(const Config &_cf): cf(_cf)
 {
+    this->rootPath = ".";
+    this->autoindex = false;
+    this->cgiTypePath = std::make_pair("Empty", "Empty");
+    this->sizeTooLarge = false;
+    this->canRespond = false;
+    this->tmpChunkSize = 0;
+    this->chunkError = false;
+
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
 }
@@ -73,7 +80,9 @@ void Http::parse(string input)
 
 void Http::handleRequest()
 {
-    if (this->sizeTooLarge)
+    if (this->chunkError)
+        code400();
+    else if (this->sizeTooLarge)
         code413();
     else if (cgiTypePath.first.compare("Empty"))
         handleCGI(this->url);
@@ -255,6 +264,8 @@ void Http::initConfig(int idx)
     this->headers["POST_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") != this->allowMethod.end() ? "Y" : "N");
     this->headers["GET_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") != this->allowMethod.end() ? "Y" : "N");
     this->headers["DEL_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "DELETE") != this->allowMethod.end() ? "Y" : "N");
+    // for (map<string, string>::iterator it = this->headers.begin(); it != this->headers.end(); ++it)
+    //     cout << "HEADER: " << it->first << " : " << it->second << endl;
     // cout << "GET: " << this->headers["GET_METHOD"] << " POST: " << this->headers["POST_METHOD"] << endl;
 }
 
@@ -267,18 +278,38 @@ void Http::readBody()
             buf = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
         else
             buf = this->buffer;
-        std::stringstream ss(buf);
 
-        string tmpBody;
+        if (this->chunkError && buf.find("0\r\n\r\n") != string::npos)
+        {
+            this->canRespond = true;
+            return ;
+        }
+
         size_t pos = 0;
         while (1)
         {
-            size_t end = buf.find("\r\n", pos);
-            if (end == string::npos)
-                break ;
-
-            std::stringstream ss_size;
+            size_t end = 0;
             size_t chunkSize = 0;
+            std::stringstream ss_size;
+
+            if (this->tmpChunkSize != 0)
+            {
+                this->tmpBodyChunk.append(buf.substr(0, this->tmpChunkSize));
+                pos += this->tmpChunkSize + 2;
+
+                this->tmpChunkSize = 0;
+            }
+
+            end = buf.find("\r\n", pos);
+            if (end == string::npos)
+            {
+                cout << RED << "posssssssssssssssss" << RESETEND;
+                if (buf.find("0\r\n\r\n") != string::npos)
+                    this->canRespond = true;
+                this->chunkError = true;
+                break ;
+            }
+
             string sizeString = buf.substr(pos, end - pos);
             ss_size << std::hex << sizeString;
             ss_size >> chunkSize;
@@ -286,7 +317,7 @@ void Http::readBody()
             cout << "size: " << chunkSize << endl;
             if (chunkSize == 0)
             {
-                cout << "0" << endl;
+                cout << RED << "0000000000000" << RESETEND;
                 this->canRespond = true;
                 break ;
             }
@@ -295,21 +326,25 @@ void Http::readBody()
             if (pos + chunkSize > buf.length())
             {
                 cout << pos << "+" << chunkSize << '>' << buf.length() << endl;
+                this->tmpChunkSize = pos + chunkSize - buf.length();
                 break ;
             }
-            tmpBody.append(buf.substr(pos, chunkSize));
-
+            this->tmpBodyChunk.append(buf.substr(pos, chunkSize));
+            cout << "pos: " << pos << endl;
             cout << "buf: " << buf.substr(pos, chunkSize) << endl;
             pos += chunkSize;
 
             if (buf.substr(pos, 2).compare("\r\n"))
             {
-                cout << "breaked" << endl;
+                cout << RED << "breakedddddddddddddd" << RESETEND;
+                if (buf.find("0\r\n\r\n") != string::npos)
+                    this->canRespond = true;
+                this->chunkError = true;
                 break ;
             }
             pos += 2;
         }
-        this->body.append(tmpBody);
+        this->body.append(this->tmpBodyChunk);
     }
     else
     {
@@ -317,7 +352,6 @@ void Http::readBody()
         if (ContentLenght > this->bodySize)
         {
             cout << RED << "POST: Size too large" << RESETEND;
-            code413();
             this->canRespond = true;
             this->sizeTooLarge = true;
             return ;

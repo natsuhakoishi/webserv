@@ -6,13 +6,15 @@ import cgi
 
 test = os.environ.get("Content-Length", 0)
 if int(test) == 0:
-    print("404")
-    sys.exit(1)
+    test = os.environ.get("CONTENT_LENGTH", 0)
+    if int(test) == 0:
+        print("ok")
+        sys.exit()
 
 length = int(test)
 body = sys.stdin.read(length)
 
-filename = os.environ.get("FILEN", "default");
+filename = os.environ.get("FILEN", "default")
 upload_dir = os.environ.get("UPLOAD_PATH")
 if not upload_dir:
     upload_dir = "/upload"
