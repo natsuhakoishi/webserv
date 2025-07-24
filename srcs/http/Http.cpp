@@ -6,8 +6,8 @@
 //         cout << GREEN << "Default constructor called" << endl;
 // }
 
-Http::Http(pollfd _pfd, const Config &_cf)
-: pfd(_pfd), cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), canRespond(false)
+Http::Http(const Config &_cf)
+:cf(_cf), rootPath("."), autoindex(false), cgiTypePath(std::make_pair("Empty", "Empty")), canRespond(false)
 {
     if (DEBUG)
         cout << GREEN << "Arg constructor called" << endl;
@@ -26,7 +26,6 @@ Http &Http::operator=(const Http &q)
 {
     if (this == &q)
         return *this;
-    this->pfd = q.pfd;
     this->cs = q.cs;
     this->rootPath = q.rootPath;
     this->routes = q.routes;
@@ -59,7 +58,7 @@ Http &Http::operator=(const Http &q)
 
 void Http::parse(string input)
 {
-    // cout << GREEN << "Client: " << input << RESETEND;
+    cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
@@ -267,36 +266,68 @@ void Http::initConfig(int idx)
 
 void Http::readBody()
 {
-    size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
-    if (ContentLenght > this->bodySize)
+    if (!this->headers["Transfer-Encoding"].compare("chunked"))
     {
-        cout << RED << "POST: Size too large" << RESETEND;
-        code413();
-        return ;
-    }
-    this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+        string buf;
+        if (this->body.empty())
+            buf = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+        else
+            buf = this->buffer;
+        std::stringstream ss(buf);
 
-    if (this->body.length() == ContentLenght)
-        this->canRespond = true;
-    // {
-        // if (this->cgiTypePath.first.compare("Empty"))
-        //     handleCGI(this->url);
-        // else
-        //     POST(this->pfd, this->filePath);
-    // }
+        string tmpBody;
+        size_t pos;
+        while (1)
+        {
+            size_t end = buf.find("\r\n");
+            if (end == string::npos)
+                break ;
+
+            std::stringstream ss_size;
+            size_t chunkSize = 0;
+            string sizeString = buf.substr(pos, end - pos);
+            ss_size << std::hex << sizeString;
+            ss_size >> chunkSize;
+
+            if (chunkSize == 0)
+            {
+                this->canRespond = true;
+                break ;
+            }
+            pos += end + 2;
+
+            if (pos + chunkSize > buf.length())
+                break ;
+            tmpBody.append(buf.substr(pos, chunkSize));
+
+            pos += chunkSize;
+
+            if (buf.substr(pos, 2).compare("\r\n"))
+                break ;
+            pos += 2;
+        }
+        this->body.append(tmpBody);
+    }
+    else
+    {
+        size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
+        if (ContentLenght > this->bodySize)
+        {
+            cout << RED << "POST: Size too large" << RESETEND;
+            code413();
+            return ;
+        }
+        this->body = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+
+        if (this->body.length() == ContentLenght)
+            this->canRespond = true;
+    }
+    cout << body << endl;
 }
 
 bool Http::getCanRespond() const
 {
     return this->canRespond;
-}
-
-const string Http::getConnection() const
-{
-    map<string, string>::const_iterator iter = this->headers.find("Connection");
-    if (iter == this->headers.end())
-        return "";
-    return iter->second;
 }
 
 const string &Http::getRespond()

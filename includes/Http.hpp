@@ -11,7 +11,6 @@ class Config;
 class Http
 {
     private:
-        pollfd pfd;
         const Config &cf;
         cfgServer cs;
         string rootPath;
@@ -44,7 +43,7 @@ class Http
         Http();
 
     public:
-        Http(pollfd _pfd, const Config &_cf);
+        Http(const Config &_cf);
         Http(const Http &);
         ~Http();
 
@@ -96,7 +95,6 @@ class Http
 
         //getter
         bool getCanRespond() const;
-        const string getConnection() const;
         const string &getRespond();
 
 };
