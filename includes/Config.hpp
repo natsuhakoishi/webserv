@@ -27,7 +27,7 @@ class Config {
 		void	scan_serverBody(std::ifstream &infile);
 		void	general_check();
 		void	build_SocketTable();
-		void	checkRoute();
+		bool	checkRoute(cfgServer &block);
 
 		class ConfigError : public std::exception {
 			public:
