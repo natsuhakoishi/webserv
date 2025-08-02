@@ -65,7 +65,7 @@ Http &Http::operator=(const Http &q)
 
 void Http::parse(string input)
 {
-    cout << GREEN << "Client: " << input << RESETEND;
+    // cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
     this->rev.append(this->buffer);
     if (this->header.empty())
@@ -361,7 +361,7 @@ void Http::readBody()
         if (this->body.length() == ContentLenght)
             this->canRespond = true;
     }
-    cout << "body:\n" << body << endl;
+    // cout << "body:\n" << body << endl;
 }
 
 bool Http::getCanRespond() const

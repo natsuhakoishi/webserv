@@ -15,7 +15,7 @@ while read_total < length:
     data += chunk
     read_total += len(chunk)
 
-path_info = os.environ.get("PATH_INFO", "default")
+path_info = os.environ.get("PATH_INFO", "/cgi/upload/default")
 upload_dir, filename = os.path.split(path_info)
 if not upload_dir:
     upload_dir = "/upload"
