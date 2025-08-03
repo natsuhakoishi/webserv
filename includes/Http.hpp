@@ -47,14 +47,6 @@ class Http
         string respond;
         Http();
 
-    public:
-        Http(const Config &_cf);
-        Http(const Http &);
-        ~Http();
-
-        Http &operator=(const Http &);
-
-        void parse(string input);
         void readHeaders();
         void readBody();
         void readConfig();
@@ -66,9 +58,7 @@ class Http
         string getContentType(string);
         string getErrorCodePath(int code);
         string getResponse();
-        // bool getServerFromServerName(const vector<cfgServer> &csVec);
         void getServerBlock(const vector<cfgServer> &csVec);
-        void handleRequest();
         void GET(string);
         void POST(string);
         void DELETE(string);
@@ -88,8 +78,8 @@ class Http
         bool IsCorrectPrefix(const string &url, const string &routePath) const;
         bool isExecutale(const string &path);
 
-        void code301(string url); //redirection
-        void code303(); //see other
+        void code301(string url); // Moved Permanently // browser will send a new http request and remember this new url
+        void code303(); //see other // redirection to new url from server config
         void code400(); //bad request
         void code403(); //forbidden
         void code404(); //error not found
@@ -98,6 +88,16 @@ class Http
         void code413(); //post body too large
         void code500(); //server error
         void code504(); //time out
+
+    public:
+        Http(const Config &_cf);
+        Http(const Http &);
+        ~Http();
+
+        Http &operator=(const Http &);
+
+        void parse(string input);
+        void handleRequest();
 
         //getter
         bool getCanRespond() const;
