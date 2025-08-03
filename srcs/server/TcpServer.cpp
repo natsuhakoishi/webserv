@@ -48,19 +48,25 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 			size_t	separate_pos = hostPorts[i].find(":");
 			if (separate_pos == string::npos)
 			{
-				cout << "Error: Invalid HostPort" << endl;
-				exit(1);
+				cout << RED << "Error: Invalid HostPort" << RESETEND << endl;
+				break ;
 			}
 			string host = hostPorts[i].substr(0, separate_pos);
 			string port_str = hostPorts[i].substr(separate_pos + 1);
 
 			if (port_str.empty())
 			{
-				cout << "Invalid Port" << endl;
-				exit(1);
+				std::cerr << RED << "Error: Invalid Port: Empty" << RESETEND << endl;
+				break ;
 			}
 
 			int port = atoi(port_str.c_str());
+
+			if (port < 0 || port > 65535)
+			{
+				std::cerr << RED << "Error: Invalid Port: Range" << RESETEND << std::endl;
+				break ;
+			}
 
 			if (std::find(used_ports.begin(), used_ports.end(), port) != used_ports.end())
 			{
@@ -68,7 +74,7 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 			}
 			else
 			{
-				cout << GREEN << "Host " << host << " Port " << port << RESETEND << endl;
+				cout << BLUE << "H/P detected: Host " << host << " Port " << port << RESETEND;
 				ipp.push_back(std::make_pair(host, port));
 				used_ports.push_back(port);
 			}
@@ -86,7 +92,7 @@ void	TcpServer::initServer()
 
 		if (server_fd < 0)
 		{
-			std::cerr << "Failure: Socket Creation" << std::endl;
+			std::cerr << RED << "Failure: Socket Creation" << RESETEND << std::endl;
 			exit(1);
 		}
 
@@ -98,20 +104,20 @@ void	TcpServer::initServer()
 		address.sin_family = AF_INET;
 		if (inet_pton(AF_INET, this->ips[i].c_str(), &(address.sin_addr)) <= 0)
 		{
-			std::cerr << "Error: Invalid Address: " << this->ips[i] << std::endl;
+			std::cerr << RED << "Error: Invalid Address: " << this->ips[i] << RESETEND << std::endl;
 			exit(1);
 		}
 		address.sin_port = htons(this->ports[i]);
 
 		if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 		{
-			std::cerr << "Failure: Bind on port " << this->ports[i] << std::endl;
+			std::cerr << RED << "Failure: Bind on port " << this->ports[i] << RESETEND << std::endl;
 			exit(1);
 		}
 
 		if (listen(server_fd, 3) < 0)
 		{
-			std::cerr << "Failure: Listen on port " << this->ports[i] << std::endl;
+			std::cerr << RED << "Failure: Listen on port " << this->ports[i] << RESETEND << std::endl;
 			exit(1);
 		}
 
@@ -126,7 +132,7 @@ void	TcpServer::initServer()
 		this->fds.push_back(pfd);
 		this->server_fds.push_back(server_fd);
 
-		std::cout << "Listening on port " << this->ports[i] << "..." << " | IP: " << this->ips[i] << std::endl;
+		std::cout << GREEN << "Listening on port " << this->ports[i] << "..." << " | IP: " << this->ips[i] << RESETEND;
 	}
 }
 
@@ -147,7 +153,7 @@ void	TcpServer::handleClientConnection(size_t i)
 		npoll.revents = 0;
 		this->fds.push_back(npoll);
 
-		std::cout << "Client (fd: "<< new_socket << ") Connected" << std::endl;
+		std::cout << GREEN << "Client (fd: "<< new_socket << ") Connected" << RESETEND << std::endl;
 
 		// const char *msg = "Connected to the Server\n";
 		// send(new_socket, msg, strlen(msg), 0);
@@ -177,13 +183,13 @@ void	TcpServer::handleClientMessage(size_t i)
 	}
 	else if (bytes_read == 0)
 	{
-		std::cout << "Client (fd: " << this->fds[i].fd << ") Disconnected" << std::endl;
+		std::cout << YELLOW << "Client (fd: " << this->fds[i].fd << ") Disconnected" << RESETEND << std::endl;
 		close(this->fds[i].fd);
 		this->fds.erase(fds.begin() + i);
 	}
 	else if (bytes_read < 0)
 	{
-		std::cout << "Error: Client (fd: " << this->fds[i].fd << ") Force Disconnected" << std::endl;
+		std::cout << RED << "Error: Client (fd: " << this->fds[i].fd << ") Force Disconnected" << RESETEND << std::endl;
 		this->httpMap.erase(this->fds[i].fd);
 		close(this->fds[i].fd);
 		this->fds.erase(fds.begin() + i);
@@ -204,7 +210,7 @@ void	TcpServer::handleClientSend(size_t i)
 		ssize_t bytes_send = send(this->fds[i].fd, response.c_str() + total_sent, response.length() - total_sent, 0);
 		if (bytes_send < 0)
 		{
-			std::cerr << "Error: Send: fd " << this->fds[i].fd << std::endl;
+			std::cerr << RED << "Error: Send: fd " << this->fds[i].fd << RESETEND << std::endl;
 			break ;
 		}
 		total_sent += bytes_send;
@@ -223,7 +229,7 @@ void	TcpServer::runServer()
 		int poll_count = poll(this->fds.data(), this->fds.size(), -1);
 		if (poll_count < 0)
 		{
-			std::cerr << "Failure: Poll" << std::endl;
+			std::cerr << RED << "Failure: Poll" << RESETEND << std::endl;
 			break ;
 		}
 

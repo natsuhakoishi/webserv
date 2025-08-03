@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/24 04:11:55 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/07/27 04:26:55 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,8 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
 			a_server.parseServer(server_body);
 			this->_Servers.push_back(a_server);
-			this->checkRoute();
+			if (!this->checkRoute(a_server))
+				this->_Servers.erase(this->_Servers.begin() + this->_blockCount);
 			server_body.clear();
 		}
 		else
@@ -135,7 +136,8 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
 			a_server.parseServer(server_body);
 			this->_Servers.push_back(a_server);
-			this->checkRoute();
+			if (!this->checkRoute(a_server))
+				this->_Servers.erase(this->_Servers.begin() + this->_blockCount);
 			server_body.clear();
 		}
 	}
@@ -143,8 +145,8 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Brace: Not enclosed properly.");
 	this->general_check();
 	this->build_SocketTable();
-	// this->print_ServerParsed();
-	std::cout << "\033[0;32m-- Parsing Success! --\033[0m" << std::endl;
+	this->print_ServerParsed();
+	std::cout << "\033[0;32m\n-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_SocketTable();
 }
 
@@ -157,7 +159,10 @@ void	Config::general_check() {
 		vector<cfgRoute>::iterator	it2 = temp_route.begin();
 
 		if (server.get_hostPort().empty())
-			throw CheckingError(server.get_id(), "listen", "No valid socket address / port found!");
+		{
+			std::cout << "\033[38;5;202mCHECKING ->" << " Server(" << server.get_id() << "): [listen]: " << "No valid socket address / port found!" << reset << std::endl;
+			this->_Servers.erase(it);
+		}
 		while (it2 != temp_route.end())
 		{
 			cfgRoute &current = *it2;
@@ -209,34 +214,30 @@ void	Config::build_SocketTable() {
 	}
 }
 
-void	Config::checkRoute() {
+bool	Config::checkRoute(cfgServer &block) {
 	vector<string>	temp_buffer;
-	vector<cfgServer>::iterator	it = this->_Servers.begin();
-	while (it != this->_Servers.end())
+	vector<cfgRoute>	&temp_route = block.get_routes();
+	vector<cfgRoute>::iterator	it2 = temp_route.begin();
+	while (it2 != temp_route.end())
 	{
-		vector<cfgRoute>	&temp_route = (*it).get_routes();
-		vector<cfgRoute>::iterator	it2 = temp_route.begin();
-		while (it2 != temp_route.end())
+		if (!temp_buffer.empty())
 		{
-			if (temp_buffer.size() >= 2)
+			vector<string>::iterator	it3 = temp_buffer.begin();
+			while (it3 != temp_buffer.end())
 			{
-				vector<string>::iterator	it3 = temp_buffer.begin();
-				while (it3 != temp_buffer.end())
+				if (*it3 == (*it2).get_path())
 				{
-					if (*it3 == (*it2).get_path())
-					{
-						std::cout << red << "Error -> \"" << (*it2).get_path() << "\"" << reset << std::endl;
-						throw CheckingError((*it).get_id(), "Location", "Found duplicate route!");
-					}
-					++it3;
+					std::cout << "\033[38;5;202mCHECKING ->" << " Server(" << block.get_id() << "): [Location " << it2->get_path() << "]: " << "Found duplicate route!" << reset << std::endl;
+					return false;
 				}
+				++it3;
 			}
-			temp_buffer.push_back((*it2).get_path());
-			++it2;
 		}
-		temp_buffer.clear();
-		++it;
+		temp_buffer.push_back((*it2).get_path());
+		++it2;
 	}
+	temp_buffer.clear();
+	return true;
 }
 
 void	Config::print_ServerParsed() {
