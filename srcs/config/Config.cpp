@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 07:46:00 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/27 04:26:55 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/08/04 04:26:31 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,10 +122,17 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			first_Obrace = false;
 			this->_blockCount++;
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
-			a_server.parseServer(server_body);
-			this->_Servers.push_back(a_server);
-			if (!this->checkRoute(a_server))
-				this->_Servers.erase(this->_Servers.begin() + this->_blockCount);
+			try
+			{
+				a_server.parseServer(server_body);
+				this->_Servers.push_back(a_server);
+				if (!this->checkRoute(a_server))
+					this->_Servers.erase(this->_Servers.begin() + this->_blockCount);
+			}
+			catch(const std::exception& e)
+			{
+				std::cout << red << e.what() << '\n' << reset;
+			}
 			server_body.clear();
 		}
 		else
@@ -134,10 +141,17 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 			first_Obrace = false;
 			this->_blockCount++;
 			cfgServer a_server = cfgServer(this->_blockCount - 1);
-			a_server.parseServer(server_body);
-			this->_Servers.push_back(a_server);
-			if (!this->checkRoute(a_server))
-				this->_Servers.erase(this->_Servers.begin() + this->_blockCount);
+			try
+			{
+				a_server.parseServer(server_body);
+				this->_Servers.push_back(a_server);
+				if (!this->checkRoute(a_server))
+					this->_Servers.erase(this->_Servers.begin() + this->_blockCount);
+			}
+			catch(const std::exception& e)
+			{
+				std::cout << red << e.what() << '\n' << reset;
+			}
 			server_body.clear();
 		}
 	}
@@ -145,7 +159,7 @@ void	Config::scan_serverBody(std::ifstream &infile) {
 		throw ConfigError("Brace: Not enclosed properly.");
 	this->general_check();
 	this->build_SocketTable();
-	this->print_ServerParsed();
+	// this->print_ServerParsed();
 	std::cout << "\033[0;32m\n-- Parsing Success! --\033[0m" << std::endl;
 	// this->print_SocketTable();
 }
@@ -242,8 +256,11 @@ bool	Config::checkRoute(cfgServer &block) {
 
 void	Config::print_ServerParsed() {
 	vector<cfgServer>::iterator	it = this->_Servers.begin();
+	if (it != this->_Servers.end())
+		std::cout << "\033[38;5;202m" << "\n///////////////// CONTENT /////////////////\033[0m\n";
 	while (it != this->_Servers.end())
 	{
+		std::cout << "\n";
 		(*it).display_parsedContent();
 		vector<cfgRoute> temp_route = (*it).get_routes();
 		vector<cfgRoute>::iterator	it2 = temp_route.begin();
@@ -252,7 +269,7 @@ void	Config::print_ServerParsed() {
 			(*it2).displayContent();
 			++it2;
 		}
-		std::cout << "\033[38;5;202m" << "/////////////////////////////////////////////////////////////////" << "\033[0m\n" << std::endl;
+		std::cout << "\033[38;5;202m" << "///////////////////////////////////////////" << "\033[0m\n" << std::endl;
 		++it;
 	}
 }

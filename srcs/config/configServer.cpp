@@ -6,7 +6,7 @@
 /*   By: zgoh <zgoh@student.42kl.edu.my>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 18:57:54 by zgoh              #+#    #+#             */
-/*   Updated: 2025/07/24 03:43:09 by zgoh             ###   ########.fr       */
+/*   Updated: 2025/08/04 04:08:48 by zgoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,8 @@ void	cfgServer::handle_hostPort(vector<string> &line) {
 	{
 		if (line[1].at(0) == ':')
 			throw ArgError(this->_id, line[0], "No host");
+		else if (pos == line[1].size() - 1)
+			throw ArgError(this->_id, line[0], "No port!");
 		this->_hostPort.push_back(line[1]);
 	}
 	else
@@ -207,7 +209,7 @@ void	cfgServer::handle_hostPort(vector<string> &line) {
 			this->_hostPort.push_back(temp);
 		}
 		else
-			throw ArgError(this->_id, line[0], "No port!");
+			throw ArgError(this->_id, line[0], "No port");
 	}
 }
 
@@ -235,72 +237,65 @@ void	cfgServer::parseServer(string &content) {
 	list["index"] = &cfgServer::handle_serverIndex;
 	list["autoindex"] = &cfgServer::handle_autoIndexS;
 
-	try
+	while (std::getline(iss, line))
 	{
-		while (std::getline(iss, line))
+		vector<string>	inline_directives = Utils::splitInline(line);
+		vector<string>::iterator it2 = inline_directives.begin();
+		while (it2 != inline_directives.end())
 		{
-			vector<string>	inline_directives = Utils::splitInline(line);
-			vector<string>::iterator it2 = inline_directives.begin();
-			while (it2 != inline_directives.end())
+			string	inlines = *it2;
+			inlines = Utils::trim_whitespaces(inlines);
+			//don't move it to Config parsing logic, will not working w/ inline config
+			if (!in_body && (!inlines.compare(0, 7, "server{") || !inlines.compare(0, 8, "server {") || !inlines.compare(0, 8, "server	{")))
 			{
-				string	inlines = *it2;
-				inlines = Utils::trim_whitespaces(inlines);
-				//don't move it to Config parsing logic, will not working w/ inline config
-				if (!in_body && (!inlines.compare(0, 7, "server{") || !inlines.compare(0, 8, "server {") || !inlines.compare(0, 8, "server	{")))
-				{
-					++it2;
-					continue ;
-				}
-				if (!in_body && !inlines.compare(0,8,"location"))
-					in_body = true;
-				if (in_body)
-				{
-					location_body.append(inlines).append("\n");
-					if (inlines.find("}") != std::string::npos)
-					{
-						in_body = false;
-						cfgRoute a_block_found = cfgRoute();
-						a_block_found.parseLocation(location_body, this->_id);
-						// a_block_found.displayContent();
-						this->_Routes.push_back(a_block_found);
-						location_body.clear();
-					}
-				}
-				else
-				{
-					inlines = Utils::trim_inlineComment(inlines);
-					if (!inlines.empty())
-					{
-						if (inlines == "}" || inlines == "{")
-						{
-							++it2;
-							continue ;
-						}
-						else if (inlines[inlines.size() - 1] != ';')
-						{
-							std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
-							throw ArgError(this->_id, "", "not terminated by \";\"");
-						}
-						tokens_holder = Utils::tokenizer(inlines);
-						map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
-						if (it != list.end())
-							(this->*(it->second))(tokens_holder);
-						else
-						{
-							std::cout << red << "Error -> \"" << tokens_holder[0] << "\"" << reset << std::endl;
-							throw ArgError(this->_id, "", "unknown directive");
-						}
-					}
-				}
 				++it2;
+				continue ;
 			}
+			if (!in_body && !inlines.compare(0,8,"location"))
+				in_body = true;
+			if (in_body)
+			{
+				location_body.append(inlines).append("\n");
+				if (inlines.find("}") != std::string::npos)
+				{
+					in_body = false;
+					cfgRoute a_block_found = cfgRoute();
+					a_block_found.parseLocation(location_body, this->_id);
+					// a_block_found.displayContent();
+					this->_Routes.push_back(a_block_found);
+					location_body.clear();
+				}
+			}
+			else
+			{
+				inlines = Utils::trim_inlineComment(inlines);
+				if (!inlines.empty())
+				{
+					if (inlines == "}" || inlines == "{")
+					{
+						++it2;
+						continue ;
+					}
+					else if (inlines[inlines.size() - 1] != ';')
+					{
+						std::cout << red << "Error -> \"" << inlines << "\"" << reset << std::endl;
+						throw ArgError(this->_id, "", "not terminated by \";\"");
+					}
+					tokens_holder = Utils::tokenizer(inlines);
+					map<string,void(cfgServer::*)(vector<string>&)>::iterator it = list.find(tokens_holder[0]);
+					if (it != list.end())
+						(this->*(it->second))(tokens_holder);
+					else
+					{
+						std::cout << red << "Error -> \"" << tokens_holder[0] << "\"" << reset << std::endl;
+						throw ArgError(this->_id, "", "unknown directive");
+					}
+				}
+			}
+			++it2;
 		}
-		std::cout << "\033[32mServer(" << this->_id << "): Parsed." << reset << std::endl;
 	}
-	catch(const std::exception& e)
-	{
-		std::cout << red << e.what() << '\n' << reset;
-	}
+	std::cout << "\033[32mServer(" << this->_id << "): Parsed." << reset << std::endl;
 }
 
 void	cfgServer::display_parsedContent(void) {
