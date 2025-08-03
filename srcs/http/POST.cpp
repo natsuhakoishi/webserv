@@ -23,7 +23,7 @@ void Http::POST(string path)
             std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") == this->allowMethod.end())
     {
         cout << RED << "POST: Method not allow" << RESETEND;
-        code403();
+        code405();
         return ;
     }
     // if (static_cast<int>(this->body.length()) > this->bodySize)

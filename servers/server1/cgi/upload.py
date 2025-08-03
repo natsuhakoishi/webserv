@@ -3,8 +3,8 @@ import sys
 import os
 import cgi
 
-
-
+if "GET" in os.environ.get("Method"):
+    sys.exit(1)
 
 # length = int(os.environ.get("Content-Length", 0))
 # read_total = 0

@@ -21,7 +21,7 @@ void Http::GET(string path)
     if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
     {
         cout << RED << "GET: Method not allow" << RESETEND;
-        code403();
+        code405();
         return ;
     }
     else if (!this->redirectPath.empty())

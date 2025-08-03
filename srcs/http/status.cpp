@@ -88,7 +88,7 @@ void Http::code409()
 
     string content = getContent(getErrorCodePath(409));
     if (!content.compare(""))
-        ss << "<!doctype html><html lang=\"en\"><head><title>409 Conflict [DefaultPage]</title></head><body><main><h1>404 Conflict</h1></main></body></html>";
+        ss << "<!doctype html><html lang=\"en\"><head><title>409 Conflict [DefaultPage]</title></head><body><main><h1>409 Conflict</h1></main></body></html>";
     else
         ss << content;
 
@@ -161,7 +161,7 @@ void Http::code413()
     else
         ss << content;
 
-    cout << ss.str() << endl;
+    // cout << ss.str() << endl;
     this->respond = ss.str();
     // send(pfd, ss.str().c_str(), ss.str().length(), 0);
 
