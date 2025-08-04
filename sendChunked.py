@@ -1,10 +1,10 @@
 import socket
 
 host = '127.0.0.1'
-port = 4242
+port = 1234
 
 request = (
-    "POST /cgi/plain.py?FILEN=Test HTTP/1.1\r\n"
+    "POST /cgi/uploadNotForm.py?FILEN=Test HTTP/1.1\r\n"
     "Host: 127.0.0.1\r\n"
     "Transfer-Encoding: chunked\r\n"
     "Content-Type: application/x-www-form-urlencoded\r\n"
