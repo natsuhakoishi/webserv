@@ -279,13 +279,12 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     // cout << BLUE << "CGI Respond ok" << RESETEND;
                     // close(pfd.fd);
                 }
-                // else if (!CGIoutput.compare("500\n"))
                 else
                     code500(); //server error
 
                 return ;
             }
-            // cout << "wait" << endl;
+            // cout << "wait" << endl; //debug
             usleep(10000);
         }
     }
@@ -294,6 +293,18 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
 
 void Http::handleCGI(string CGIpath)
 {
+    {
+        size_t i = 0;
+        for (; this->allowMethod.size() < i; ++i)
+            if (this->method == this->allowMethod[i])
+                break ;
+        if (i > this->allowMethod.size())
+        {
+            code405();
+            return ;
+        }
+    }
+
     size_t pos;
     string clearURL(this->rootPath + CGIpath); //remove ?...
     if (std::count(CGIpath.begin(), CGIpath.end(), '?') != 0)
@@ -326,7 +337,7 @@ void Http::handleCGI(string CGIpath)
     {
         code403(); //forbidden
         return ;
-    }
+    }        
 
     // for (size_t i = 0; i < vecEnv.size(); ++i)
         // cout << BLUE << vecEnv[i] << RESETEND; //debug
