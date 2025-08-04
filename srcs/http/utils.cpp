@@ -52,3 +52,12 @@ bool Http::isExecutale(const string &path)
         return true;
     return false;
 }
+
+bool Http::IsAllowMethod()
+{
+    vector<string>::iterator iter = this->allowMethod.begin();
+    for (; iter != this->allowMethod.end(); ++iter)
+        if (this->method == *iter)
+            return true;
+    return false;
+}

@@ -80,15 +80,19 @@ void Http::handleRequest()
         code400(); //bad request
     else if (this->sizeTooLarge)
         code413(); //size too large
-    else if (cgiTypePath.first.compare("Empty"))
-        handleCGI(this->url);
-    else if (!this->method.compare("POST"))
-        POST(this->filePath);
-    else if (!this->method.compare("GET"))
-        GET(this->filePath);
-    else if (!this->method.compare("DELETE"))
-        DELETE(this->filePath);
-    else //unknown method
+
+    if (IsAllowMethod())
+    {
+        if (cgiTypePath.first.compare("Empty"))
+            handleCGI(this->url);
+        else if (!this->method.compare("POST"))
+            POST(this->filePath);
+        else if (!this->method.compare("GET"))
+            GET(this->filePath);
+        else if (!this->method.compare("DELETE"))
+            DELETE(this->filePath);
+    }
+    else //unknown method or method not allow 
         code405();
 }
 

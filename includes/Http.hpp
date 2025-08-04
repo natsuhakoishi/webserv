@@ -60,6 +60,8 @@ class Http
         string getErrorCodePath(int code);
         string getResponse();
         void getServerBlock(const vector<cfgServer> &csVec);
+
+        bool IsAllowMethod();
         void GET(string);
         void POST(string);
         void DELETE(string);

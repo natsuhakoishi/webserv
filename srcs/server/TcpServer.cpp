@@ -42,6 +42,8 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 	{
 		vector<string> hostPorts = it->get_hostPort();
 		vector<int> used_ports;
+		vector<std::pair<string, int> > sb_ipp;
+		bool flag = true;
 
 		for (size_t i = 0; i < hostPorts.size(); ++i)
 		{
@@ -49,6 +51,7 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 			if (separate_pos == string::npos)
 			{
 				cout << RED << "Error: Invalid HostPort" << RESETEND << endl;
+				flag = false;
 				break ;
 			}
 			string host = hostPorts[i].substr(0, separate_pos);
@@ -57,6 +60,7 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 			if (port_str.empty())
 			{
 				std::cerr << RED << "Error: Invalid Port: Empty" << RESETEND << endl;
+				flag = false;
 				break ;
 			}
 
@@ -65,22 +69,33 @@ TcpServer::TcpServer(Config *_cf): config(_cf)
 			if (port < 0 || port > 65535)
 			{
 				std::cerr << RED << "Error: Invalid Port: Range" << RESETEND << std::endl;
+				flag = false;
 				break ;
 			}
-
+			
 			if (std::find(used_ports.begin(), used_ports.end(), port) != used_ports.end())
 			{
 				std::cerr << RED << "Failure: Port " << port << " is in used." << RESETEND << std::endl;
+				flag = false;
+				break ;
 			}
-			else
+
+			sb_ipp.push_back(std::make_pair(host, port));
+			used_ports.push_back(port);
+		}
+		if (flag)
+		{
+			for (size_t i = 0; i < sb_ipp.size(); ++i)
 			{
-				cout << BLUE << "H/P detected: Host " << host << " Port " << port << RESETEND;
-				ipp.push_back(std::make_pair(host, port));
-				used_ports.push_back(port);
+				cout << BLUE << "H/P detected: Host " << sb_ipp[i].first << " Port " << sb_ipp[i].second << RESETEND;
+				ipp.push_back(sb_ipp[i]);
 			}
 		}
 	}
-	handleIpp(ipp);
+	if (!ipp.empty())
+		handleIpp(ipp);
+	else
+		exit(1);
 	initServer();
 }
 
@@ -218,6 +233,7 @@ void	TcpServer::handleClientSend(size_t i)
 	delete h;
 	this->httpMap.erase(this->fds[i].fd);
 
+	std::cout << YELLOW << "Client (fd: " << this->fds[i].fd << ") Disconnected" << RESETEND << std::endl;
 	close(this->fds[i].fd);
 	this->fds.erase(this->fds.begin() + i);
 }
