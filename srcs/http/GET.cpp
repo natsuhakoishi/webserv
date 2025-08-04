@@ -18,13 +18,13 @@ void Http::GET(string path)
     cout << BLUE << "GET: Client request: " << GREEN << path << RESETEND;
     bool Autoindex = false;
 
-    if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
-    {
-        cout << RED << "GET: Method not allow" << RESETEND;
-        code405();
-        return ;
-    }
-    else if (!this->redirectPath.empty())
+    // if (std::find(this->allowMethod.begin(), this->allowMethod.end(), "GET") == this->allowMethod.end())
+    // {
+    //     cout << RED << "GET: Method not allow" << RESETEND;
+    //     code405();
+    //     return ;
+    // }
+    if (!this->redirectPath.empty())
     {
         code303(); //redirection
         return ;
