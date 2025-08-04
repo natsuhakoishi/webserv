@@ -160,8 +160,6 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
         for (size_t i = 0; i < vecTmp.size(); ++i)
             vecEnv.push_back(const_cast<char *>(vecTmp[i].c_str()));
 
-        // string boundary("Boundary=" + this->headers["Content-Type"].substr(this->headers["Content-Type"].find("----") + 4));
-        // vecEnv.push_back(const_cast<char *>(boundary.c_str()));
         if (std::count(CGIpath.begin(), CGIpath.end(), '?') != 0) //if have Query Parameters, save all to env's vector
         {
             CGIpath = CGIpath.substr(CGIpath.find("?") + 1);
@@ -175,10 +173,10 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
         vecEnv.push_back(const_cast<char *>(qs.c_str()));
         vecEnv.push_back(NULL);
         for (size_t i = 0; i < vecEnv.size() - 1; ++i)
-        cout << RED << "vecEnv: " << vecEnv[i] << RESETEND;
+        cout << RED << "vecEnv: " << vecEnv[i] << RESETEND; //debug
 
         for (size_t i = 0; i < argv.size() - 1; ++i)
-            cout << RED << "argv: " << argv[i] << RESETEND;
+            cout << RED << "argv: " << argv[i] << RESETEND; //debug
 
         dup2(cgiIn[0], 0); 
         dup2(cgiOut[1], 1); 
@@ -197,9 +195,6 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
         close(cgiIn[0]);
         close(cgiOut[1]);
         ssize_t total = 0;
-        // sleep(1);
-
-        // this->body = this->header + "\r\n\r\n" + this->body;
 
         // cout << this->body << endl;
         while (static_cast<size_t>(total) < this->body.size())
@@ -227,14 +222,14 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
         {
             int status;
             pid_t result = waitpid(pid, &status, WNOHANG);
-            if (result == -1)
+            if (result == -1) //unknown error
             {
                 perror("waitpid error");
                 close(cgiOut[0]);
                 code500();
                 return;
             }
-            else if (!result)
+            else if (!result) //pid no close yet
             {
                 if (time(NULL) - start > TIMEOUT)
                 {
@@ -245,7 +240,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     return ;
                 }
             }
-            else if (result > 0)
+            else if (result > 0) //pid closed
             {
                 while ((readd = read(cgiOut[0], buffer, sizeof(buffer))) > 0)
                     CGIoutput.append(buffer, readd);
@@ -255,7 +250,7 @@ void Http::CGIPost(vector<char *> &argv, string CGIpath)
                     code504(); //time out
                     return ;
                 }
-                cout << BLUE << "Out:\n" << CGIoutput << RESETEND;
+                cout << BLUE << "Out:\n" << CGIoutput << RESETEND; //debug
 
                 this->respond = CGIoutput;
                 if (!CGIoutput.compare("403\n"))
@@ -297,14 +292,14 @@ void Http::handleCGI(string CGIpath)
     string clearURL(this->rootPath + CGIpath); //remove ?...
     if (std::count(CGIpath.begin(), CGIpath.end(), '?') != 0)
         clearURL = this->rootPath + CGIpath.substr(0, CGIpath.find("?"));  //remove ?...
-    else if ((pos = CGIpath.find(this->cgiTypePath.first)) != string::npos)
+    else if ((pos = CGIpath.find(this->cgiTypePath.first)) != string::npos) //this->cgiTypePath.first ex. .py  .sh
     {
         string check(CGIpath.substr(pos + this->cgiTypePath.first.length())); 
         // cout << "check: " << check << endl; //debug
         if (!check.empty())
         {
             if (check[0] != '/') //example cgi.pyaaa
-                clearURL.clear();
+                clearURL.clear(); ///clear, then 404
             else
                 clearURL = this->rootPath + CGIpath.substr(0, pos + this->cgiTypePath.first.length()); //remove /xxx/xxx
             this->headers["PATH_INFO"] = check;
@@ -333,7 +328,7 @@ void Http::handleCGI(string CGIpath)
 
     if (this->cgiTypePath.first.compare("C?"))
         vecArgv.push_back(const_cast<char *>(this->cgiTypePath.second.c_str()));
-    else
+    else //remove it can handle all cgi
     {
         code400(); //bad request
         return ;

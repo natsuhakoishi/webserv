@@ -81,7 +81,7 @@ void Http::handleRequest()
     else if (this->sizeTooLarge)
         code413(); //size too large
 
-    if (IsAllowMethod())
+    if (std::find(this->allowMethod.begin(), this->allowMethod.end(), this->method) != this->allowMethod.end())
     {
         if (cgiTypePath.first.compare("Empty"))
             handleCGI(this->url);
