@@ -45,10 +45,11 @@ class Http
 
         bool canRespond;
         string respond;
-        Http();
+
 
         void readHeaders();
         void readBody();
+        void readChunked();
         void readConfig();
         void readRouteConfig();
         void initConfig(int idx);
@@ -89,12 +90,12 @@ class Http
         void code500(); //server error
         void code504(); //time out
 
+        Http();
+        Http(const Http &);
+        Http &operator=(const Http &);
     public:
         Http(const Config &_cf);
-        Http(const Http &);
         ~Http();
-
-        Http &operator=(const Http &);
 
         void parse(string input);
         void handleRequest();

@@ -301,7 +301,7 @@ void Http::handleCGI(string CGIpath)
     else if ((pos = CGIpath.find(this->cgiTypePath.first)) != string::npos)
     {
         string check(CGIpath.substr(pos + this->cgiTypePath.first.length())); 
-        // cout << "check: " << check << endl;
+        // cout << "check: " << check << endl; //debug
         if (!check.empty())
         {
             if (check[0] != '/') //example cgi.pyaaa
@@ -309,7 +309,7 @@ void Http::handleCGI(string CGIpath)
             else
                 clearURL = this->rootPath + CGIpath.substr(0, pos + this->cgiTypePath.first.length()); //remove /xxx/xxx
             this->headers["PATH_INFO"] = check;
-            // cout << "ClearUrl: " << clearURL << endl;
+            // cout << "ClearUrl: " << clearURL << endl; //debug
         }
     }
     if (!fileExistis(clearURL))
@@ -329,7 +329,7 @@ void Http::handleCGI(string CGIpath)
     }
 
     // for (size_t i = 0; i < vecEnv.size(); ++i)
-        // cout << BLUE << vecEnv[i] << RESETEND;
+        // cout << BLUE << vecEnv[i] << RESETEND; //debug
     vector<char *> vecArgv;
 
     if (this->cgiTypePath.first.compare("C?"))

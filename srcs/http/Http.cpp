@@ -1,10 +1,47 @@
 #include "../../includes/Http.hpp"
 
-// Http::Http()//: cf(Config())
+// Http::Http(const Http &other): cf(other.cf)
 // {
 //     if (DEBUG)
-//         cout << GREEN << "Default constructor called" << endl;
+//         cout << GREEN << "Copy constructor called" << endl;
+//     *this = other;
 // }
+
+
+// Http &Http::operator=(const Http &q)
+// {
+//     if (this == &q)
+//         return *this;
+//     this->cs = q.cs;
+//     this->rootPath = q.rootPath;
+//     this->routes = q.routes;
+//     this->autoindex = q.autoindex;
+//     this->indexFile = q.indexFile;
+//     this->bodySize = q.bodySize;
+//     this->errorCodeMap = q.errorCodeMap;
+//     this->redirectPath = q.rootPath;
+//     this->uplaodPath = q.uplaodPath;
+
+//     this->headers = q.headers;
+//     this->allowMethod = q.allowMethod;
+
+//     this->rev = q.rev;
+//     this->buffer = q.buffer;
+
+//     this->header = q.header;
+//     this->body = q.body;
+
+//     this->method = q.method;
+//     this->url = q.url;
+//     this->filePath = q.filePath;
+//     this->headers = q.headers;
+//     this->HttpVersion = q.HttpVersion;
+
+//     this->canRespond = q.canRespond;
+
+//     return *this;
+// }
+
 
 Http::Http(const Config &_cf): cf(_cf)
 {
@@ -20,60 +57,19 @@ Http::Http(const Config &_cf): cf(_cf)
         cout << GREEN << "Arg constructor called" << endl;
 }
 
-Http::Http(const Http &other): cf(other.cf)
-{
-    if (DEBUG)
-        cout << GREEN << "Copy constructor called" << endl;
-    *this = other;
-}
-
 Http::~Http() {}
-
-Http &Http::operator=(const Http &q)
-{
-    if (this == &q)
-        return *this;
-    this->cs = q.cs;
-    this->rootPath = q.rootPath;
-    this->routes = q.routes;
-    this->autoindex = q.autoindex;
-    this->indexFile = q.indexFile;
-    this->bodySize = q.bodySize;
-    this->errorCodeMap = q.errorCodeMap;
-    this->redirectPath = q.rootPath;
-    this->uplaodPath = q.uplaodPath;
-
-    this->headers = q.headers;
-    this->allowMethod = q.allowMethod;
-
-    this->rev = q.rev;
-    this->buffer = q.buffer;
-
-    this->header = q.header;
-    this->body = q.body;
-
-    this->method = q.method;
-    this->url = q.url;
-    this->filePath = q.filePath;
-    this->headers = q.headers;
-    this->HttpVersion = q.HttpVersion;
-
-    this->canRespond = q.canRespond;
-
-    return *this;
-}
 
 void Http::parse(string input)
 {
     // cout << GREEN << "Client: " << input << RESETEND;
     this->buffer = input;
-    this->rev.append(this->buffer);
-    if (this->header.empty())
-        readHeaders();
+    this->rev.append(this->buffer); //save input to buffer
+    if (this->header.empty()) // first raed header
+        readHeaders(); 
     if (!this->method.compare("POST"))
         readBody();
     else
-        this->canRespond = true;
+        this->canRespond = true; //GET
 
     this->buffer.clear();
 }
@@ -81,9 +77,9 @@ void Http::parse(string input)
 void Http::handleRequest()
 {
     if (this->chunkError)
-        code400();
+        code400(); //bad request
     else if (this->sizeTooLarge)
-        code413();
+        code413(); //size too large
     else if (cgiTypePath.first.compare("Empty"))
         handleCGI(this->url);
     else if (!this->method.compare("POST"))
@@ -106,16 +102,16 @@ void Http::readHeaders()
     std::getline(ss, line);
     std::istringstream requestLine(line);
 
-    requestLine >> this->method >> this->url >> this->HttpVersion;
+    requestLine >> this->method >> this->url >> this->HttpVersion; //save header's first line
 
     this->headers["Method"] = this->method;
     this->headers["Url"] = this->url;
     this->headers["Http-Version"] = this->HttpVersion;
 
-    cout << YELLOW << "method:" << method << ", " << "url:" << url << RESETEND;
-    // cout << "headers: " << YELLOW << this->header << RESETEND;
+    cout << YELLOW << "method:" << method << ", " << "url:" << url << RESETEND; //debug
+    // cout << "headers: " << YELLOW << this->header << RESETEND; //debug
 
-    while (getline(ss, line))
+    while (getline(ss, line)) //save haeder's key & value to a map<>
     {
         size_t pos = line.find(":");
         string key = line.substr(0, pos);
@@ -129,7 +125,7 @@ void Http::readHeaders()
     readRouteConfig();
 
     // this->filePath = this->cs.get_rootPath() + this->url; // example ./index + /
-    cout << YELLOW << "file path: " << this->filePath << RESETEND;
+    cout << YELLOW << "file path: " << this->filePath << RESETEND; //debug
     // cout << YELLOW << this->cs.get_serverName() << RESETEND;
 
 }
@@ -142,50 +138,62 @@ check all server block's server name
 */
 void Http::readConfig()
 {
-    vector<cfgServer> csVec = this->cf.get_Servers();
+    vector<cfgServer> csVec = this->cf.get_Servers(); //copy config of servers
 
-    getServerBlock(csVec);
-    cout << RED << "Server name: " << this->cs.get_serverName() << RESETEND;
+    getServerBlock(csVec); //bind server's config
+    cout << RED << "Server name: " << this->cs.get_serverName() << RESETEND; //debug
 
-    this->errorCodeMap = this->cs.get_errorCodesMap();
-    // printMap(this->errorCodeMap);
-    // printMap(this->headers);
+    this->errorCodeMap = this->cs.get_errorCodesMap(); //save error code map
+    // printMap(this->errorCodeMap); //debug
+    // printMap(this->headers); //debug
 }
 
+/**
+ * bind server block
+ * try to match server name
+ * if not match
+ * try to match ip+host
+ * if not match
+ * take the first server block 
+ */
 void Http::getServerBlock(const vector<cfgServer> &csVec)
 {
     map<string, cfgServer> csMap; //ipPort | cfgServer
 
-    for (size_t i = 0; i < csVec.size(); ++i)
+    for (size_t i = 0; i < csVec.size(); ++i) //get all match ports
     {
         const vector<string> &hp = csVec[i].get_hostPort();
         for (size_t j = 0; j < hp.size(); ++j)
-            if (!hp[j].compare(this->headers["Host"]))
+            if (!hp[j].compare(this->headers["Host"])) //try to match host ex. 120.0.0.1
                 csMap[hp[j]] = csVec[i];
     }
 
-    if (csMap.size() == 0)
+    if (csMap.size() == 0) //have'nt match port, try match serverName
     {
         string hostName = this->headers["Host"].substr(0, this->headers["Host"].find(':'));
         vector<cfgServer>::const_iterator csIter = csVec.begin();
-        for (; csIter != csVec.end(); ++csIter)
+        for (; csIter != csVec.end(); ++csIter) //loop all servers blocks
         {
-            if (!csIter->get_serverName().compare(hostName))
+            if (!csIter->get_serverName().compare(hostName)) //try to match serverName ex. 42KL.com
             {
-                this->cs = *csIter;
+                this->cs = *csIter; //bind server block
                 return ;
             }
         }
-        csIter = csVec.begin();
+        csIter = csVec.begin(); //have'nt match serverName, bind the first server block
         this->cs = *csIter;
     }
     else
     {
-        map<string, cfgServer>::iterator csMapIter = csMap.begin();
+        map<string, cfgServer>::iterator csMapIter = csMap.begin(); //bind the first server block
         this->cs = csMapIter->second;
     }
 }
 
+/**
+ * bind route block
+ * init my config's variable
+ */
 void Http::readRouteConfig()
 {
     this->routes = this->cs.get_routes();
@@ -196,16 +204,22 @@ void Http::readRouteConfig()
             idx = i;
     if (idx == -1)
         for (int i = 0; i < static_cast<int>(this->routes.size()) && idx == -1; ++i)
-            if (this->routes[i].get_path() == "/")
+            if (this->routes[i].get_path() == "/") //find '/' block
                 idx = i;
     initConfig(idx);
 }
 
+/**
+ * init config's variable
+ * if have'nt bind route
+ * take server's config (default)
+ * else use the corrrect route
+ */
 void Http::initConfig(int idx)
 {
-    if (idx == -1)
+    if (idx == -1) // no bind any route even '/'
     {
-        cout << YELLOW << "Debug: Route not found, use server block data:" << endl;
+        cout << YELLOW << "Debug: Route not found, use server block data:" << endl; //debug
         this->rootPath = this->cs.get_rootPath();
         this->filePath = this->rootPath + this->url;
         this->indexFile = this->cs.get_indexPath();
@@ -214,14 +228,16 @@ void Http::initConfig(int idx)
         this->allowMethod.push_back("GET");
         this->allowMethod.push_back("POST");
         this->allowMethod.push_back("DELETE");
-        cout << "Root path: " << this->cs.get_rootPath() << endl;
-        cout << "Index file: " << this->indexFile << endl;
-        cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
-        cout << "Body size: " << this->bodySize << " " << this->cs.get_clientBodySize() << RESETEND;
+        {//debug
+            cout << "Root path: " << this->cs.get_rootPath() << endl; //debug
+            cout << "Index file: " << this->indexFile << endl; //debug
+            cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl; //debug
+            cout << "Body size: " << this->bodySize << " " << this->cs.get_clientBodySize() << RESETEND; //debug
+        }
     }
     else
     {
-        cout << YELLOW << "Debug: Found route, using route block data: " << this->routes[idx].get_path() << endl;
+        cout << YELLOW << "Debug: Found route, using route block data: " << this->routes[idx].get_path() << endl; //debug
         this->rootPath = this->routes[idx].get_rootPath();
         this->redirectPath = this->routes[idx].get_redirectionPath();
         this->filePath = this->rootPath + this->url;
@@ -247,18 +263,21 @@ void Http::initConfig(int idx)
                 }
             }
         }
-        cout << "CgiType: " << this->cgiTypePath.first << " : " << this->cgiTypePath.second << endl;
-        cout << "Root path: " << this->routes[idx].get_rootPath() << endl;
-        cout << "Index file: " << this->indexFile << endl;
-        cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl;
-        cout << "Body size: " << this->bodySize << endl;
-        cout << "Redirect: " << (this->redirectPath.empty() ? "no" : "yes ->" + this->redirectPath) << endl;
-        cout << "Upload Path: " << this->uplaodPath << endl;
-        for (int i = 0; i != static_cast<int>(this->allowMethod.size()); ++i)
-            cout << "Allow method: " << this->allowMethod[i] << endl;
-        cout << RESETEND;
+        {//debug
+            cout << "CgiType: " << this->cgiTypePath.first << " : " << this->cgiTypePath.second << endl; //debug
+            cout << "Root path: " << this->routes[idx].get_rootPath() << endl; //debug
+            cout << "Index file: " << this->indexFile << endl; //debug
+            cout << "Auto index: " << (this->autoindex ? "on" : "off") << endl; //debug
+            cout << "Body size: " << this->bodySize << endl; //debug
+            cout << "Redirect: " << (this->redirectPath.empty() ? "no" : "yes ->" + this->redirectPath) << endl; //debug
+            cout << "Upload Path: " << this->uplaodPath << endl; //debug
+            for (int i = 0; i != static_cast<int>(this->allowMethod.size()); ++i) //debug
+                cout << "Allow method: " << this->allowMethod[i] << endl; //debug
+            cout << RESETEND; //debug
+        }
     }
 
+    //for cgi env
     this->headers["ROOT_PATH"] = this->rootPath;
     this->headers["UPLOAD_PATH"] = this->uplaodPath;
     this->headers["POST_METHOD"] = (std::find(this->allowMethod.begin(), this->allowMethod.end(), "POST") != this->allowMethod.end() ? "Y" : "N");
@@ -269,84 +288,16 @@ void Http::initConfig(int idx)
     // cout << "GET: " << this->headers["GET_METHOD"] << " POST: " << this->headers["POST_METHOD"] << endl;
 }
 
+/**
+ * read by chunked body and normal body
+ * if find "/r/n/r/n" or "0" means body is end, canRespond = true
+ * else http will keep receive body data until body is end
+ */
 void Http::readBody()
 {
     if (!this->headers["Transfer-Encoding"].compare("chunked"))
-    {
-        string buf;
-        if (this->body.empty())
-            buf = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
-        else
-            buf = this->buffer;
-
-        if (this->chunkError && buf.find("0\r\n\r\n") != string::npos)
-        {
-            this->canRespond = true;
-            return ;
-        }
-
-        size_t pos = 0;
-        while (1)
-        {
-            size_t end = 0;
-            size_t chunkSize = 0;
-            std::stringstream ss_size;
-
-            if (this->tmpChunkSize != 0)
-            {
-                this->tmpBodyChunk.append(buf.substr(0, this->tmpChunkSize));
-                pos += this->tmpChunkSize + 2;
-
-                this->tmpChunkSize = 0;
-            }
-
-            end = buf.find("\r\n", pos);
-            if (end == string::npos)
-            {
-                cout << RED << "posssssssssssssssss" << RESETEND;
-                if (buf.find("0\r\n\r\n") != string::npos)
-                    this->canRespond = true;
-                this->chunkError = true;
-                break ;
-            }
-
-            string sizeString = buf.substr(pos, end - pos);
-            ss_size << std::hex << sizeString;
-            ss_size >> chunkSize;
-
-            cout << "size: " << chunkSize << endl;
-            if (chunkSize == 0)
-            {
-                cout << RED << "0000000000000" << RESETEND;
-                this->canRespond = true;
-                break ;
-            }
-            pos = end + 2;
-
-            if (pos + chunkSize > buf.length())
-            {
-                cout << pos << "+" << chunkSize << '>' << buf.length() << endl;
-                this->tmpChunkSize = pos + chunkSize - buf.length();
-                break ;
-            }
-            this->tmpBodyChunk.append(buf.substr(pos, chunkSize));
-            cout << "pos: " << pos << endl;
-            cout << "buf: " << buf.substr(pos, chunkSize) << endl;
-            pos += chunkSize;
-
-            if (buf.substr(pos, 2).compare("\r\n"))
-            {
-                cout << RED << "breakedddddddddddddd" << RESETEND;
-                if (buf.find("0\r\n\r\n") != string::npos)
-                    this->canRespond = true;
-                this->chunkError = true;
-                break ;
-            }
-            pos += 2;
-        }
-        this->body.append(this->tmpBodyChunk);
-    }
-    else
+        readChunked();
+    else //read normal body
     {
         size_t ContentLenght = static_cast<size_t>(std::atoi(this->headers["Content-Length"].c_str()));
         if (ContentLenght > this->bodySize)
@@ -364,6 +315,82 @@ void Http::readBody()
     // cout << "body:\n" << body << endl;
 }
 
+void Http::readChunked()
+{
+    string buf;
+    if (this->body.empty())
+        buf = this->rev.substr(this->rev.find("\r\n\r\n") + 4);
+    else
+        buf = this->buffer;
+
+    if (this->chunkError && buf.find("0\r\n\r\n") != string::npos)
+    {
+        this->canRespond = true;
+        return ;
+    }
+
+    size_t pos = 0;
+    while (1)
+    {
+        size_t end = 0;
+        size_t chunkSize = 0;
+        std::stringstream ss_size;
+
+        if (this->tmpChunkSize != 0)
+        {
+            this->tmpBodyChunk.append(buf.substr(0, this->tmpChunkSize));
+            pos += this->tmpChunkSize + 2;
+
+            this->tmpChunkSize = 0;
+        }
+
+        end = buf.find("\r\n", pos);
+        if (end == string::npos) //error
+        {
+            cout << RED << "posssssssssssssssss" << RESETEND; //debug
+            if (buf.find("0\r\n\r\n") != string::npos)
+                this->canRespond = true;
+            this->chunkError = true;
+            break ;
+        }
+
+        string sizeString = buf.substr(pos, end - pos);
+        ss_size << std::hex << sizeString;
+        ss_size >> chunkSize;
+
+        cout << "size: " << chunkSize << endl; //debug
+        if (chunkSize == 0) //end of the body
+        {
+            cout << RED << "0000000000000" << RESETEND; //debug
+            this->canRespond = true;
+            break ;
+        }
+        pos = end + 2;
+
+        if (pos + chunkSize > buf.length()) //body of the middle, wait next body data
+        {
+            cout << pos << "+" << chunkSize << '>' << buf.length() << endl;
+            this->tmpChunkSize = pos + chunkSize - buf.length();
+            break ;
+        }
+        this->tmpBodyChunk.append(buf.substr(pos, chunkSize));
+        cout << "pos: " << pos << endl; //debug
+        cout << "buf: " << buf.substr(pos, chunkSize) << endl; //debug
+        pos += chunkSize;
+
+        if (buf.substr(pos, 2).compare("\r\n")) //error
+        {
+            cout << RED << "breakeddd" << RESETEND; //debug
+            if (buf.find("0\r\n\r\n") != string::npos)
+                this->canRespond = true;
+            this->chunkError = true;
+            break ;
+        }
+        pos += 2;
+    }
+    this->body.append(this->tmpBodyChunk);
+}
+
 bool Http::getCanRespond() const
 {
     return this->canRespond;
@@ -371,8 +398,8 @@ bool Http::getCanRespond() const
 
 const string &Http::getRespond()
 {
-    if (this->respond.empty())
-        code500();
-    // cout << GREEN << "respond:\n" << this->respond << RESETEND;
+    if (this->respond.empty()) //it won't happen, but just to be safe
+        code500(); //server error
+    // cout << GREEN << "respond:\n" << this->respond << RESETEND; //debug
     return this->respond;
 }
