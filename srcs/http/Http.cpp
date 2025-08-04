@@ -78,22 +78,24 @@ void Http::handleRequest()
 {
     if (this->chunkError)
         code400(); //bad request
-    else if (this->sizeTooLarge)
-        code413(); //size too large
-
-    if (std::find(this->allowMethod.begin(), this->allowMethod.end(), this->method) != this->allowMethod.end())
+    else if (this->sizeTooLarge || this->body.size() > this->bodySize)
+        code413();
+    else
     {
-        if (cgiTypePath.first.compare("Empty"))
-            handleCGI(this->url);
-        else if (!this->method.compare("POST"))
-            POST(this->filePath);
-        else if (!this->method.compare("GET"))
-            GET(this->filePath);
-        else if (!this->method.compare("DELETE"))
-            DELETE(this->filePath);
+        if (std::find(this->allowMethod.begin(), this->allowMethod.end(), this->method) != this->allowMethod.end())
+        {
+            if (cgiTypePath.first.compare("Empty"))
+                handleCGI(this->url);
+            else if (!this->method.compare("POST"))
+                POST(this->filePath);
+            else if (!this->method.compare("GET"))
+                GET(this->filePath);
+            else if (!this->method.compare("DELETE"))
+                DELETE(this->filePath);
+        }
+        else //unknown method or method not allow 
+            code405();
     }
-    else //unknown method or method not allow 
-        code405();
 }
 
 void Http::readHeaders()
@@ -351,7 +353,7 @@ void Http::readChunked()
         end = buf.find("\r\n", pos);
         if (end == string::npos) //error
         {
-            cout << RED << "posssssssssssssssss" << RESETEND; //debug
+            // cout << RED << "posss" << RESETEND; //debug
             if (buf.find("0\r\n\r\n") != string::npos)
                 this->canRespond = true;
             this->chunkError = true;
@@ -365,7 +367,7 @@ void Http::readChunked()
         cout << "size: " << chunkSize << endl; //debug
         if (chunkSize == 0) //end of the body
         {
-            cout << RED << "0000000000000" << RESETEND; //debug
+            // cout << RED << "0000000000000" << RESETEND; //debug
             this->canRespond = true;
             break ;
         }
@@ -378,13 +380,13 @@ void Http::readChunked()
             break ;
         }
         this->tmpBodyChunk.append(buf.substr(pos, chunkSize));
-        cout << "pos: " << pos << endl; //debug
-        cout << "buf: " << buf.substr(pos, chunkSize) << endl; //debug
+        // cout << "pos: " << pos << endl; //debug
+        // cout << "buf: " << buf.substr(pos, chunkSize) << endl; //debug
         pos += chunkSize;
 
         if (buf.substr(pos, 2).compare("\r\n")) //error
         {
-            cout << RED << "breakeddd" << RESETEND; //debug
+            // cout << RED << "breakeddd" << RESETEND; //debug
             if (buf.find("0\r\n\r\n") != string::npos)
                 this->canRespond = true;
             this->chunkError = true;

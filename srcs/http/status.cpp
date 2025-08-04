@@ -132,7 +132,7 @@ void Http::code504()
 
     ss << "HTTP/1.1 504 Gateway Timeout\r\n\r\n";
 
-    string content = getContent(getErrorCodePath(500));
+    string content = getContent(getErrorCodePath(504));
     if (!content.compare(""))
         ss << "<!doctype html><html lang=\"en\"><head><title>504 Gateway Timeout [DefaultPage]</title></head><body><main><h1>504 Gateway Timeout</h1></main></body></html>";
     else
