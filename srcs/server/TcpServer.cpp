@@ -4,7 +4,7 @@ TcpServer::TcpServer(): config(NULL)
 {
 }
 
-void	TcpServer::handleIpp(vector<std::pair<string, int> > ipp)
+void TcpServer::handleIpp(vector<std::pair<string, int> > ipp)
 {
 	vector<std::pair<string, int> > checked_ipp;
 
@@ -19,10 +19,26 @@ void	TcpServer::handleIpp(vector<std::pair<string, int> > ipp)
 			string exist_ip = checked_ipp[j].first;
 			int exist_port = checked_ipp[j].second;
 
-			if (exist_port == port && (exist_ip == "0.0.0.0" || ip == "0.0.0.0" || exist_ip == ip))
+			if (exist_port == port)
 			{
-				conflict = true;
-				break;
+				if (exist_ip == "0.0.0.0")
+				{
+					conflict = true;
+					break;
+				}
+				else if (ip == "0.0.0.0")
+				{
+					this->ips[j] = ip;
+					this->ports[j] = port;
+					checked_ipp[j] = ipp[i];
+					conflict = true;
+					break;
+				}
+				else if (exist_ip == ip)
+				{
+					conflict = true;
+					break;
+				}
 			}
 		}
 		if (!conflict)
