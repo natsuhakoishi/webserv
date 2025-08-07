@@ -8,19 +8,19 @@
 ##### !! Only directives listed below are supported, others are ignored;
 1. ``server_name <name>``
 
-&emsp;&emsp;Specify server's host name
+&emsp;&emsp;Set server's host name
 
 2. ``listen <port>`` &nbsp;***OR***&nbsp; ``listen <socket_address>``
 
-&emsp;&emsp;Specify socket address or port the server will listen on (e.g., 127.0.0.1:4242 or 4242)
+&emsp;&emsp;Set socket address or port the server will listen on (e.g., 127.0.0.1:4242 or 4242)
 
 3. ``root <filepath>``
 
-&emsp;&emsp;Specify root directory of the server
+&emsp;&emsp;Set root directory of the server
 
 4. ``index <filepath>``
 
-&emsp;&emsp;Specify default file to serve when a directory is requested by the client
+&emsp;&emsp;Set default file to serve when a directory is requested by the client
 
 5. ``autoindex <value>``
 
@@ -32,16 +32,20 @@
 
 7. ``allowed_methods <method> <method> ...``
 
-&emsp;&emsp;Specify which HTTP methods are allowed for the route
+&emsp;&emsp;Set which HTTP methods are allowed for the route
 
 8. ``upload <filepath>``
 
-&emsp;&emsp;Specify the location where file uploaded by the client will be saved
+&emsp;&emsp;Set the location where file uploaded by the client will be saved
 
-9. ``redirection <URL>``
+9. ``client_max_body_size <size>``
 
-&emsp;&emsp;Specify the URL to redirect request to
+&emsp;&emsp;Set the maximum upload size (read as bytes by default, but units like GB or kb is accepted)
 
-10. ``cgi <file_extension> <path_to_executor>``
+10. ``redirection <URL>``
+
+&emsp;&emsp;Set the URL to redirect request to
+
+11. ``cgi <file_extension> <path_to_executor>``
 
 &emsp;&emsp;Define CGI handler for files with the given extension (e.g. ***cgi*** ***.py*** ***/usr/bin/python3***)
